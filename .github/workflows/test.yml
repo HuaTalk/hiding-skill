@@ -1,0 +1,45 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check rule copies
+        run: node scripts/check-rule-copies.js
+
+      - name: Check version consistency
+        run: node scripts/check-versions.js
+
+      - name: Validate plugin JSON
+        run: |
+          for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json .codex-plugin/plugin.json .devin-plugin/plugin.json gemini-extension.json; do
+            node -e "JSON.parse(require('fs').readFileSync('$f','utf8')); console.log('$f: valid')"
+          done
+
+      - name: Check SKILL.md frontmatter
+        run: |
+          node -e "
+          const fs = require('fs');
+          const content = fs.readFileSync('skills/hiding/SKILL.md', 'utf8');
+          if (!content.startsWith('---')) { console.error('Missing frontmatter'); process.exit(1); }
+          const end = content.indexOf('---', 3);
+          const fm = content.substring(3, end).trim();
+          if (!fm.includes('name:')) { console.error('Missing name in frontmatter'); process.exit(1); }
+          if (!fm.includes('description:')) { console.error('Missing description in frontmatter'); process.exit(1); }
+          console.log('SKILL.md frontmatter: valid');
+          "
+
+      - name: Check OpenClaw skills up to date
+        run: node scripts/build-openclaw-skills.js
