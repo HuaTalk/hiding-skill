@@ -1,0 +1,6 @@
+{
+  "name": "hiding",
+  "version": "0.5.0",
+  "description": "Strip AI leakage from files before committing, pushing, or sharing. Removes secrets, AI self-reference, thought process traces, and rule citations.",
+  "contextFileName": "AGENTS.md"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "hiding-skill",
+  "description": "Strip AI leakage from files before committing — secrets, self-reference, thought process, rule citations. Silent by default.",
+  "owner": {
+    "name": "HuaTalk",
+    "url": "https://github.com/HuaTalk"
+  },
+  "plugins": [
+    {
+      "name": "hiding",
+      "description": "Strip AI leakage from files before committing, pushing, or sharing. Session-aware HITL mode for interactive cleanup.",
+      "source": "./",
+      "category": "security",
+      "tags": ["hiding", "security", "cleanup", "output-discipline"],
+      "commands": "commands/",
+      "skills": "skills/"
+    }
+  ]
+}
