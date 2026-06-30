@@ -1,0 +1,55 @@
+{
+  "name": "@huatalk/hiding-skill",
+  "version": "0.5.0",
+  "description": "Strip AI leakage from files before committing, pushing, or sharing. Removes secrets, AI self-reference, thought process traces, and rule citations.",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "hiding",
+    "output-discipline",
+    "security",
+    "cleanup",
+    "ai-leakage"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "HuaTalk",
+    "url": "https://github.com/HuaTalk"
+  },
+  "homepage": "https://github.com/HuaTalk/hiding-skill",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HuaTalk/hiding-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HuaTalk/hiding-skill/issues"
+  },
+  "files": [
+    "AGENTS.md",
+    "skills/",
+    "commands/",
+    "hooks/",
+    ".claude-plugin/",
+    ".codex-plugin/",
+    ".devin-plugin/",
+    ".cursor/",
+    ".windsurf/",
+    ".clinerules/",
+    ".kiro/",
+    ".agents/",
+    ".opencode/",
+    ".openclaw/",
+    ".github/",
+    "opencode.json",
+    "plugin.yaml",
+    "gemini-extension.json",
+    "after-install.md",
+    "__init__.py",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node scripts/check-rule-copies.js && node scripts/check-versions.js",
+    "check": "node scripts/check-rule-copies.js && node scripts/check-versions.js",
+    "build-openclaw": "node scripts/build-openclaw-skills.js"
+  }
+}

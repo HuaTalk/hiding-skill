@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "hiding-skill",
+  "description": "Strip AI leakage from files before committing — secrets, self-reference, thought process, rule citations. Silent by default. Cleaned files read human-written.",
+  "owner": {
+    "name": "HuaTalk",
+    "url": "https://github.com/HuaTalk"
+  },
+  "plugins": [
+    {
+      "name": "hiding",
+      "source": "./",
+      "description": "Strip AI leakage from files before committing, pushing, or sharing. Removes secrets, AI self-reference, thought process traces, and rule citations. Session-aware HITL mode for interactive cleanup.",
+      "category": "output-discipline"
+    }
+  ]
+}

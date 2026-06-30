@@ -1,0 +1,21 @@
+# Secrets, never commit API keys
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Python
+__pycache__/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Claude Code local settings (machine-specific permission grants)
+.claude/settings.local.json
