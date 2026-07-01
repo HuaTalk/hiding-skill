@@ -12,38 +12,41 @@ Artifacts:
 - `.claude-plugin/plugin.json` — plugin manifest (name: `hiding-skill`, version: `0.5.0`)
 - `.claude-plugin/marketplace.json` — marketplace listing (plugin registered as `hiding`)
 - `skills/hiding/SKILL.md` — the skill definition (English, loaded by the dispatcher, **canonical source**)
-- `AGENTS.md` — canonical portable rules (source of truth for multi-platform copies)
+- `AGENTS.md` — leakage pattern reference card
+- `commands/hiding.toml` — Claude Code native command
 - `package.json` — npm publishing metadata
 
-Plugin manifests (one per agent host):
-- `.codex-plugin/plugin.json` — Codex
-- `.devin-plugin/plugin.json` — Devin CLI
-- `plugin.yaml` + `__init__.py` + `after-install.md` — Hermes Agent
-- `gemini-extension.json` — Gemini CLI / Antigravity
-- `opencode.json` + `.opencode/command/hiding.md` — OpenCode
-- `.agents/plugins/marketplace.json` — Agent Protocol
-
-Multi-platform rule adapters (generated from `AGENTS.md`, verified by `scripts/check-rule-copies.js`):
-- `.cursor/rules/hiding.mdc` — Cursor
-- `.windsurf/rules/hiding.md` — Windsurf
-- `.clinerules/hiding.md` — Cline
-- `.github/copilot-instructions.md` — GitHub Copilot
-- `.kiro/steering/hiding.md` — Kiro
-- `.agents/rules/hiding.md` — Agent Protocol
-
-Skill packages:
-- `commands/hiding.toml` — Claude Code native command
-- `.openclaw/skills/hiding/SKILL.md` — OpenClaw skill
+Hooks:
+- `hooks/claude-codex-hooks.json` — Claude Code SessionStart hook config
+- `hooks/hiding-activate.js` — SessionStart awareness context (primes model to avoid leakage)
 
 Infrastructure:
-- `scripts/check-rule-copies.js` — verify multi-platform copies match `AGENTS.md`
-- `.github/workflows/test.yml` — CI: rule copy check + JSON validation + frontmatter check
+- `scripts/check-versions.js` — verify version consistency across `.claude-plugin/plugin.json`, `package.json`, and `SKILL.md`
+- `.github/workflows/test.yml` — CI: version check + JSON validation + frontmatter check
+- `.github/workflows/publish.yml` — npm publish on `v*` tags (OIDC)
 
 Documentation (reference only, not loaded by the dispatcher):
 - `README.md` / `README-zh.md` — user-facing usage docs
-- `CLAUDE-zh.md` — Chinese translation of this file
-- `ROADMAP-zh.md` — planned improvements (Chinese)
 - `docs/agent-portability.md` — which files map to which agent
+- `docs/platform-native.md` — native replacements for common AI leakage
+
+## Design Philosophy
+
+### Post-hoc cleanup, not real-time constraint
+
+The core design decision: `/hiding` is a cleanup tool, not a behavior modifier. It does not inject rules into every session to force the model to avoid AI leakage. Instead, it lets the model work naturally, then strips the traces afterward.
+
+Rationale — see `docs/design-tradeoffs-zh.md` for the full argument. Summary:
+
+- **Injected rules degrade thinking quality** — every token spent on self-censorship is a token not spent on reasoning.
+- **Prevention doesn't eliminate cleanup** — models still leak even with rules active. The cleanup step is unavoidable.
+- **Silent execution philosophy demands it** — "after `/hiding` runs, no one should be able to tell it ran." Real-time constraint produces unnatural output that betrays its origin; post-hoc cleanup can produce truly human-looking files.
+
+### What we don't do
+
+- Platform-specific rule copies (`.cursor/rules/`, `.windsurf/rules/`, `.clinerules/`, `.github/copilot-instructions.md`, `.agents/rules/`) — removed. These injected the hiding rules into every session, conflicting with the post-hoc philosophy.
+- Rule copy verification scripts — removed. No copies to verify.
+- Multi-agent plugin manifests beyond Claude Code — removed. `npx skills` handles distribution to 70+ agents.
 
 ## Skill Architecture
 
@@ -86,17 +89,25 @@ The only exceptions to silence: HITL interactions (user-facing decisions, not cl
 
 ## Design Decisions
 
-1. **Bilingual trigger words in SKILL.md `description`**: The English SKILL.md includes both English and Chinese trigger phrases in its frontmatter `description` field, so Chinese-speaking users invoking `/hiding` also match the skill. This means only one SKILL.md is needed — no separate Chinese skill file.
+1. **Post-hoc cleanup over real-time constraints**: The skill cleans files after generation, rather than injecting rules that constrain generation. See `docs/design-tradeoffs-zh.md`.
 
-2. **Chinese content is documentation only**: `README-zh.md`, `CLAUDE-zh.md`, and `ROADMAP-zh.md` exist as reference translations for Chinese-speaking contributors. They are NOT loaded by the dispatcher. Only `SKILL.md` needs to be maintained as the canonical skill definition.
+2. **Bilingual trigger words in SKILL.md `description`**: The English SKILL.md includes both English and Chinese trigger phrases in its frontmatter `description` field, so Chinese-speaking users invoking `/hiding` also match the skill. Only one SKILL.md is needed.
 
-3. **Multi-platform distribution**: The same hiding rules are available for 5+ agents via platform-specific adapter files. `AGENTS.md` is the canonical source; `scripts/check-rule-copies.js` verifies all copies stay in sync. See `docs/agent-portability.md` for the full mapping.
+3. **`npx skills` as primary distribution**: `npx skills add HuaTalk/hiding-skill` distributes to 70+ agents. The Claude Code plugin marketplace is the secondary channel for users who prefer native installation.
 
 4. **Version `0.5.0`**: Stable with session-aware HITL mode, five-pattern detection, and file-level purge check.
 
 5. **Installation path `hiding@hiding`**: marketplace plugin name is `hiding`, repo name is `hiding-skill`.
 
 ## Installation (Consumer Repos)
+
+### Primary: via npx skills (70+ agents)
+
+```bash
+npx skills add HuaTalk/hiding-skill
+```
+
+### Claude Code native
 
 ```bash
 /plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
@@ -117,10 +128,7 @@ ln -sf ~/path/to/hiding-skill/skills /path/to/project/.claude/skills
 
 When updating the skill:
 1. Edit `skills/hiding/SKILL.md` — this is the only canonical skill file
-2. If the core rules change, update `AGENTS.md` and run `node scripts/check-rule-copies.js` to sync multi-platform copies
+2. Update `AGENTS.md` if the leakage patterns change
 3. Update documentation files (`README.md`, `README-zh.md`) if the change affects user-facing behavior
 4. Bump version in `.claude-plugin/plugin.json`, `package.json`, and `SKILL.md` metadata
 5. Tag the release and push — CI publishes to npm on `v*` tags
-6. Notify consumers to run `/plugin update hiding@hiding` + restart Claude Code
-
-See `ROADMAP-zh.md` for planned improvements.

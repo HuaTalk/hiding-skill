@@ -30,26 +30,11 @@
     "commands/",
     "hooks/",
     ".claude-plugin/",
-    ".codex-plugin/",
-    ".devin-plugin/",
-    ".cursor/",
-    ".windsurf/",
-    ".clinerules/",
-    ".kiro/",
-    ".agents/",
-    ".opencode/",
-    ".openclaw/",
     ".github/",
-    "opencode.json",
-    "plugin.yaml",
-    "gemini-extension.json",
-    "after-install.md",
-    "__init__.py",
     "LICENSE"
   ],
   "scripts": {
-    "test": "node scripts/check-rule-copies.js && node scripts/check-versions.js",
-    "check": "node scripts/check-rule-copies.js && node scripts/check-versions.js",
-    "build-openclaw": "node scripts/build-openclaw-skills.js"
+    "test": "node scripts/check-versions.js",
+    "check": "node scripts/check-versions.js"
   }
 }

@@ -28,7 +28,15 @@ A Claude Code plugin that removes AI-generated artifacts from files before commi
 
 ## Installation
 
-### Claude Code
+### Primary: via npx skills (recommended, 70+ agents)
+
+```bash
+npx skills add HuaTalk/hiding-skill
+```
+
+One command installs to all your coding agents (Claude Code, Codex, Cursor, Windsurf, Gemini CLI, Copilot, Cline, and more).
+
+### Claude Code (native plugin)
 
 ```
 /plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
@@ -42,90 +50,25 @@ Restart Claude Code. The `/hiding` command is ready.
 
 Upgrade: `/plugin update hiding@hiding` + restart.
 
-### Codex
+### npm (for skills-npm users)
 
 ```bash
-codex plugin marketplace add HuaTalk/hiding-skill
-codex plugin install hiding@hiding-skill
-```
-
-Open `/plugins`, select the Hiding marketplace, and install Hiding. Restart or start a new thread.
-
-### Devin CLI
-
-```bash
-devin plugins install HuaTalk/hiding-skill
-```
-
-Skills are available as `/hiding:hiding`.
-
-### Gemini CLI / Antigravity
-
-```bash
-gemini extensions install https://github.com/HuaTalk/hiding-skill
-# or
-agy plugin install https://github.com/HuaTalk/hiding-skill
-```
-
-Loads the ruleset from `AGENTS.md` every session.
-
-### Hermes Agent
-
-```bash
-hermes plugins install HuaTalk/hiding-skill --enable
-```
-
-Restart Hermes after installing. Skill available as `hiding:hiding`, command as `/hiding`.
-
-### OpenClaw
-
-```bash
-clawhub install hiding
-```
-
-### GitHub Copilot CLI
-
-```bash
-copilot plugin marketplace add HuaTalk/hiding-skill
-copilot plugin install hiding@hiding-skill
-```
-
-Copilot CLI also reads `AGENTS.md` and `.github/copilot-instructions.md` for always-on rules.
-
-### Pi agent harness
-
-```
-pi install git:github.com/HuaTalk/hiding-skill
-```
-
-### OpenCode
-
-Add to `opencode.json`:
-
-```json
-{ "plugin": ["@huatalk/hiding-skill"] }
-```
-
-OpenCode also auto-loads this repo's `AGENTS.md`, so the rules hold even without the plugin.
-
-### Other Agents (always-on rules)
-
-For Cursor, Windsurf, Cline, Kiro, CodeWhale, Swival, Zed, Aider — copy the matching rules file from this repo to your project. See [Agent Portability](docs/agent-portability.md) for the full mapping.
-
-Quick start — copy `AGENTS.md` to your project root:
-```bash
-curl -o AGENTS.md https://raw.githubusercontent.com/HuaTalk/hiding-skill/main/AGENTS.md
+npm install -D @huatalk/hiding-skill
+npx skills-npm setup
 ```
 
 ### Uninstall
 
-| Host | Command |
-|------|---------|
+| Method | Command |
+|--------|---------|
+| npx skills | `npx skills remove hiding` |
 | Claude Code | `/plugin remove hiding` |
-| Codex | `codex plugin remove hiding` |
-| Devin CLI | `devin plugins remove hiding` |
-| Pi agent | `pi uninstall hiding` |
-| Cursor / Windsurf / Cline / etc. | Delete the copied rule file |
+
+## Design Philosophy
+
+`/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. It does not inject rules into your agent's session context. Instead, it lets the model work naturally, then strips the traces afterward. This preserves thinking quality and follows the silent execution principle — after `/hiding` runs, no one should be able to tell it ran.
+
+See [设计取舍：事后清理而非实时约束](docs/design-tradeoffs-zh.md) (Chinese) for the full rationale.
 
 ## Execution Guarantees
 

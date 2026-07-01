@@ -14,10 +14,6 @@ const PINNED_SEMVER = /^\d+\.\d+\.\d+$/;
 
 const VERSION_FILES = [
   '.claude-plugin/plugin.json',   // Claude Code plugin
-  '.codex-plugin/plugin.json',    // Codex plugin
-  '.devin-plugin/plugin.json',    // Devin CLI plugin
-  '.github/plugin/plugin.json',   // Copilot CLI plugin
-  'gemini-extension.json',        // Gemini CLI / Antigravity extension
   'package.json',                 // npm / repo root
 ];
 
@@ -27,17 +23,6 @@ function readVersion(relPath) {
     return JSON.parse(raw).version;
   } catch (e) {
     throw new Error(`${relPath}: ${e.message}`);
-  }
-}
-
-// Also check YAML-based version
-function readYamlVersion() {
-  try {
-    const raw = fs.readFileSync(path.join(root, 'plugin.yaml'), 'utf8');
-    const match = raw.match(/^version:\s*(\S+)/m);
-    return match ? match[1] : null;
-  } catch (e) {
-    return null;
   }
 }
 
@@ -58,16 +43,6 @@ for (const relPath of VERSION_FILES) {
     failed = true;
   }
   versions.push([relPath, version]);
-}
-
-// YAML version
-const yamlVersion = readYamlVersion();
-if (yamlVersion) {
-  versions.push(['plugin.yaml', yamlVersion]);
-  if (!PINNED_SEMVER.test(yamlVersion)) {
-    console.error(`plugin.yaml: version must be a pinned X.Y.Z semver, got ${JSON.stringify(yamlVersion)}`);
-    failed = true;
-  }
 }
 
 // SKILL.md metadata version

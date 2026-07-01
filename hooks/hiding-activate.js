@@ -2,32 +2,16 @@
 // hiding — Claude Code SessionStart activation hook
 //
 // Runs on every session start:
-//   1. Writes flag file for statusline
-//   2. Emits hiding awareness context
-//   3. Detects missing statusline config and offers setup
+//   1. Emits hiding awareness context to prime the model
+//
+// No side effects — no flag files, no settings changes.
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-function getClaudeDir() {
-  return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
-}
-
-const claudeDir = getClaudeDir();
-const flagPath = path.join(claudeDir, '.hiding-active');
-const settingsPath = path.join(claudeDir, 'settings.json');
-
-// 1. Write flag file for statusline
-try {
-  fs.mkdirSync(path.dirname(flagPath), { recursive: true });
-  fs.writeFileSync(flagPath, 'active');
-} catch (e) {
-  // Silent fail — best-effort
-}
-
-// 2. Emit hiding awareness as hidden SessionStart context
-let output = [
+// Emit hiding awareness as SessionStart context
+const output = [
   'HIDING AWARENESS ACTIVE',
   '',
   'Remember: before committing, pushing, or sharing files, scan for AI leakage:',
@@ -39,31 +23,6 @@ let output = [
   '',
   'Use /hiding to clean files. Silent execution — no markers, no announcements.',
 ].join('\n');
-
-// 3. Detect missing statusline — offer setup
-try {
-  let hasStatusline = false;
-  if (fs.existsSync(settingsPath)) {
-    const raw = fs.readFileSync(settingsPath, 'utf8').replace(/^﻿/, '');
-    try {
-      const settings = JSON.parse(raw);
-      if (settings.statusLine) hasStatusline = true;
-    } catch (e) {}
-  }
-
-  if (!hasStatusline) {
-    const isWindows = process.platform === 'win32';
-    const scriptName = isWindows ? 'hiding-statusline.ps1' : 'hiding-statusline.sh';
-    const scriptPath = path.join(__dirname, scriptName);
-    const command = isWindows
-      ? `powershell -ExecutionPolicy Bypass -File "${scriptPath}"`
-      : `bash "${scriptPath}"`;
-    const snippet = '"statusLine": { "type": "command", "command": ' + JSON.stringify(command) + ' }';
-    output += '\n\nSTATUSLINE SETUP: Add to ~/.claude/settings.json: ' + snippet;
-  }
-} catch (e) {
-  // Silent fail
-}
 
 try {
   const hookOutput = process.env.CLAUDE_CODEX_HOOK_OUTPUT;

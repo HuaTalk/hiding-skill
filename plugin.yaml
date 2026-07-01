@@ -1,6 +1,0 @@
-name: hiding
-version: 0.5.0
-description: Strip AI leakage from files — secrets, self-reference, thought process, rule citations. Cleaned files read human-written.
-author: HuaTalk
-provides_skills:
-  - hiding

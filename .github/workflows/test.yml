@@ -16,15 +16,12 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Check rule copies
-        run: node scripts/check-rule-copies.js
-
       - name: Check version consistency
         run: node scripts/check-versions.js
 
       - name: Validate plugin JSON
         run: |
-          for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json .codex-plugin/plugin.json .devin-plugin/plugin.json gemini-extension.json; do
+          for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json; do
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8')); console.log('$f: valid')"
           done
 
@@ -40,6 +37,3 @@ jobs:
           if (!fm.includes('description:')) { console.error('Missing description in frontmatter'); process.exit(1); }
           console.log('SKILL.md frontmatter: valid');
           "
-
-      - name: Check OpenClaw skills up to date
-        run: node scripts/build-openclaw-skills.js
