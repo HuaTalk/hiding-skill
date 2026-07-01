@@ -27,11 +27,12 @@
   "files": [
     "AGENTS.md",
     "skills/",
-    "commands/",
-    "hooks/",
+    "scripts/",
     ".claude-plugin/",
     ".github/",
-    "LICENSE"
+    "LICENSE",
+    "README.md",
+    "README-zh.md"
   ],
   "scripts": {
     "test": "node scripts/check-versions.js",

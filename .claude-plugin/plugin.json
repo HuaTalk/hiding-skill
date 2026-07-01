@@ -9,7 +9,6 @@
     "url": "https://github.com/HuaTalk"
   },
   "repository": "https://github.com/HuaTalk/hiding-skill.git",
-  "hooks": "./hooks/claude-codex-hooks.json",
   "keywords": [
     "claude-code",
     "plugin",

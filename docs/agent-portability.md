@@ -16,7 +16,7 @@ This installs the `/hiding` slash command to all detected agents (Claude Code, C
 
 | Agent | File(s) | Type |
 |-------|---------|------|
-| **Claude Code** | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `skills/hiding/SKILL.md`, `commands/hiding.toml`, `hooks/` | Plugin + Skill + Command + Hooks |
+| **Claude Code** | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `skills/hiding/SKILL.md` | Plugin + Skill |
 
 ## Additional Agents (via npx skills)
 
@@ -39,7 +39,7 @@ Gives you the `/hiding` command on all installed agents.
 /plugin install hiding@hiding
 ```
 
-Gives you the full `/hiding` command with session-aware HITL mode and SessionStart awareness hook.
+Gives you the full `/hiding` command with session-aware HITL mode.
 
 ### Reference card
 
