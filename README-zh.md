@@ -8,6 +8,31 @@
 
 **作用域**：仅作用于文件（代码、配置、markdown、文档）。不修改 agent 的对话回复。
 
+## 前后对比
+
+```java
+// 清理前 /hiding
+// I'll use the Builder pattern here since the constructor has too many params.
+// As an AI, I think this is cleaner than telescoping constructors.
+// Following the team conventions in CLAUDE.md, I'm adding validation.
+public UserService createUser(UserDTO dto) {
+    return User.builder()
+        .name(dto.getName())
+        .email(dto.getEmail())
+        .build();
+}
+
+// 清理后 /hiding
+public UserService createUser(UserDTO dto) {
+    return User.builder()
+        .name(dto.getName())
+        .email(dto.getEmail())
+        .build();
+}
+```
+
+无标记、无注解、无人能察觉到它执行过。代码看上去就像是人类从一开始就写的那样。
+
 ## 五种泄露模式
 
 | 模式 | 检测内容 |
@@ -21,10 +46,42 @@
 ## 用法
 
 ```bash
-/hiding                       # 会话感知 HITL —— 分析、建议、用户决策
-/hiding <文件路径>              # 清理指定文件
-/hiding <描述>                  # 按描述隐藏匹配内容（如 "/hiding mock数据"）
+/hiding                              # 会话感知 HITL —— 扫描会话文件 + git 未提交文件
+/hiding <文件路径>                     # 原地清理指定文件
+/hiding <描述>                         # 按描述隐藏匹配内容（如 "/hiding mock数据"）
 ```
+
+### 参数
+
+| 参数 | 值 | 默认 | 说明 |
+|------|--------|---------|-------------|
+| `--mode` | `inplace` / `newfile` / `backup` | `inplace` | 输出模式 |
+| `--subagent` | （布尔标记） | 关闭 | 使用子代理执行，隔离性更好 |
+| `--dry-run` | （布尔标记） | 关闭 | 预览变更，不修改文件 |
+
+```bash
+/hiding --mode newfile file.java          # 输出到 file-cleaned.java，保留原文件
+/hiding --mode backup config.yml          # 原文件重命名为 .bak，清理版使用原名
+/hiding --dry-run file.java               # 预览将要清理的内容
+/hiding --subagent file.java              # 通过子代理剥离泄露痕迹
+/hiding --dry-run                         # HITL 预览，不实际执行
+```
+
+### 输出模式
+
+| 模式 | 行为 |
+|------|----------|
+| `inplace`（默认） | 原地修改文件 |
+| `newfile` | 创建 `<名称>-cleaned.<扩展名>`，原文件保持不变 |
+| `backup` | 原文件重命名为 `<名称>.bak`，清理版写入原文件名 |
+
+### 安全：凭证处理
+
+当检测并剥离 Pattern S（凭据、API 密钥、令牌）时，`/hiding` **始终会发出警告**：
+
+> ⚠️ 发现并移除了安全敏感内容。如果此文件曾被提交、推送或分享，请立即轮换受影响的凭证。
+
+这是静默执行**唯一的强制性例外**——因为不知道需要轮换的静默凭证剥离，比有声的剥离更危险。
 
 ## 安装
 
@@ -68,18 +125,22 @@ npx skills-npm setup
 
 `/hiding` 是一个**事后清理**工具，而非实时行为约束。它不在 agent 会话上下文中注入规则，而是让模型自然工作，然后在最后一步统一处理。这样做保留了推理质量，并且遵循了静默执行原则——`/hiding` 执行后，没人能察觉它执行过。
 
-详见 [设计取舍：事后清理而非实时约束](docs/design-tradeoffs-zh.md)。
+想想费马的页边笔记。费马没有展示他的证明过程——他写下了定理就直接发表了。证明本身成为了传奇。`/hiding` 让你的代码拥有同样的神秘感：结果自成一体，没有可见的「脚手架」。你的同事会好奇你是怎么写得这么干净的。（详见 [费马原则](docs/hiding-philosophy.md)，一个略微不敬的论证。）
+
+详见 [设计取舍：事后清理而非实时约束](docs/design-tradeoffs-zh.md) 的技术论述。
 
 ## 执行保证
 
 - **默认静默** — `/hiding` 执行后，没人能察觉它执行过。无标记、无公告、无副作用。
 - **代码逻辑绝不修改** — 只剥离注释和叙述性文本。
-- **结构安全** — 清理后验证大括号、JSON、YAML、markdown 结构完整性。
+- **结构安全** — 清理后使用实际解析器（JSON、YAML、XML）验证结构完整性。
 - **删除需确认** — 文件级删除候选项需要用户确认后才执行。
+- **凭证告警** — Pattern S 剥离始终产生「轮换凭证」警告。
+- **三种输出模式** — 原地修改（默认）、新建文件（保留原文件）、备份修改（原文件重命名为 .bak）。
 
 ## 版本
 
-当前：**0.5.0** —— 会话感知 HITL 模式，五种泄露模式检测，文件级删除检查。
+当前：**0.6.0** —— 输出模式（inplace/newfile/backup）、dry-run 预览、子代理执行、凭证安全告警、git 未提交文件发现、扩展文件类型支持。
 
 ## 许可证
 
