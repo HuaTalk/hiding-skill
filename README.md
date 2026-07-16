@@ -12,7 +12,7 @@ A Claude Code plugin that removes AI-generated artifacts from files before commi
 
 `/hiding` strips five categories of AI leakage from files. Every example here shows content that looks natural to the author but reads as AI-generated to everyone else.
 
-### Python Code — Constraint / Thought Process
+### 1. Python Code — Constraint / Thought Process
 
 ```python
 # Before /hiding
@@ -27,7 +27,7 @@ def get_user() -> dict[str, str]:
 
 The comment explains a design choice to the AI's own satisfaction — but the reader gains nothing from it. The function signature speaks for itself.
 
-### Markdown Docs — Rule / Thought Process
+### 2. Markdown Docs — Rule / Thought Process
 
 ```md
 Before /hiding
@@ -42,7 +42,7 @@ After /hiding
 
 Rule citation and research trail are scaffolding for the AI's own reasoning. The reader only needs the conclusion.
 
-### Teaching Docs — Rule
+### 3. Teaching Docs — Rule
 
 **Prompt**:
 > Write a beginner-friendly explanation of how LLMs work. Use analogies instead of jargon to explain the Transformer architecture.
@@ -66,7 +66,7 @@ A Large Language Model (LLM) is a neural network that predicts text. Give it a s
 
 The prompt's instructions and the rule citation leaked into the document. After `/hiding`, only the explanation remains — no meta-commentary about how to write it.
 
-### YAML CI — Constraint / Thought Process
+### 4. YAML CI — Constraint / Thought Process
 
 ```yaml
 # Before /hiding
@@ -80,7 +80,7 @@ steps:
 
 The constraint justification and step-by-step plan are AI-facing rationale. The workflow definition is all the reader needs.
 
-### TypeScript Component — AI Self-Reference
+### 5. TypeScript Component — AI Self-Reference
 
 ```typescript
 // Before /hiding
@@ -95,7 +95,7 @@ const UserProfile = memo(({ user }) => {
 
 "Here's the…" and "I think…" betray AI authorship. A human writes the technical reason directly.
 
-### Python Credentials — Secret
+### 6. Python Credentials — Secret
 
 ```python
 # Before /hiding
