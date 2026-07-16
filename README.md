@@ -33,6 +33,14 @@ public UserService createUser(UserDTO dto) {
 
 No markers. No annotations. No one can tell it ran. The code simply reads as if a human wrote it from the start.
 
+## Design Philosophy
+
+`/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. It does not inject rules into your agent's session context. Instead, it lets the model work naturally, then strips the traces afterward. This preserves thinking quality and follows the silent execution principle — after `/hiding` runs, no one should be able to tell it ran.
+
+Think of it like Fermat's margin note. Fermat didn't show his work — he wrote the theorem and moved on. The proof became legend. `/hiding` gives your code the same mystique: the result stands on its own, with no visible scaffolding. Your colleagues will wonder how you wrote it so cleanly. (See [The Fermat Principle](docs/hiding-philosophy.md) for the full, slightly irreverent argument.)
+
+See [设计取舍：事后清理而非实时约束](docs/design-tradeoffs-zh.md) (Chinese) for the full technical rationale.
+
 ## Five Leakage Patterns
 
 | Pattern         | What It Catches |
@@ -42,6 +50,53 @@ No markers. No annotations. No one can tell it ran. The code simply reads as if 
 | Constraint      | "I can't use X because the team requires Y", rationale trails about AI-facing constraints |
 | AI Self-Reference | "As an AI…", "I think…", "Here's the result:", "I hope this helps!" |
 | Thought Process | Step-by-step reasoning, dated progress logs, research findings, design rationale trails |
+
+## Execution Guarantees
+
+- **Silent by default** — after `/hiding` runs, no one should be able to tell it ran. No markers, no announcements, no side effects.
+- **Code logic is NEVER changed** — only comments and prose are stripped.
+- **Structurally safe** — post-cleanup validation uses actual parsers (JSON, YAML, XML) where available.
+- **HITL for deletions** — file-level purge candidates require user confirmation before deletion.
+- **Credential warnings** — Pattern S stripping always produces a rotate-credentials warning.
+- **Three output modes** — inplace (default), newfile (original preserved), backup (original renamed to `.bak`).
+
+## Installation
+
+### Primary: via npx skills (recommended, 70+ agents)
+
+```bash
+npx skills add HuaTalk/hiding-skill
+```
+
+One command installs to all your coding agents (Claude Code, Codex, Cursor, Windsurf, Gemini CLI, Copilot, Cline, and more).
+
+### Claude Code (native plugin)
+
+```
+/plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
+```
+```
+/plugin install hiding@hiding
+```
+(You have to send two separate prompts for the install to work)
+
+Restart Claude Code. The `/hiding` command is ready.
+
+Upgrade: `/plugin update hiding@hiding` + restart.
+
+### npm (for skills-npm users)
+
+```bash
+npm install -D @huatalk/hiding-skill
+npx skills-npm setup
+```
+
+### Uninstall
+
+| Method | Command |
+|--------|---------|
+| npx skills | `npx skills remove hiding` |
+| Claude Code | `/plugin remove hiding` |
 
 ## Usage
 
@@ -85,68 +140,13 @@ When Pattern S (credentials, API keys, tokens) is **found** — whether stripped
 
 This is the only mandatory exception to silent execution — because a silent credential strip where the user doesn't know to rotate is worse than a noisy one.
 
-## Installation
-
-### Primary: via npx skills (recommended, 70+ agents)
-
-```bash
-npx skills add HuaTalk/hiding-skill
-```
-
-One command installs to all your coding agents (Claude Code, Codex, Cursor, Windsurf, Gemini CLI, Copilot, Cline, and more).
-
-### Claude Code (native plugin)
-
-```
-/plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
-```
-```
-/plugin install hiding@hiding
-```
-(You have to send two separate prompts for the install to work)
-
-Restart Claude Code. The `/hiding` command is ready.
-
-Upgrade: `/plugin update hiding@hiding` + restart.
-
-### npm (for skills-npm users)
-
-```bash
-npm install -D @huatalk/hiding-skill
-npx skills-npm setup
-```
-
-### Uninstall
-
-| Method | Command |
-|--------|---------|
-| npx skills | `npx skills remove hiding` |
-| Claude Code | `/plugin remove hiding` |
-
-## Design Philosophy
-
-`/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. It does not inject rules into your agent's session context. Instead, it lets the model work naturally, then strips the traces afterward. This preserves thinking quality and follows the silent execution principle — after `/hiding` runs, no one should be able to tell it ran.
-
-Think of it like Fermat's margin note. Fermat didn't show his work — he wrote the theorem and moved on. The proof became legend. `/hiding` gives your code the same mystique: the result stands on its own, with no visible scaffolding. Your colleagues will wonder how you wrote it so cleanly. (See [The Fermat Principle](docs/hiding-philosophy.md) for the full, slightly irreverent argument.)
-
-See [设计取舍：事后清理而非实时约束](docs/design-tradeoffs-zh.md) (Chinese) for the full technical rationale.
-
-### Responsible Use
-
-`/hiding` removes noise — leaked credentials, reasoning scaffolding, rule citations — so files stand on their own as reference material. It is **not** a tool for evading disclosure obligations. If your employer, project, or publication venue requires disclosing AI assistance, that policy governs; cleaning a file's contents does not change what you must declare. You are responsible for complying with the disclosure rules that apply to you.
-
-## Execution Guarantees
-
-- **Silent by default** — after `/hiding` runs, no one should be able to tell it ran. No markers, no announcements, no side effects.
-- **Code logic is NEVER changed** — only comments and prose are stripped.
-- **Structurally safe** — post-cleanup validation uses actual parsers (JSON, YAML, XML) where available.
-- **HITL for deletions** — file-level purge candidates require user confirmation before deletion.
-- **Credential warnings** — Pattern S stripping always produces a rotate-credentials warning.
-- **Three output modes** — inplace (default), newfile (original preserved), backup (original renamed to `.bak`).
-
 ## Version
 
 Current: **0.6.0** — Output modes (inplace/newfile/backup), dry-run preview, sub-agent execution, credential security warnings, git-uncommitted discovery, expanded file type support.
+
+## Responsible Use
+
+`/hiding` removes noise — leaked credentials, reasoning scaffolding, rule citations — so files stand on their own as reference material. It is **not** a tool for evading disclosure obligations. If your employer, project, or publication venue requires disclosing AI assistance, that policy governs; cleaning a file's contents does not change what you must declare. You are responsible for complying with the disclosure rules that apply to you.
 
 ## License
 

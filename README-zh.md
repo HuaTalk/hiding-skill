@@ -33,6 +33,16 @@ public UserService createUser(UserDTO dto) {
 
 无标记、无注解、无人能察觉到它执行过。代码看上去就像是人类从一开始就写的那样。
 
+## 设计哲学
+
+`/hiding` 是一个**事后清理**工具，而非实时行为约束。它不在 agent 会话上下文中注入规则，而是让模型自然工作，然后在最后一步统一处理。这样做保留了推理质量，并且遵循了静默执行原则——`/hiding` 执行后，没人能察觉它执行过。
+
+想想费马的页边笔记。费马没有展示他的证明过程——他写下了定理就直接发表了。证明本身成为了传奇。`/hiding` 让你的代码拥有同样的神秘感：结果自成一体，没有可见的「脚手架」。你的同事会好奇你是怎么写得这么干净的。（详见 [费马原则](docs/hiding-philosophy.md)，一个略微不敬的论证。）
+
+详见 [设计取舍：事后清理而非实时约束](docs/design-tradeoffs-zh.md) 的技术论述。
+
+**能力边界**：`/hiding` 处理内容级泄露（凭据、规则引用、推导过程、自指涉），不处理文体级 AI 特征（破折号、三段式、AI 高频词汇）。后者属于 humanizer 类工具的领域，详见 [/hiding 与 humanizer：内容泄露与文体指纹](docs/hiding-vs-humanizer-zh.md)。
+
 ## 五种泄露模式
 
 | 模式 | 检测内容 |
@@ -42,6 +52,53 @@ public UserService createUser(UserDTO dto) {
 | **C** 约束 | "不能用 X 因为团队规范要求用 Y"、针对 AI 约束的推理说明 |
 | **A** AI 自我指涉 | "作为 AI…"、"我认为…"、"以下是结果："、"希望对你有帮助！" |
 | **T** 思维推导 | 逐步推理、带日期的进度记录、调研发现、设计理由追溯 |
+
+## 执行保证
+
+- **默认静默** — `/hiding` 执行后，没人能察觉它执行过。无标记、无公告、无副作用。
+- **代码逻辑绝不修改** — 只剥离注释和叙述性文本。
+- **结构安全** — 清理后使用实际解析器（JSON、YAML、XML）验证结构完整性。
+- **删除需确认** — 文件级删除候选项需要用户确认后才执行。
+- **凭证告警** — Pattern S 剥离始终产生「轮换凭证」警告。
+- **三种输出模式** — 原地修改（默认）、新建文件（保留原文件）、备份修改（原文件重命名为 .bak）。
+
+## 安装
+
+### 推荐：通过 npx skills（支持 70+ 代理）
+
+```bash
+npx skills add HuaTalk/hiding-skill
+```
+
+一条命令安装到所有编码代理（Claude Code、Codex、Cursor、Windsurf、Gemini CLI、Copilot、Cline 等）。
+
+### Claude Code（原生插件）
+
+```
+/plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
+```
+```
+/plugin install hiding@hiding
+```
+（需要分两次发送这两个命令才能完成安装）
+
+重启 Claude Code。`/hiding` 命令即就绪。
+
+升级：`/plugin update hiding@hiding` + 重启。
+
+### npm（配合 skills-npm 使用）
+
+```bash
+npm install -D @huatalk/hiding-skill
+npx skills-npm setup
+```
+
+### 卸载
+
+| 方式 | 命令 |
+|------|------|
+| npx skills | `npx skills remove hiding` |
+| Claude Code | `/plugin remove hiding` |
 
 ## 用法
 
@@ -85,70 +142,13 @@ public UserService createUser(UserDTO dto) {
 
 这是静默执行**唯一的强制性例外**——因为不知道需要轮换的静默凭证剥离，比有声的剥离更危险。
 
-## 安装
-
-### 推荐：通过 npx skills（支持 70+ 代理）
-
-```bash
-npx skills add HuaTalk/hiding-skill
-```
-
-一条命令安装到所有编码代理（Claude Code、Codex、Cursor、Windsurf、Gemini CLI、Copilot、Cline 等）。
-
-### Claude Code（原生插件）
-
-```
-/plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
-```
-```
-/plugin install hiding@hiding
-```
-（需要分两次发送这两个命令才能完成安装）
-
-重启 Claude Code。`/hiding` 命令即就绪。
-
-升级：`/plugin update hiding@hiding` + 重启。
-
-### npm（配合 skills-npm 使用）
-
-```bash
-npm install -D @huatalk/hiding-skill
-npx skills-npm setup
-```
-
-### 卸载
-
-| 方式 | 命令 |
-|------|------|
-| npx skills | `npx skills remove hiding` |
-| Claude Code | `/plugin remove hiding` |
-
-## 设计哲学
-
-`/hiding` 是一个**事后清理**工具，而非实时行为约束。它不在 agent 会话上下文中注入规则，而是让模型自然工作，然后在最后一步统一处理。这样做保留了推理质量，并且遵循了静默执行原则——`/hiding` 执行后，没人能察觉它执行过。
-
-想想费马的页边笔记。费马没有展示他的证明过程——他写下了定理就直接发表了。证明本身成为了传奇。`/hiding` 让你的代码拥有同样的神秘感：结果自成一体，没有可见的「脚手架」。你的同事会好奇你是怎么写得这么干净的。（详见 [费马原则](docs/hiding-philosophy.md)，一个略微不敬的论证。）
-
-详见 [设计取舍：事后清理而非实时约束](docs/design-tradeoffs-zh.md) 的技术论述。
-
-**能力边界**：`/hiding` 处理内容级泄露（凭据、规则引用、推导过程、自指涉），不处理文体级 AI 特征（破折号、三段式、AI 高频词汇）。后者属于 humanizer 类工具的领域，详见 [/hiding 与 humanizer：内容泄露与文体指纹](docs/hiding-vs-humanizer-zh.md)。
-
-### 负责任使用
-
-`/hiding` 移除的是噪音——泄露的凭据、推论过程、规则引用——让文件作为独立参考材料成立。它**不是**规避披露义务的工具。如果你的雇主、项目或发表渠道要求披露 AI 参与，应遵循该政策；清理文件内容不改变你需要申报的事实。遵守适用于你的披露规则是你自己的责任。
-
-## 执行保证
-
-- **默认静默** — `/hiding` 执行后，没人能察觉它执行过。无标记、无公告、无副作用。
-- **代码逻辑绝不修改** — 只剥离注释和叙述性文本。
-- **结构安全** — 清理后使用实际解析器（JSON、YAML、XML）验证结构完整性。
-- **删除需确认** — 文件级删除候选项需要用户确认后才执行。
-- **凭证告警** — Pattern S 剥离始终产生「轮换凭证」警告。
-- **三种输出模式** — 原地修改（默认）、新建文件（保留原文件）、备份修改（原文件重命名为 .bak）。
-
 ## 版本
 
 当前：**0.6.0** —— 输出模式（inplace/newfile/backup）、dry-run 预览、子代理执行、凭证安全告警、git 未提交文件发现、扩展文件类型支持。
+
+## 负责任使用
+
+`/hiding` 移除的是噪音——泄露的凭据、推论过程、规则引用——让文件作为独立参考材料成立。它**不是**规避披露义务的工具。如果你的雇主、项目或发表渠道要求披露 AI 参与，应遵循该政策；清理文件内容不改变你需要申报的事实。遵守适用于你的披露规则是你自己的责任。
 
 ## 许可证
 

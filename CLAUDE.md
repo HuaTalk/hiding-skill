@@ -71,7 +71,7 @@ When updating the skill:
 
 1. Edit `skills/hiding/SKILL.md` — the only canonical skill file
 2. Update `AGENTS.md` if the leakage pattern reference card changes
-3. Update `README.md` / `README-zh.md` if user-facing behavior changes
+3. Update `README.md` / `README-zh.md` if user-facing behavior changes — the two are language versions of one document and must stay structurally identical (same section order, same headings, equivalent content); any change to one must be mirrored in the other. Known allowed divergence: the zh version's extra "能力边界" paragraph in 设计哲学.
 4. Bump version in `.claude-plugin/plugin.json`, `package.json`, and `SKILL.md` frontmatter
 5. Run `npm test` to verify consistency
 6. Tag the release (`v0.6.1`, etc.) and push — CI publishes to npm on `v*` tags
