@@ -1,0 +1,23 @@
+AGENTS.md
+  s_458b97628c636f::t_7c35b485d5ca33 11
+skills/hiding/SKILL.md
+  s_458b97628c636f::t_df384a67add0ab 190
+package.json
+  s_458b97628c636f::t_1ce4c809790dbc 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "0bf1c39591d2b8cce6dfd0ca13a6ebd2cfa89973",
+  "prompts": {},
+  "sessions": {
+    "s_458b97628c636f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5c1ca169-ab1e-4d2c-88b3-ea210c437145",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
