@@ -1,0 +1,23 @@
+README.md
+  s_e72bd928b907cf::t_7d83b3eb24cfe3 73-74
+  s_e72bd928b907cf::t_f855632b57a43b 48,53,55-56,58,62,64
+  s_e72bd928b907cf::t_8fd1e623d7c049 19
+  s_e72bd928b907cf::t_2ed2a9ac6a04b1 35-36,40
+  s_e72bd928b907cf::t_465f3f513110bb 102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "920268184eac41eb94f92c430d9f959b96fd37b8",
+  "prompts": {},
+  "sessions": {
+    "s_e72bd928b907cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "19e770d9-a097-459b-b52a-10691c535995",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
