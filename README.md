@@ -35,13 +35,13 @@ No markers. No annotations. No one can tell it ran. The code simply reads as if 
 
 ## Five Leakage Patterns
 
-| Pattern | What It Catches |
-|---------|----------------|
-| **S**ecret | API keys, tokens, passwords, connection strings, internal URLs |
-| **R**ule | References to CLAUDE.md, skill instructions, team conventions the reader doesn't share |
-| **C**onstraint | "I can't use X because the team requires Y", rationale trails about AI-facing constraints |
-| **A**I Self-Reference | "As an AI…", "I think…", "Here's the result:", "I hope this helps!" |
-| **T**hought Process | Step-by-step reasoning, dated progress logs, research findings, design rationale trails |
+| Pattern         | What It Catches |
+|-----------------|----------------|
+| Secret          | API keys, tokens, passwords, connection strings, internal URLs |
+| Rule            | References to CLAUDE.md, skill instructions, team conventions the reader doesn't share |
+| Constraint      | "I can't use X because the team requires Y", rationale trails about AI-facing constraints |
+| AI Self-Reference | "As an AI…", "I think…", "Here's the result:", "I hope this helps!" |
+| Thought Process | Step-by-step reasoning, dated progress logs, research findings, design rationale trails |
 
 ## Usage
 
@@ -99,13 +99,13 @@ One command installs to all your coding agents (Claude Code, Codex, Cursor, Wind
 /plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
 ```
 ```
-/plugin install hiding@hiding
+/plugin install hiding@hiding-skill
 ```
 (You have to send two separate prompts for the install to work)
 
 Restart Claude Code. The `/hiding` command is ready.
 
-Upgrade: `/plugin update hiding@hiding` + restart.
+Upgrade: `/plugin update hiding@hiding-skill` + restart.
 
 ### npm (for skills-npm users)
 
