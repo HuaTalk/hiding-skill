@@ -1,0 +1,26 @@
+.github/workflows/publish.yml
+  s_2d853376f1478a::t_57b98430e23b9e 20-21,23
+scripts/check-versions.js
+  s_2d853376f1478a::t_c86dc9a556036e 51,58-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "07ffc069dfd2f00f9734a73ad186da7e43baefd9",
+  "prompts": {},
+  "humans": {
+    "h_5595c707bc937d": {
+      "author": "linqh <linqh@trip.com>"
+    }
+  },
+  "sessions": {
+    "s_2d853376f1478a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f04c88d5-25fc-48cb-a8ab-49f2159c2898",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
