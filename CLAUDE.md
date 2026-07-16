@@ -19,7 +19,7 @@ CI (`.github/workflows/test.yml`) additionally validates JSON syntax of plugin m
 
 ## Core Architecture
 
-The canonical skill: `skills/hiding/SKILL.md` (~207 lines). Everything else is packaging or documentation.
+The canonical skill: `skills/hiding/SKILL.md` (~360 lines). Everything else is packaging or documentation.
 
 ### Distribution: Two channels
 
@@ -46,7 +46,7 @@ Three files carry the version number:
 Rationale (full argument in `docs/design-tradeoffs-zh.md`):
 - **Injected rules degrade thinking quality** — tokens spent on self-censorship are not spent on reasoning.
 - **Prevention doesn't eliminate cleanup** — models still leak even with rules active. The cleanup step is unavoidable.
-- **Silent execution demands it** — real-time constraint produces unnatural output that betrays its origin; post-hoc cleanup can produce truly human-looking files.
+- **Silent execution demands it** — real-time constraint produces unnatural output that betrays its origin; post-hoc cleanup can produce truly human-looking files. Silence is the default; it has documented exceptions (HITL interactions, credential-rotation warnings, `--dry-run` preview, structural-failure reporting, input errors). The credential exception is mandatory: a silent credential strip where the user doesn't know to rotate is worse than a noisy one.
 
 ### What we don't do
 
@@ -63,7 +63,7 @@ Rationale (full argument in `docs/design-tradeoffs-zh.md`):
 
 3. **Chinese documentation is user-facing only**: `README-zh.md` and `docs/design-tradeoffs-zh.md` exist for Chinese-speaking users. All maintainer-facing content (this file, scripts, CI, SKILL.md body) is English.
 
-4. **Version `0.5.0`**, installation path `hiding@hiding`.
+4. **Version `0.6.0`**, installation path `hiding@hiding`. Features: output modes (inplace/newfile/backup), `--dry-run`, `--subagent`, credential-rotation warnings, git-uncommitted discovery.
 
 ## Maintenance
 
@@ -74,7 +74,7 @@ When updating the skill:
 3. Update `README.md` / `README-zh.md` if user-facing behavior changes
 4. Bump version in `.claude-plugin/plugin.json`, `package.json`, and `SKILL.md` frontmatter
 5. Run `npm test` to verify consistency
-6. Tag the release (`v0.5.1`, etc.) and push — CI publishes to npm on `v*` tags
+6. Tag the release (`v0.6.1`, etc.) and push — CI publishes to npm on `v*` tags
 
 ### File map (what to edit for what change)
 

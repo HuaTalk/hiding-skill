@@ -17,5 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check version consistency
+        run: node scripts/check-versions.js
       - run: npm install -g npm@latest
-      - run: npm publish
+      - run: npm publish --provenance

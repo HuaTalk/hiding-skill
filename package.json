@@ -1,6 +1,6 @@
 {
   "name": "@huatalk/hiding-skill",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Strip AI leakage from files before committing, pushing, or sharing. Removes secrets, AI self-reference, thought process traces, and rule citations.",
   "keywords": [
     "claude-code",
@@ -29,7 +29,6 @@
     "skills/",
     "scripts/",
     ".claude-plugin/",
-    ".github/",
     "LICENSE",
     "README.md",
     "README-zh.md"
