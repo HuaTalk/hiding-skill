@@ -48,13 +48,16 @@ for (const relPath of VERSION_FILES) {
 // SKILL.md metadata version
 try {
   const skillRaw = fs.readFileSync(path.join(root, 'skills/hiding/SKILL.md'), 'utf8');
-  const skillMatch = skillRaw.match(/version:\s*"([^"]+)"/);
+  const skillMatch = skillRaw.match(/version:\s*["']?([^"'\s]+)["']?/);
   if (skillMatch) {
     versions.push(['skills/hiding/SKILL.md', skillMatch[1]]);
     if (!PINNED_SEMVER.test(skillMatch[1])) {
       console.error(`skills/hiding/SKILL.md: version must be a pinned X.Y.Z semver, got ${JSON.stringify(skillMatch[1])}`);
       failed = true;
     }
+  } else {
+    console.error('skills/hiding/SKILL.md: no version field found in frontmatter (expected version: "X.Y.Z")');
+    failed = true;
   }
 } catch (e) {
   console.error(`skills/hiding/SKILL.md: ${e.message}`);
