@@ -16,7 +16,7 @@ A Claude Code plugin that removes AI-generated artifacts from files before commi
 
 ```python
 # Before /hiding
-# 这里不使用Tuple，提升可读性
+# Returns dict instead of Tuple for readability
 def get_user() -> dict[str, str]:
     ...
 
@@ -32,12 +32,12 @@ The comment explains a design choice to the AI's own satisfaction — but the re
 ```md
 Before /hiding
 
-> 根据 CLAUDE.md 团队规范，API 层统一走 gRPC
-> 调研记录（2026-07-15）：对比 REST / gRPC / GraphQL 后决定用 gRPC
+> Per CLAUDE.md conventions, all APIs must use gRPC
+> Research notes (2026-07-15): Compared REST, gRPC, and GraphQL — gRPC selected for performance
 
 After /hiding
 
-> API 层统一走 gRPC
+> All APIs use gRPC
 ```
 
 Rule citation and research trail are scaffolding for the AI's own reasoning. The reader only needs the conclusion.
@@ -45,23 +45,23 @@ Rule citation and research trail are scaffolding for the AI's own reasoning. The
 ### Teaching Docs — Rule
 
 **Prompt**:
-> 写一篇面向初学者的 LLM 原理解析，用比喻解释 Transformer，不要用专业术语。
+> Write a beginner-friendly explanation of how LLMs work. Use analogies instead of jargon to explain the Transformer architecture.
 
 ```md
 Before /hiding
 
-# 大语言模型原理解析
+# How Large Language Models Work
 
-> **写作说明**：以下内容面向完全不了解技术的读者，用生活化比喻解释 Transformer 架构，避免数学公式和专业术语（如注意力机制、多头注意力、自注意力等）。
-> 根据 CLAUDE.md 规范，每个核心概念配一个类比。
+> **Authoring note**: The following is written for readers with no technical background. Use everyday analogies to explain the Transformer, avoid math and jargon (attention mechanism, multi-head attention, self-attention, etc.).
+> Per CLAUDE.md conventions, pair each core concept with a real-world analogy.
 
-大语言模型（LLM）是一种能预测文本的神经网络。给定一段开头，它会逐个词地补全后面的内容——就像手机输入法的联想功能，只不过规模大了几万倍。
+A Large Language Model (LLM) is a neural network that predicts text. Give it a sentence starter, and it completes it word by word — like your phone's predictive keyboard, but millions of times larger.
 
 After /hiding
 
-# 大语言模型原理解析
+# How Large Language Models Work
 
-大语言模型（LLM）是一种能预测文本的神经网络。给定一段开头，它会逐个词地补全后面的内容——就像手机输入法的联想功能，只不过规模大了几万倍。
+A Large Language Model (LLM) is a neural network that predicts text. Give it a sentence starter, and it completes it word by word — like your phone's predictive keyboard, but millions of times larger.
 ```
 
 The prompt's instructions and the rule citation leaked into the document. After `/hiding`, only the explanation remains — no meta-commentary about how to write it.
@@ -70,8 +70,8 @@ The prompt's instructions and the rule citation leaked into the document. After 
 
 ```yaml
 # Before /hiding
-# 团队不允许直接用第三方 action，手写脚本绕过
-# 步骤：拉镜像 → 装依赖 → 跑测试 → 构建 → 上传
+# Team policy forbids third-party actions — handwritten script as workaround
+# Steps: pull image → install deps → run tests → build → upload
 steps:
 
 # After /hiding
@@ -99,7 +99,7 @@ const UserProfile = memo(({ user }) => {
 
 ```python
 # Before /hiding
-OPENAI_API_KEY = "sk-abc123"  # 我这里直接用真实 key 方便测试
+OPENAI_API_KEY = "sk-abc123"  # Using real key here for convenience during testing
 
 # After /hiding
 OPENAI_API_KEY = "sk-abc123"
