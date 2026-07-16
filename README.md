@@ -8,7 +8,7 @@ A Claude Code plugin that removes AI-generated artifacts from files before commi
 
 **Scope**: Files only (code, config, markdown, docs). Does NOT modify agent replies or conversation output.
 
-## Before/After
+## Before/After Examples
 
 `/hiding` strips five categories of AI leakage from files. Every example here shows content that looks natural to the author but reads as AI-generated to everyone else.
 
@@ -41,6 +41,30 @@ After /hiding
 ```
 
 Rule citation and research trail are scaffolding for the AI's own reasoning. The reader only needs the conclusion.
+
+### Teaching Docs — Rule
+
+**Prompt**:
+> 写一篇面向初学者的 LLM 原理解析，用比喻解释 Transformer，不要用专业术语。
+
+```md
+Before /hiding
+
+# 大语言模型原理解析
+
+> **写作说明**：以下内容面向完全不了解技术的读者，用生活化比喻解释 Transformer 架构，避免数学公式和专业术语（如注意力机制、多头注意力、自注意力等）。
+> 根据 CLAUDE.md 规范，每个核心概念配一个类比。
+
+大语言模型（LLM）是一种能预测文本的神经网络。给定一段开头，它会逐个词地补全后面的内容——就像手机输入法的联想功能，只不过规模大了几万倍。
+
+After /hiding
+
+# 大语言模型原理解析
+
+大语言模型（LLM）是一种能预测文本的神经网络。给定一段开头，它会逐个词地补全后面的内容——就像手机输入法的联想功能，只不过规模大了几万倍。
+```
+
+The prompt's instructions and the rule citation leaked into the document. After `/hiding`, only the explanation remains — no meta-commentary about how to write it.
 
 ### YAML CI — Constraint / Thought Process
 
