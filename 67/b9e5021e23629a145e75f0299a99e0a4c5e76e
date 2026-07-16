@@ -1,0 +1,25 @@
+README-zh.md
+  s_e72bd928b907cf::t_f583b1621b06ed 11
+  s_e72bd928b907cf::t_f0f448e35f199b 45-46,50-51,54,57,60,63,65-66,68
+  s_e72bd928b907cf::t_ddd854598768a8 47-49,52-53,55-56,58-59,61-62,64,67
+README.md
+  s_e72bd928b907cf::t_7258ccd4ba477c 45-46,50-51,54,57,60,63,65-66,68
+  s_e72bd928b907cf::t_fdd588f07ccaa7 47-49,52-53,55-56,58-59,61-62,64,67
+  s_e72bd928b907cf::t_dbc565d6208f7f 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "67b9e5021e23629a145e75f0299a99e0a4c5e76e",
+  "prompts": {},
+  "sessions": {
+    "s_e72bd928b907cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "19e770d9-a097-459b-b52a-10691c535995",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
