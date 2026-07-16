@@ -1,0 +1,28 @@
+docs/zh/competitive-landscape.md
+  s_c619e83b090b73::t_60d0eb83ad9eac 1-69
+README.md
+  s_c619e83b090b73::t_3a3914e8f242f4 116
+README-zh.md
+  s_c619e83b090b73::t_83bae3818018a0 118
+  s_c619e83b090b73::t_e7d36cfd5189a1 120
+  s_c619e83b090b73::t_5c0b60b37648b3 116
+CLAUDE.md
+  s_c619e83b090b73::t_3afa2f9828b05d 46
+  s_c619e83b090b73::t_ab0db61372ceec 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "5462481dcfec2be1c177d2141e172f8c820ca85b",
+  "prompts": {},
+  "sessions": {
+    "s_c619e83b090b73": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e257fc8-aef6-4c9d-9d84-a7557b46858d",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
