@@ -1,0 +1,23 @@
+CLAUDE.md
+  s_c619e83b090b73::t_1589042803d616 74
+README-zh.md
+  s_c619e83b090b73::t_115c3188fda5d2 36-45,56,58-63,103,105-109,111,113-117,119-125,127,129-133,135,137-143,149-151
+README.md
+  s_c619e83b090b73::t_a4283b0a9d780d 36-43,54,56-61,101,103-107,109,111-123,125,127-131,133,135-141,147-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "71a019bd9314e4dd09956c2fb9ea5d348833e3d6",
+  "prompts": {},
+  "sessions": {
+    "s_c619e83b090b73": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e257fc8-aef6-4c9d-9d84-a7557b46858d",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
