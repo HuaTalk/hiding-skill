@@ -25,12 +25,12 @@ This repo contains no source code, no build, and no runtime tests — it is enti
 ## Language conventions
 
 - Maintainer-facing content (SKILL.md body, `CLAUDE.md`, scripts, CI, this file) is **English**.
-- `README-zh.md` and `docs/*-zh.md` are user-facing Chinese documentation.
+- `README-zh.md` and `docs/zh/` are user-facing Chinese documentation.
 - The SKILL.md `description` frontmatter carries bilingual trigger phrases — keep both languages when editing it.
 
 ## Design constraints (read before proposing features)
 
-`/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. Proposals that inject rules into agent sessions (always-on rule files, session hooks, statusline badges) conflict with the project philosophy and will be declined. See `CLAUDE.md` and `docs/design-tradeoffs-zh.md` for the full rationale.
+`/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. Proposals that inject rules into agent sessions (always-on rule files, session hooks, statusline badges) conflict with the project philosophy and will be declined. See `CLAUDE.md` and `docs/zh/design-tradeoffs.md` for the full rationale.
 
 Silent execution is the default; the exceptions are enumerated in SKILL.md ("Explicit Exceptions to Silence"). New user-visible output must be justified as a new numbered exception, not added ad hoc.
 

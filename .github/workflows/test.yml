@@ -25,6 +25,14 @@ jobs:
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8')); console.log('$f: valid')"
           done
 
+      - name: Check English docs have no Chinese characters
+        run: |
+          if grep -Pn '[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}]' README.md docs/en/*.md; then
+            echo 'ERROR: English docs (README.md, docs/en/) must not contain Chinese characters.'
+            exit 1
+          fi
+          echo 'OK: no Chinese characters in README.md or docs/en/'
+
       - name: Check SKILL.md frontmatter
         run: |
           npm install --no-save js-yaml

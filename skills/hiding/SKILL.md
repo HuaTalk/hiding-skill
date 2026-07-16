@@ -1,6 +1,7 @@
 ---
 name: hiding
 description: Strip AI leakage from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的AI残留痕迹。Supports inplace/newfile/backup output modes, dry-run preview, sub-agent execution, and credential-security warnings. 支持原地修改/新建文件/备份修改三种输出模式、预览模式、子代理执行、凭证安全告警。
+argument-hint: "[<file>|<description>] [--mode inplace|newfile|backup] [--dry-run] [--subagent]"
 metadata:
   author: HuaTalk
   version: "0.6.0"
