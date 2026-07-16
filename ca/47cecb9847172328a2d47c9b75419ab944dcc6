@@ -1,0 +1,19 @@
+.github/workflows/test.yml
+  s_c619e83b090b73::t_47fb65573696eb 28,30-31,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "ca47cecb9847172328a2d47c9b75419ab944dcc6",
+  "prompts": {},
+  "sessions": {
+    "s_c619e83b090b73": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e257fc8-aef6-4c9d-9d84-a7557b46858d",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
