@@ -43,7 +43,7 @@ Three files carry the version number:
 
 `/hiding` is a cleanup tool, not a behavior modifier. It does NOT inject rules into agent sessions. It lets the model work naturally, then strips traces afterward.
 
-Rationale (full argument in `docs/design-tradeoffs-zh.md`):
+Rationale (full argument in `docs/zh/design-tradeoffs.md`):
 - **Injected rules degrade thinking quality** — tokens spent on self-censorship are not spent on reasoning.
 - **Prevention doesn't eliminate cleanup** — models still leak even with rules active. The cleanup step is unavoidable.
 - **Silent execution demands it** — real-time constraint produces unnatural output that betrays its origin; post-hoc cleanup can produce truly human-looking files. Silence is the default; it has documented exceptions (HITL interactions, credential-rotation warnings, `--dry-run` preview, structural-failure reporting, input errors). The credential exception is mandatory: a silent credential strip where the user doesn't know to rotate is worse than a noisy one.
@@ -61,7 +61,7 @@ Rationale (full argument in `docs/design-tradeoffs-zh.md`):
 
 2. **`npx skills` as primary distribution**: One command reaches 70+ agents. Claude Code native plugin is the secondary channel.
 
-3. **Chinese documentation is user-facing only**: `README-zh.md` and `docs/design-tradeoffs-zh.md` exist for Chinese-speaking users. All maintainer-facing content (this file, scripts, CI, SKILL.md body) is English.
+3. **Chinese documentation is user-facing only**: `README-zh.md` and `docs/zh/` exist for Chinese-speaking users. English docs live in `docs/en/`. All maintainer-facing content (this file, scripts, CI, SKILL.md body) is English.
 
 4. **Version `0.6.0`**, installation path `hiding@hiding`. Features: output modes (inplace/newfile/backup), `--dry-run`, `--subagent`, credential-rotation warnings, git-uncommitted discovery.
 

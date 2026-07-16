@@ -113,7 +113,7 @@ No markers. No annotations. No one can tell it ran. The code simply reads as if 
 
 `/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. It does not inject rules into your agent's session context. Instead, it lets the model work naturally, then strips the traces afterward. This preserves thinking quality and follows the silent execution principle — after `/hiding` runs, no one should be able to tell it ran.
 
-Think of it like Fermat's margin note. Fermat didn't show his work — he wrote the theorem and moved on. The proof became legend. `/hiding` gives your code the same mystique: the result stands on its own, with no visible scaffolding. Your colleagues will wonder how you wrote it so cleanly. (See [The Fermat Principle](docs/hiding-philosophy.md) for the full, slightly irreverent argument.)
+Think of it like Fermat's margin note. Fermat didn't show his work — he wrote the theorem and moved on. The proof became legend. `/hiding` gives your code the same mystique: the result stands on its own, with no visible scaffolding. Your colleagues will wonder how you wrote it so cleanly. (See [The Fermat Principle](docs/en/hiding-philosophy.md) for the full, slightly irreverent argument.)
 
 
 ## Five Leakage Patterns
