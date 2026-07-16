@@ -1,0 +1,25 @@
+README.md
+  h_5595c707bc937d 39-44
+  s_2d853376f1478a::t_193c20e46c42cf 102,108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "24ab07fd30f091552ae09fb948da2c434c75b8f1",
+  "prompts": {},
+  "humans": {
+    "h_5595c707bc937d": {
+      "author": "linqh <linqh@trip.com>"
+    }
+  },
+  "sessions": {
+    "s_2d853376f1478a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f04c88d5-25fc-48cb-a8ab-49f2159c2898",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+docs/hiding-vs-humanizer-zh.md
+  s_2d853376f1478a::t_d98556ff9f9f81 1-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "6b5884658f901bc9afb78ae145636e97df9e4c7a",
+  "prompts": {},
+  "humans": {
+    "h_5595c707bc937d": {
+      "author": "linqh <linqh@trip.com>"
+    }
+  },
+  "sessions": {
+    "s_2d853376f1478a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f04c88d5-25fc-48cb-a8ab-49f2159c2898",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
