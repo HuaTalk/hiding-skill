@@ -1,0 +1,31 @@
+README.md
+  s_e72bd928b907cf::t_dd1f92049fec0e 30
+  s_e72bd928b907cf::t_5da2a93d35c2a4 83
+  s_e72bd928b907cf::t_9ccf736dfe1dc1 98
+  s_e72bd928b907cf::t_8736330d2d8206 15
+  s_e72bd928b907cf::t_6908f5db3bf200 45
+  s_e72bd928b907cf::t_e75f6f22d1ddcd 69
+README-zh.md
+  s_e72bd928b907cf::t_331d4ebb8ddbe0 69
+  s_e72bd928b907cf::t_48329369be0fad 30
+  s_e72bd928b907cf::t_a8ed5dfafa33b8 83
+  s_e72bd928b907cf::t_7cb656ff2d67ed 98
+  s_e72bd928b907cf::t_322a0716be515e 45
+  s_e72bd928b907cf::t_f651cf02cec2a3 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "43ecad99ae9f0dbb161b73cc13092d1e356c3058",
+  "prompts": {},
+  "sessions": {
+    "s_e72bd928b907cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "19e770d9-a097-459b-b52a-10691c535995",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
