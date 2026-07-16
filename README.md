@@ -73,13 +73,15 @@ No markers. No annotations. No one can tell it ran. The code simply reads as if 
 |------|----------|
 | `inplace` (default) | Modify file in place — classic `/hiding` |
 | `newfile` | Create `<name>-cleaned.<ext>`, leave original untouched |
-| `backup` | Rename original to `<name>.bak`, write cleaned to original name |
+| `backup` | Rename original to `<name>.<ext>.bak`, write cleaned to original name |
+
+If the target (`-cleaned` file or `.bak`) already exists, `/hiding` never overwrites it — it writes to a numbered alternative (`-cleaned-2`, `.bak-2`) and reports which name it used.
 
 ### Security: Credential Handling
 
-When Pattern S (credentials, API keys, tokens) is detected and stripped, `/hiding` **always warns**:
+When Pattern S (credentials, API keys, tokens) is **found** — whether stripped or only previewed via `--dry-run` — `/hiding` **always warns**:
 
-> ⚠️ Security-sensitive content was removed. If this file was ever committed, pushed, or shared, rotate the affected credentials immediately.
+> ⚠️ Security-sensitive content was found {and removed / preview only}. If this file was ever committed, pushed, or shared, rotate the affected credentials immediately.
 
 This is the only mandatory exception to silent execution — because a silent credential strip where the user doesn't know to rotate is worse than a noisy one.
 
@@ -99,13 +101,13 @@ One command installs to all your coding agents (Claude Code, Codex, Cursor, Wind
 /plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
 ```
 ```
-/plugin install hiding@hiding-skill
+/plugin install hiding@hiding
 ```
 (You have to send two separate prompts for the install to work)
 
 Restart Claude Code. The `/hiding` command is ready.
 
-Upgrade: `/plugin update hiding@hiding-skill` + restart.
+Upgrade: `/plugin update hiding@hiding` + restart.
 
 ### npm (for skills-npm users)
 
@@ -128,6 +130,10 @@ npx skills-npm setup
 Think of it like Fermat's margin note. Fermat didn't show his work — he wrote the theorem and moved on. The proof became legend. `/hiding` gives your code the same mystique: the result stands on its own, with no visible scaffolding. Your colleagues will wonder how you wrote it so cleanly. (See [The Fermat Principle](docs/hiding-philosophy.md) for the full, slightly irreverent argument.)
 
 See [设计取舍：事后清理而非实时约束](docs/design-tradeoffs-zh.md) (Chinese) for the full technical rationale.
+
+### Responsible Use
+
+`/hiding` removes noise — leaked credentials, reasoning scaffolding, rule citations — so files stand on their own as reference material. It is **not** a tool for evading disclosure obligations. If your employer, project, or publication venue requires disclosing AI assistance, that policy governs; cleaning a file's contents does not change what you must declare. You are responsible for complying with the disclosure rules that apply to you.
 
 ## Execution Guarantees
 

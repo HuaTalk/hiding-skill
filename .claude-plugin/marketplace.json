@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "hiding-skill",
+  "name": "hiding",
   "description": "Strip AI leakage from files before committing — secrets, self-reference, thought process, rule citations. Silent by default. Cleaned files read human-written.",
   "owner": {
     "name": "HuaTalk",

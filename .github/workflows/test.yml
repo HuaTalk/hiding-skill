@@ -27,13 +27,19 @@ jobs:
 
       - name: Check SKILL.md frontmatter
         run: |
+          npm install --no-save js-yaml
           node -e "
           const fs = require('fs');
+          const yaml = require('js-yaml');
           const content = fs.readFileSync('skills/hiding/SKILL.md', 'utf8');
           if (!content.startsWith('---')) { console.error('Missing frontmatter'); process.exit(1); }
-          const end = content.indexOf('---', 3);
-          const fm = content.substring(3, end).trim();
-          if (!fm.includes('name:')) { console.error('Missing name in frontmatter'); process.exit(1); }
-          if (!fm.includes('description:')) { console.error('Missing description in frontmatter'); process.exit(1); }
-          console.log('SKILL.md frontmatter: valid');
+          const end = content.indexOf('\n---', 3);
+          if (end === -1) { console.error('Unterminated frontmatter'); process.exit(1); }
+          const fm = yaml.load(content.substring(3, end));
+          if (!fm || typeof fm !== 'object') { console.error('Frontmatter is not a YAML mapping'); process.exit(1); }
+          for (const field of ['name', 'description']) {
+            if (typeof fm[field] !== 'string' || !fm[field].trim()) { console.error('Missing or empty ' + field + ' in frontmatter'); process.exit(1); }
+          }
+          if (!fm.metadata || typeof fm.metadata.version !== 'string') { console.error('Missing metadata.version in frontmatter'); process.exit(1); }
+          console.log('SKILL.md frontmatter: valid YAML, name/description/metadata.version present');
           "

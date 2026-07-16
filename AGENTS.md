@@ -31,6 +31,8 @@ Note: TODO/FIXME/HACK markers are NOT automatically AI leakage — human develop
 | `newfile` | Create `<name>-cleaned.<ext>`, leave original untouched |
 | `backup` | Rename original to `<file>.bak` (e.g. `config.yml` → `config.yml.bak`), write cleaned to original name |
 
+Target collision (`newfile`/`backup`): never overwrite an existing target — use a numbered alternative (`-cleaned-2`, `.bak-2`, incrementing) and report the name used in one line.
+
 ## Flags
 
 | Flag | Effect |
@@ -47,7 +49,7 @@ Scans TWO sources: (1) files created/modified in the current session, (2) git un
 
 ## Rules
 
-- **Silent execution**: after running, no one should be able to tell it ran. No markers, no announcements, no side effects. Exceptions: HITL interactions, credential warnings (Pattern S), dry-run preview, structural verification failures, input errors.
+- **Silent execution**: after running, no one should be able to tell it ran. No markers, no announcements, no side effects. Exceptions: HITL interactions, credential warnings (Pattern S), dry-run preview, structural verification failures, input errors, output-target collisions.
 - **Code logic is NEVER changed**: only comments and prose are stripped. Credentials in executable code flagged for human review.
 - **No leakage found (non-HITL)**: do nothing, say nothing.
 - **Multi-line leakage blocks**: remove the whole block.

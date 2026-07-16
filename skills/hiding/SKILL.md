@@ -72,16 +72,16 @@ Modify the file in place. This is the classic `/hiding` behavior — read → st
 Create a new file with cleaned content; leave the original untouched.
 - Naming: `<stem>-cleaned.<ext>` (e.g., `UserService.java` → `UserService-cleaned.java`)
 - Extension-less files: `<name>-cleaned` (e.g., `Dockerfile` → `Dockerfile-cleaned`)
-- If the cleaned file already exists, overwrite it.
-- Do NOT announce the new file name. The file simply appears.
+- If the target name already exists, do NOT overwrite it — it may be a hand-written file. Write to `<stem>-cleaned-2.<ext>` instead, incrementing (`-3`, `-4`, …) until a free name is found, and report one line: "`<target>` already existed — wrote to `<alternative>` instead." (Exception 9 — output-target collision.)
+- Otherwise do NOT announce the new file name. The file simply appears.
 
 ### `backup`
 
 Rename the original file as a backup, then write the cleaned content to the original filename.
 - Rename original: `<name>.<ext>` → `<name>.<ext>.bak` (e.g., `config.yml` → `config.yml.bak`)
 - Write cleaned content to `<name>.<ext>` (the original name)
-- If `.bak` already exists, overwrite it.
-- Do NOT announce the backup operation.
+- If `<name>.<ext>.bak` already exists, do NOT overwrite it — it may hold the true original from an earlier run. Rename the original to `<name>.<ext>.bak-2` instead, incrementing until a free name is found, and report one line: "`<name>.<ext>.bak` already existed — original saved as `<alternative>`." (Exception 9 — output-target collision.)
+- Otherwise do NOT announce the backup operation.
 
 ### `--dry-run` (Preview Mode)
 
@@ -340,6 +340,7 @@ These are the ONLY cases where `/hiding` produces output beyond the HITL decisio
 6. **Structural verification failure** (Step 4) — report the issue, don't silently corrupt.
 7. **Binary file / directory / empty file / invalid flag** — report the input error.
 8. **External modification during operation** (mtime check) — warn and abort, don't overwrite concurrent changes.
+9. **Output-target collision** (`newfile`/`backup`) — the target file already exists; never overwrite it, write to a numbered alternative and report the name used.
 
 ### Behavior Guardrails
 
