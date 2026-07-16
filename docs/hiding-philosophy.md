@@ -38,7 +38,7 @@ This is the AI equivalent of Fermat writing a 100-page proof in the margin. It's
 The result looks like this:
 
 ```java
-public UserService createUser(UserDTO dto) {
+public User createUser(UserDTO dto) {
     return User.builder()
         .name(dto.getName())
         .email(dto.getEmail())
