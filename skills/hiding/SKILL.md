@@ -4,7 +4,7 @@ description: Strip AI leakage from files before committing, pushing, or sharing.
 argument-hint: "[<file>|<description>] [--mode inplace|newfile|backup] [--dry-run] [--subagent]"
 metadata:
   author: HuaTalk
-  version: "0.6.0"
+  version: "0.7.0"
   category: output-discipline
 ---
 
@@ -184,7 +184,7 @@ Examples: "as instructed by...", "following the convention...", "per the skill..
 
 ### Pattern C: Constraint & Rationale
 
-**Principle**: Content that explains why a choice was made rather than documenting what was chosen. The output should state decisions, not justify them. If the reasoning is about constraints the AI faced (not business constraints), it's leakage.
+**Principle**: Content that explains why a choice was made rather than documenting what was chosen. The output should state decisions, not justify them. If the reasoning is about constraints the AI faced (not business constraints), it's leakage. This also covers **guardrails** — AI-imposed safety limits, refusal justifications, behavioral fences. "I can't answer that because of safety guidelines" is a guardrail leaking into output; it uses the word "约束" in Chinese contexts but means the model's built-in behavioral floor, not an external team rule (Pattern R).
 
 Examples: "I can't use X because the team standard requires...", "不能使用 X 因为团队用 Y", "由于规范要求...", "we chose X because...", "the reason for Y is...", "调研发现...", "设计决策...".
 

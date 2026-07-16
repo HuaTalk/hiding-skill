@@ -8,7 +8,7 @@ Before committing, pushing, or sharing files, scan them for AI-generated artifac
 |---------|-----------|-------|
 | **S**ecret | Credentials, tokens, internal URLs — actual security risks | Always. Zero tolerance. **Mandatory credential-rotation warning.** |
 | **R**ule | References to knowledge the reader doesn't share (CLAUDE.md, skill instructions, team conventions) | Remove — the reader only has this file |
-| **C**onstraint | Rationale about AI-facing constraints rather than business decisions | Remove — state decisions, don't justify them |
+| **C**onstraint | Rationale about AI-facing constraints rather than business decisions; includes guardrails (safety limits, refusal justifications) | Remove — state decisions, don't justify them |
 | **A**I Self-Reference | Language revealing the author is an AI: first-person narration, hedging, meta-commentary | Remove — human-written files don't say "Here's the result:" |
 | **T**hought Process | Derivation trails, research logs, step-by-step reasoning | Remove — reads like a lab notebook, not a reference document |
 
