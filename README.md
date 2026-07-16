@@ -10,26 +10,78 @@ A Claude Code plugin that removes AI-generated artifacts from files before commi
 
 ## Before/After
 
-```java
+`/hiding` strips five categories of AI leakage from files. Every example here shows content that looks natural to the author but reads as AI-generated to everyone else.
+
+### Python Code — Constraint / Thought Process
+
+```python
+# Before /hiding
+# 这里不使用Tuple，提升可读性
+def get_user() -> dict[str, str]:
+    ...
+
+# After /hiding
+def get_user() -> dict[str, str]:
+    ...
+```
+
+The comment explains a design choice to the AI's own satisfaction — but the reader gains nothing from it. The function signature speaks for itself.
+
+### Markdown Docs — Rule / Thought Process
+
+```md
+Before /hiding
+
+> 根据 CLAUDE.md 团队规范，API 层统一走 gRPC
+> 调研记录（2026-07-15）：对比 REST / gRPC / GraphQL 后决定用 gRPC
+
+After /hiding
+
+> API 层统一走 gRPC
+```
+
+Rule citation and research trail are scaffolding for the AI's own reasoning. The reader only needs the conclusion.
+
+### YAML CI — Constraint / Thought Process
+
+```yaml
+# Before /hiding
+# 团队不允许直接用第三方 action，手写脚本绕过
+# 步骤：拉镜像 → 装依赖 → 跑测试 → 构建 → 上传
+steps:
+
+# After /hiding
+steps:
+```
+
+The constraint justification and step-by-step plan are AI-facing rationale. The workflow definition is all the reader needs.
+
+### TypeScript Component — AI Self-Reference
+
+```typescript
 // Before /hiding
-// I'll use the Builder pattern here since the constructor has too many params.
-// As an AI, I think this is cleaner than telescoping constructors.
-// Following the team conventions in CLAUDE.md, I'm adding validation.
-public UserService createUser(UserDTO dto) {
-    return User.builder()
-        .name(dto.getName())
-        .email(dto.getEmail())
-        .build();
-}
+// Here's the UserProfile component I created
+// I think memoizing here makes sense since props rarely change
+const UserProfile = memo(({ user }) => {
 
 // After /hiding
-public UserService createUser(UserDTO dto) {
-    return User.builder()
-        .name(dto.getName())
-        .email(dto.getEmail())
-        .build();
-}
+// Memoized since props rarely change
+const UserProfile = memo(({ user }) => {
 ```
+
+"Here's the…" and "I think…" betray AI authorship. A human writes the technical reason directly.
+
+### Python Credentials — Secret
+
+```python
+# Before /hiding
+OPENAI_API_KEY = "sk-abc123"  # 我这里直接用真实 key 方便测试
+
+# After /hiding
+OPENAI_API_KEY = "sk-abc123"
+```
+
+Inline credentials with casual justification are security accidents waiting to happen. `/hiding` always warns when secrets are found.
 
 No markers. No annotations. No one can tell it ran. The code simply reads as if a human wrote it from the start.
 
