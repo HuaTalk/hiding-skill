@@ -1,0 +1,19 @@
+skills/hiding/SKILL.md
+  s_e72bd928b907cf::t_d4d7855d059ef6 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "18d525704286456a56d129ac3237f8fc33e84d86",
+  "prompts": {},
+  "sessions": {
+    "s_e72bd928b907cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "19e770d9-a097-459b-b52a-10691c535995",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
