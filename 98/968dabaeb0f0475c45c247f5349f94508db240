@@ -1,0 +1,36 @@
+README-zh.md
+  s_528e0040097a36::t_f8fa35bd76ef6f 194,202-203
+  s_528e0040097a36::t_f28b3c6fb15a8d 224-225,228
+skills/hiding/SKILL.md
+  s_528e0040097a36::t_a89532ac470b3c 380-381,383,385,388
+  s_528e0040097a36::t_988d72c11f8bc9 43-44
+  s_528e0040097a36::t_fab755af082a7f 286-319
+  s_528e0040097a36::t_57df30a4718a67 23
+  s_528e0040097a36::t_a6e58a7b69c2ec 340-341
+  s_528e0040097a36::t_30ce5754163643 55-56
+  s_528e0040097a36::t_22513ad035d985 4
+  s_528e0040097a36::t_3a120ce3905626 7
+  s_528e0040097a36::t_3035f6019bd605 33
+  s_528e0040097a36::t_43a37fe2475081 68-69
+AGENTS.md
+  s_528e0040097a36::t_a34c8fd24e071f 43
+README.md
+  s_528e0040097a36::t_8b219b19105fae 191,199-200
+  s_528e0040097a36::t_4fe595aeb9e4e5 221-222,225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "98968dabaeb0f0475c45c247f5349f94508db240",
+  "prompts": {},
+  "sessions": {
+    "s_528e0040097a36": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1dd88676-de5c-4bb7-8003-64bb1fd0110e",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
