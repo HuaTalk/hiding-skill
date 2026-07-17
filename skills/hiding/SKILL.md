@@ -1,10 +1,10 @@
 ---
 name: hiding
 description: Strip AI leakage from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的AI残留痕迹。Supports inplace/newfile/backup output modes, dry-run preview, sub-agent execution, and credential-security warnings. 支持原地修改/新建文件/备份修改三种输出模式、预览模式、子代理执行、凭证安全告警。
-argument-hint: "[<file>|<description>] [--mode inplace|newfile|backup] [--dry-run] [--subagent]"
+argument-hint: "[<file>|<description>] [--artifacts <target>]... [--mode inplace|newfile|backup] [--dry-run] [--subagent]"
 metadata:
   author: HuaTalk
-  version: "0.7.0"
+  version: "0.8.0"
   category: output-discipline
 ---
 
@@ -20,6 +20,7 @@ Strip AI leakage from files so they read as human-written: no AI reasoning trace
 /hiding                              Analyze session + git uncommitted for leakage (HITL)
 /hiding <file>                       Clean a specific file
 /hiding <description>                Hide content matching the description (e.g., "/hiding mock data")
+/hiding --artifacts "<target>" [...]   Targeted mode: hide ONLY the specified content (see Targeted Strip)
 ```
 
 ### Flags (optional, can appear anywhere in the argument)
@@ -29,12 +30,16 @@ Strip AI leakage from files so they read as human-written: no AI reasoning trace
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Output mode (see Output Modes below) |
 | `--subagent` | (boolean flag) | off | Delegate stripping to a sub-agent for cleaner isolation |
 | `--dry-run` | (boolean flag) | off | Preview what would change without modifying any files |
+| `--artifacts` | `"<target>"` (repeatable) | (none) | Targeted mode: hide only content matching the given target(s); the five built-in patterns are NOT scanned (see Targeted Strip below) |
 
 **Examples:**
 ```
 /hiding --mode newfile file.java          Clean file.java, output to file-cleaned.java
 /hiding --dry-run file.java               Show what would be stripped, don't modify
 /hiding --mode newfile --subagent --dry-run file.java   Preview sub-agent output to new file
+/hiding --dry-run                         HITL preview: show findings without executing
+/hiding --artifacts "ProjectX" file.java    Remove only ProjectX references from file.java
+/hiding --artifacts "ProjectX" --artifacts "内部域名" --dry-run file.java   Preview matches for two targets
 ```
 
 ### Flag Parsing
@@ -45,7 +50,8 @@ Before mode selection, parse flags from the argument string. Remove parsed flags
 
 **Validation (report error, stop — do NOT silently fall back to default):**
 - `--mode` without a value, or value not in `{inplace, newfile, backup}` → report: "Invalid --mode value. Use inplace, newfile, or backup." If the token after `--mode` itself starts with `--` (e.g. `--mode --dry-run`), treat `--mode` as missing its value — do NOT consume the next flag as the mode value.
-- Any token starting with `--` that is not a recognized flag → report: "Unknown flag: <flag>. Known flags: --mode, --subagent, --dry-run."
+- `--artifacts` without a value, with an empty-string value, or where the token after `--artifacts` itself starts with `--` (e.g. `--artifacts --dry-run`) → report: "Invalid --artifacts value. Provide a non-empty target description." Do NOT consume the next flag as the target value. `--artifacts` is repeatable — each occurrence must independently pass this validation.
+- Any token starting with `--` that is not a recognized flag → report: "Unknown flag: <flag>. Known flags: --mode, --subagent, --dry-run, --artifacts."
 
 These are explicit errors, not silent fallbacks. A misspelled flag (e.g. `--dryrun`, `--mod newfile`) must surface, not be swallowed into Description mode.
 
@@ -58,6 +64,8 @@ When `/hiding` is invoked (after flag parsing):
 3. **Argument is a description** (natural language, not resolvable as a file path) → **Description mode**. Identify files in context whose content matches the description, apply relevant hide patterns.
 
 **Description mode confirmation:** First produce a bounded candidate list (respecting the current repository and session inventory), including each file's planned action and output mode. Ask the user which candidates to process. Do not write, delete, or follow symlink targets until the user explicitly confirms the selected files. If no candidates are found, report that and stop.
+
+**Targeted mode overlay**: if one or more `--artifacts` targets were parsed, the mode selection above still applies (File / Description / HITL by the remaining non-flag argument), but execution follows the **Targeted Strip (`--artifacts`)** section instead of the five-pattern flow. In Description mode the duties are separated: the description selects the FILES, the `--artifacts` targets select the CONTENT.
 
 ## Output Modes
 
@@ -277,6 +285,40 @@ If stripping broke something structural, discard the temporary candidate and lea
 
 If a deterministic parser is not available, report: "⚠️ Structural verification was visual only. Consider validating the file with a parser before committing."
 
+## Targeted Strip (`--artifacts`)
+
+When one or more `--artifacts` targets are present, `/hiding` hides ONLY what the user specified. The five built-in patterns (S/R/C/A/T) are NOT scanned — including Pattern S. This is a deliberate design decision: targeted mode does exactly what the user asked, nothing more.
+
+**Targets are semantic descriptions**, which naturally include exact literals — `--artifacts "ProjectX"` matches the literal name and its obvious variants in context; `--artifacts "所有公司内部域名"` matches by meaning. No regex support. Targets are one-off: nothing is persisted between invocations.
+
+### Execution Order (Targeted)
+
+- **Step 0 (Validate)**: unchanged — same input checks as the standard flow.
+- **Step 1 (Purge check)**: SKIPPED.
+- **Step 2 (Pattern S)**: SKIPPED.
+- **Step 2' (Targeted Strip)**: for each target, locate semantic matches in the file:
+  - Match in a **comment or prose** → delete the matched line; multi-line blocks are removed whole.
+  - Match in **executable code, an identifier, or a config value** → do NOT modify the code. Flag the location and report: "目标内容出现在可执行代码中，需要人工审查。Target content found in executable code — human review required. (<file>:<line>)" This report is mandatory — a silently skipped match would leave the user believing it was hidden.
+  - **Zero matches** for a target → silent. No "nothing found" message (use `--dry-run` to verify a target matches before running).
+- **Step 3 (Five-pattern strip)**: SKIPPED.
+- **Step 4 (Verify)**: unchanged — structural verification with parsers, restore on failure.
+
+### Mode Combinations
+
+- **File mode**: run the targeted flow on that file.
+- **Description mode**: the description selects FILES; the `--artifacts` targets select CONTENT within them.
+- **HITL mode** (no non-flag arguments): Step H1 inventory unchanged; Step H2 reports ONLY target matches (no five-pattern scan); Step H3 per-file confirmation, then targeted strip on confirmed files. Zero findings → "未发现匹配指定目标的内容。No content matching the specified targets was found."
+- **`--mode`**: orthogonal — inplace/newfile/backup apply to the targeted result as usual.
+- **`--dry-run`**: list each target with its matches (`<target>` → `<file>:<line>`: matched text). No writes.
+- **`--subagent`**: pass the targets, Steps 0/2'/4, the strip strategy by file type, and the no-recursion rule. Do NOT pass the five patterns — the sub-agent must not scan for them.
+
+### Silence (Targeted)
+
+The silence rules and exceptions apply unchanged, with these adjustments:
+- Exceptions 2 (purge check) and 3 (credential warning) never fire — their steps are skipped.
+- Exception 10 (target in executable code) is the only targeted-specific mandatory output.
+- HITL zero-findings wording is target-specific (see Mode Combinations above).
+
 ## Sub-Agent Execution (`--subagent`)
 
 When the `--subagent` flag is set, do NOT perform the stripping yourself. Instead:
@@ -294,6 +336,8 @@ When the `--subagent` flag is set, do NOT perform the stripping yourself. Instea
 - An explicit no-recursion rule: "You are a leaf task. Do NOT spawn further sub-agents. Return your result directly."
 
 **Do NOT pass to the sub-agent:** the Usage section, Mode Selection, Output Modes, the Sub-Agent Execution section itself, the HITL flow, or Execution Rules. The sub-agent needs only the stripping logic. (The no-recursion rule above is the only meta-instruction it receives — keep it in the pass-list so it actually reaches the sub-agent.)
+
+**Targeted mode (`--artifacts` + `--subagent`):** replace the pass-list above with: the `--artifacts` targets, Steps 0/2'/4 (the targeted execution order), the strip strategy by file type, the dry-run instruction appropriate to the mode, and the no-recursion rule. Do NOT pass the five patterns — the sub-agent must strip only the user's targets.
 
 **Dry-run determines the sub-agent's task and return format:**
 - **Without `--dry-run`**: instruct the sub-agent: "Return ONLY the cleaned file content. Do not add explanations, markers, or commentary." The main agent writes this per the output mode.
@@ -331,14 +375,15 @@ After `/hiding` runs, no one should be able to tell it ran from the file content
 These are the ONLY cases where `/hiding` produces output beyond the HITL decision flow:
 
 1. **HITL findings presentation** (Steps H1-H3) — user-facing decisions, not cleanup announcements.
-2. **Step 1 purge check** — asking the user whether to delete a file.
-3. **Pattern S credential warning** (Step 2) — mandatory security warning. "⚠️ 发现并移除了安全敏感内容... rotate credentials immediately."
+2. **Step 1 purge check** — asking the user whether to delete a file. (Not applicable in targeted mode — Step 1 is skipped.)
+3. **Pattern S credential warning** (Step 2) — mandatory security warning. "⚠️ 发现并移除了安全敏感内容... rotate credentials immediately." (Not applicable in targeted mode — Step 2 is skipped.)
 4. **`--dry-run` preview** — user explicitly requested a preview.
-5. **Zero findings in HITL** — brief confirmation: "未在此会话和未提交文件中发现 AI 泄露痕迹。"
+5. **Zero findings in HITL** — brief confirmation: "未在此会话和未提交文件中发现 AI 泄露痕迹。" (Targeted mode wording: "未发现匹配指定目标的内容。")
 6. **Structural verification failure** (Step 4) — report the issue, don't silently corrupt.
-7. **Binary file / directory / empty file / invalid flag** — report the input error.
+7. **Binary file / directory / empty file / invalid flag** — report the input error (including `--artifacts` validation errors).
 8. **External modification during operation** (mtime check) — warn and abort, don't overwrite concurrent changes.
 9. **Output-target collision** (`newfile`/`backup`) — the target file already exists; never overwrite it, write to a numbered alternative and report the name used.
+10. **Target in executable code** (targeted mode, Step 2') — a `--artifacts` target matched executable code, an identifier, or a config value; report the location for human review instead of silently modifying code.
 
 ### Behavior Guardrails
 
