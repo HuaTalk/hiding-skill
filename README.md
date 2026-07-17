@@ -188,6 +188,7 @@ npx skills-npm setup
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Where to write cleaned output |
 | `--subagent` | (flag) | off | Use sub-agent for cleaner isolation |
 | `--dry-run` | (flag) | off | Preview changes without modifying files |
+| `--to-hide` | `"<target>"` (repeatable) | (none) | Targeted mode: hide only the specified content — skips the five built-in patterns |
 
 ```bash
 /hiding --mode newfile file.java          # Output to file-cleaned.java, leave original
@@ -195,6 +196,8 @@ npx skills-npm setup
 /hiding --dry-run file.java               # Preview what would change
 /hiding --subagent file.java              # Strip via sub-agent for extra discipline
 /hiding --dry-run                         # HITL preview without executing
+/hiding --to-hide "ProjectX" file.java    # Remove only ProjectX references
+/hiding --to-hide "ProjectX" --to-hide "internal domains" --dry-run file.java   # Preview two targets
 ```
 
 ### Output Modes
@@ -215,9 +218,11 @@ When Pattern S (credentials, API keys, tokens) is **found** — whether stripped
 
 This is the only mandatory exception to silent execution — because a silent credential strip where the user doesn't know to rotate is worse than a noisy one.
 
+Note: in targeted mode (`--to-hide`), the five built-in patterns — including Pattern S — are not scanned, so no credential warning fires. Targeted mode does exactly what you asked, nothing more.
+
 ## Version
 
-Current: **0.6.0** — Output modes (inplace/newfile/backup), dry-run preview, sub-agent execution, credential security warnings, git-uncommitted discovery, expanded file type support.
+Current: **0.8.0** — Targeted hiding (`--to-hide`), output modes (inplace/newfile/backup), dry-run preview, sub-agent execution, credential security warnings, git-uncommitted discovery, guardrail-leakage coverage (Pattern C).
 
 ## Responsible Use
 

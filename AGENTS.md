@@ -40,6 +40,7 @@ Target collision (`newfile`/`backup`): never overwrite an existing target — us
 | `--dry-run` | Preview changes without modifying files (credential warning still fires) |
 | `--subagent` | Delegate stripping to a sub-agent for cleaner isolation (scope: patterns + Steps 0–4 + strip strategy only; no recursion) |
 | `--mode <inplace\|newfile\|backup>` | Set output mode (invalid value → error, no silent fallback) |
+| `--to-hide "<target>"` (repeatable) | Targeted mode: hide ONLY content matching the target(s). Skips the five-pattern scan entirely — including Pattern S (no credential scan/warning). Comments/prose matches deleted; matches in executable code flagged for human review (mandatory report). Zero matches → silent. |
 
 Unknown/misspelled flags → error (not swallowed into description mode).
 
