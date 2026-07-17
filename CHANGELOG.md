@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - Unreleased
+
+### Added
+
+- **Targeted hiding** (`--artifacts <target>`): remove only user-specified artifacts without running the five built-in leakage scans. The flag is repeatable and composes with output, preview, sub-agent, and HITL modes.
+- **Guardrail leakage coverage**: Pattern C now explicitly covers AI safety limits, refusal justifications, and behavioral fences.
+
+### Changed
+
+- Description mode requires explicit file selection before writing, deleting, or following symlinks.
+- Credential handling distinguishes access-bearing secrets from sensitive context, preserves executable code and unsafe-to-rewrite configuration values, and validates a temporary candidate before replacing the original.
+
 ## [0.6.0] - Unreleased
 
 ### Added

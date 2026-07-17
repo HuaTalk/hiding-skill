@@ -191,6 +191,7 @@ npx skills-npm setup
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | 输出模式 |
 | `--subagent` | （布尔标记） | 关闭 | 使用子代理执行，隔离性更好 |
 | `--dry-run` | （布尔标记） | 关闭 | 预览变更，不修改文件 |
+| `--artifacts` | `"<目标>"`（可重复） | （无） | 定向模式：只隐藏指定内容——跳过五种内建模式扫描 |
 
 ```bash
 /hiding --mode newfile file.java          # 输出到 file-cleaned.java，保留原文件
@@ -198,6 +199,8 @@ npx skills-npm setup
 /hiding --dry-run file.java               # 预览将要清理的内容
 /hiding --subagent file.java              # 通过子代理剥离泄露痕迹
 /hiding --dry-run                         # HITL 预览，不实际执行
+/hiding --artifacts "ProjectX" file.java    # 只移除 ProjectX 相关内容
+/hiding --artifacts "ProjectX" --artifacts "内部域名" --dry-run file.java   # 预览两个目标的匹配
 ```
 
 ### 输出模式
@@ -218,9 +221,11 @@ npx skills-npm setup
 
 这是静默执行**唯一的强制性例外**——因为不知道需要轮换的静默凭证剥离，比有声的剥离更危险。
 
+注意：定向模式（`--artifacts`）不扫描五种内建模式——包括 Pattern S——因此不会触发凭证警告。定向模式只做你指定的事，不多做。
+
 ## 版本
 
-当前：**0.6.0** —— 输出模式（inplace/newfile/backup）、dry-run 预览、子代理执行、凭证安全告警、git 未提交文件发现、扩展文件类型支持。
+当前：**0.8.0** —— 定向隐藏（`--artifacts`）、输出模式（inplace/newfile/backup）、dry-run 预览、子代理执行、凭证安全告警、git 未提交文件发现、护栏泄露覆盖（Pattern C）。
 
 ## 负责任使用
 
