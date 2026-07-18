@@ -12,7 +12,7 @@ A Claude Code plugin that removes AI-generated artifacts from files before commi
 
 `/hiding` strips five categories of AI leakage from files. Every example here shows content that looks natural to the author but reads as AI-generated to everyone else.
 
-### 1. Python Code — Constraint / Thought Process
+### 1. Python Code — AI-facing Rationale / Thought-process Traces
 
 ```python
 # Before /hiding
@@ -27,7 +27,7 @@ def get_user() -> dict[str, str]:
 
 The comment explains a design choice to the AI's own satisfaction — but the reader gains nothing from it. The function signature speaks for itself.
 
-### 2. Markdown Docs — Rule / Thought Process
+### 2. Markdown Docs — Unshared Rule References / Thought-process Traces
 
 ```md
 Before /hiding
@@ -66,7 +66,7 @@ A Large Language Model (LLM) is a neural network that predicts text. Give it a s
 
 The prompt's instructions and the rule citation leaked into the document. After `/hiding`, only the explanation remains — no meta-commentary about how to write it.
 
-### 4. YAML CI — Constraint / Thought Process
+### 4. YAML CI — AI-facing Rationale / Thought-process Traces
 
 ```yaml
 # Before /hiding
@@ -80,7 +80,7 @@ steps:
 
 The constraint justification and step-by-step plan are AI-facing rationale. The workflow definition is all the reader needs.
 
-### 5. TypeScript Component — AI Self-Reference
+### 5. TypeScript Component — AI Self-reference
 
 ```typescript
 // Before /hiding
@@ -95,7 +95,7 @@ const UserProfile = memo(({ user }) => {
 
 "Here's the…" and "I think…" betray AI authorship. A human writes the technical reason directly.
 
-### 6. Python Credentials — Secret
+### 6. Python Credentials — Secrets and Credentials
 
 ```python
 # Before /hiding
@@ -116,15 +116,15 @@ No markers. No annotations. No one can tell it ran. The code simply reads as if 
 Think of it like Fermat's margin note. Fermat didn't show his work — he wrote the theorem and moved on. The proof became legend. `/hiding` gives your code the same mystique: the result stands on its own, with no visible scaffolding. Your colleagues will wonder how you wrote it so cleanly. (See [The Fermat Principle](docs/en/hiding-philosophy.md) for the full, slightly irreverent argument.)
 
 
-## Five Leakage Patterns
+## Five Leakage Categories
 
-| Pattern         | What It Catches |
+| Category         | What It Catches |
 |-----------------|----------------|
-| Secret          | API keys, tokens, passwords, connection strings, internal URLs |
-| Rule            | References to CLAUDE.md, skill instructions, team conventions the reader doesn't share |
-| Constraint      | "I can't use X because the team requires Y", rationale trails about AI-facing constraints |
-| AI Self-Reference | "As an AI…", "I think…", "Here's the result:", "I hope this helps!" |
-| Thought Process | Step-by-step reasoning, dated progress logs, research findings, design rationale trails |
+| Secrets and credentials | API keys, tokens, passwords, connection strings, internal URLs |
+| Unshared rule references | References to CLAUDE.md, skill instructions, team conventions the reader doesn't share |
+| AI-facing rationale/guardrails | "I can't use X because the team requires Y", rationale trails about AI-facing constraints |
+| AI self-reference | "As an AI…", "I think…", "Here's the result:", "I hope this helps!" |
+| Thought-process traces | Step-by-step reasoning, dated progress logs, research findings, design rationale trails |
 
 ## Execution Guarantees
 
@@ -132,7 +132,7 @@ Think of it like Fermat's margin note. Fermat didn't show his work — he wrote 
 - **Code logic is NEVER changed** — only comments and prose are stripped.
 - **Structurally safe** — post-cleanup validation uses actual parsers (JSON, YAML, XML) where available.
 - **HITL for deletions** — file-level purge candidates require user confirmation before deletion.
-- **Credential warnings** — Pattern S stripping always produces a rotate-credentials warning.
+- **Credential warnings** — Secrets and credential stripping always produces a rotate-credentials warning.
 - **Three output modes** — inplace (default), newfile (original preserved), backup (original renamed to `.bak`).
 
 ## Installation
@@ -209,7 +209,7 @@ If the target (`-cleaned` file or `.bak`) already exists, `/hiding` never overwr
 
 ### Security: Credential Handling
 
-When Pattern S (credentials, API keys, tokens) is **found** — whether stripped or only previewed via `--dry-run` — `/hiding` **always warns**:
+When secrets or credentials (API keys, tokens, passwords) are **found** — whether stripped or only previewed via `--dry-run` — `/hiding` **always warns**:
 
 > ⚠️ Security-sensitive content was found {and removed / preview only}. If this file was ever committed, pushed, or shared, rotate the affected credentials immediately.
 

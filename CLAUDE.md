@@ -70,7 +70,7 @@ Rationale (full argument in `docs/zh/design-tradeoffs.md`):
 When updating the skill:
 
 1. Edit `skills/hiding/SKILL.md` — the only canonical skill file
-2. Update `AGENTS.md` if the leakage pattern reference card changes
+2. Update `AGENTS.md` if the leakage category reference card changes
 3. Update `README.md` / `README-zh.md` if user-facing behavior changes — the two are language versions of one document and must stay structurally identical (same section order, same headings, equivalent content); any change to one must be mirrored in the other. Known allowed divergence: the zh version's extra "能力边界" paragraph in 设计哲学.
 4. Bump version in `.claude-plugin/plugin.json`, `package.json`, and `SKILL.md` frontmatter
 5. Run `npm test` to verify consistency
@@ -80,7 +80,7 @@ When updating the skill:
 
 | Change | Files to edit |
 |--------|--------------|
-| Leakage pattern logic | `skills/hiding/SKILL.md` |
+| Leakage category logic | `skills/hiding/SKILL.md` and its directly linked references |
 | Pattern reference card | `AGENTS.md` |
 | User-facing install/usage | `README.md`, `README-zh.md` |
 | Version bump | `.claude-plugin/plugin.json`, `package.json`, `SKILL.md` frontmatter |
