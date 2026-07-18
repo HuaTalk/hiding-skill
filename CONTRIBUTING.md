@@ -8,7 +8,7 @@ This repo contains no source code, no build, and no runtime tests — it is enti
 
 | Change | Files to edit |
 |--------|--------------|
-| Leakage pattern logic / skill behavior | `skills/hiding/SKILL.md` (the only canonical skill file) |
+| Leakage category logic / skill behavior | `skills/hiding/SKILL.md` and its directly linked references |
 | Pattern reference card | `AGENTS.md` |
 | User-facing install/usage docs | `README.md`, `README-zh.md` |
 | Version bump | `.claude-plugin/plugin.json`, `package.json`, `SKILL.md` frontmatter (`metadata.version`) |

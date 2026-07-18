@@ -21,14 +21,14 @@
 | 操作对象 | 文件（代码、配置、Markdown、文档） | 文本（文章、prose） |
 | 操作方式 | **只删不改写**——代码逻辑永不改动 | **重写**——重构句式、变换节奏、注入个人语气 |
 | 输出行为 | 静默执行：运行后无人能看出运行过 | 高调输出：改写文 + 变更总结（部分版本附评分） |
-| 安全层 | Pattern S 凭据剥离 + 强制轮换警告 | 无——完全不涉及 secrets |
-| 交互控制 | HITL、`--dry-run`、三种输出模式、`--subagent` | 无 flag、无流程控制，纯 pattern 指南 |
+| 安全层 | 凭据与密钥剥离 + 强制轮换警告 | 无——完全不涉及 secrets |
+| 交互控制 | HITL、`--dry-run`、三种输出模式、`--subagent` | 无 flag、无流程控制，纯类别指南 |
 | 结构保障 | 清理后用真实 parser（JSON/YAML/XML）校验 | 无 |
-| pattern 依据 | 自定义原则（判断式，明确反对关键词 grep） | WikiProject AI Cleanup 实证观察（词表式，接近可 grep） |
+| 类别依据 | 自定义原则（判断式，明确反对关键词 grep） | WikiProject AI Cleanup 实证观察（词表式，接近可 grep） |
 
 ## 唯一的重叠区
 
-`/hiding` 的 Pattern A（AI 自我指涉）与 humanizer 的"协作交流痕迹"、"谄媚语气"两类 pattern 覆盖同一批内容：
+`/hiding` 的 AI 自我指涉与 humanizer 的"协作交流痕迹"、"谄媚语气"两类内容覆盖同一批内容：
 
 > "Here's the result:"、"希望这对您有帮助！"、"Great question!"、"Let me know if..."
 
@@ -51,7 +51,7 @@
 <humanizer> doc.md      # 第二步：改写残余的 AI 文体（破折号、三段式、AI 词汇）
 ```
 
-顺序重要：先 `/hiding` 后 humanizer。反过来的话，humanizer 可能把"我们按照 CLAUDE.md 的约定选择了 X"改写成更自然的"按团队约定选择了 X"——文体变好了，但规则引用（Pattern R）还在，且变得更难识别。
+顺序重要：先 `/hiding` 后 humanizer。反过来的话，humanizer 可能把"我们按照 CLAUDE.md 的约定选择了 X"改写成更自然的"按团队约定选择了 X"——文体变好了，但未共享规则引用还在，且变得更难识别。
 
 对纯代码文件，通常只需要 `/hiding`——代码注释被剥离后剩下的是可执行代码，不存在文体问题。
 
@@ -66,7 +66,7 @@
 
 **`/hiding` 可以向 humanizer 借鉴：**
 
-- pattern 依据的外部背书。humanizer 引用 Wikipedia 的实证观察数据；`/hiding` 的五 pattern 是自定义原则，补充外部参照（AI 检测研究、真实泄露案例）能增强可信度。
+- 类别依据的外部背书。humanizer 引用 Wikipedia 的实证观察数据；`/hiding` 的五类内容类别是自定义原则，补充外部参照（AI 检测研究、真实泄露案例）能增强可信度。
 
 **humanizer 类工具可以向 `/hiding` 借鉴：**
 
