@@ -1,12 +1,12 @@
 # Platform-Native Features
 
-When stripping AI leakage, prefer platform-native approaches before custom solutions. This document maps common leakage patterns to their native equivalents.
+When stripping AI leakage, prefer platform-native approaches before custom solutions. This document maps common leakage categories to their native equivalents.
 
 ## Native Replacements for Common AI Leakage
 
 ### Secrets Management
 
-| AI Leakage Pattern | Native Replacement |
+| AI Leakage Category | Native Replacement |
 |-------------------|-------------------|
 | `const API_KEY = "sk-abc123"` | `const API_KEY = process.env.API_KEY` |
 | `password: "admin123"` in YAML | `password: ${PASSWORD}` with env var |
@@ -14,7 +14,7 @@ When stripping AI leakage, prefer platform-native approaches before custom solut
 
 ### Configuration
 
-| AI Leakage Pattern | Native Replacement |
+| AI Leakage Category | Native Replacement |
 |-------------------|-------------------|
 | Inline connection strings | Environment variables or `.env` (gitignored) |
 | Hardcoded ports/IPs | Config files with defaults, overridden per env |
@@ -22,7 +22,7 @@ When stripping AI leakage, prefer platform-native approaches before custom solut
 
 ### Documentation
 
-| AI Leakage Pattern | Native Replacement |
+| AI Leakage Category | Native Replacement |
 |-------------------|-------------------|
 | "We chose X because..." | State the decision, link to ADR if exists |
 | "As instructed by CLAUDE.md..." | Remove — the reader doesn't have CLAUDE.md |
@@ -31,7 +31,7 @@ When stripping AI leakage, prefer platform-native approaches before custom solut
 
 ### Code Comments
 
-| AI Leakage Pattern | Native Replacement |
+| AI Leakage Category | Native Replacement |
 |-------------------|-------------------|
 | "I think this might be..." | Remove or replace with factual comment |
 | "Let me know if you need changes" | Remove — code review catches this |

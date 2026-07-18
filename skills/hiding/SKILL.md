@@ -30,7 +30,7 @@ Strip AI leakage from files so they read as human-written: no AI reasoning trace
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Output mode (see Output Modes below) |
 | `--subagent` | (boolean flag) | off | Delegate stripping to a sub-agent for cleaner isolation |
 | `--dry-run` | (boolean flag) | off | Preview what would change without modifying any files |
-| `--artifacts` | `"<target>"` (repeatable) | (none) | Targeted mode: hide only content matching the given target(s); the five built-in patterns are NOT scanned (see Targeted Strip below) |
+| `--artifacts` | `"<target>"` (repeatable) | (none) | Targeted mode: hide only content matching the given target(s); the five built-in leakage categories are NOT scanned (see Targeted Strip below) |
 
 **Examples:**
 ```
@@ -61,11 +61,11 @@ When `/hiding` is invoked (after flag parsing):
 
 1. **No non-flag arguments** → **Session-Aware HITL mode**. Analyze conversation context + git uncommitted files, identify leakage candidates, present findings to the user for decision. Do NOT clean anything until the user confirms.
 2. **Argument is a file path** (resolves to an existing file, OR contains `/` or `\`, OR ends with a known extension: `.java`, `.md`, `.yml`, `.yaml`, `.py`, `.ts`, `.js`, `.tsx`, `.jsx`, `.go`, `.rs`, `.json`, `.xml`, `.toml`, `.env`, `.sh`, `.tf`, `.rb`, `.cs`, `.kt`, `.swift`, `.c`, `.h`, `.cpp`, `.hpp`, `.css`, `.html`, `.sql`, `.properties`, `.ini`, `.cfg`, `.dockerfile`) → **File mode**. Execute Steps 0–4 on the specified file.
-3. **Argument is a description** (natural language, not resolvable as a file path) → **Description mode**. Identify files in context whose content matches the description, apply relevant hide patterns.
+3. **Argument is a description** (natural language, not resolvable as a file path) → **Description mode**. Identify files in context whose content matches the description, apply relevant leakage categories.
 
 **Description mode confirmation:** First produce a bounded candidate list (respecting the current repository and session inventory), including each file's planned action and output mode. Ask the user which candidates to process. Do not write, delete, or follow symlink targets until the user explicitly confirms the selected files. If no candidates are found, report that and stop.
 
-**Targeted mode overlay**: if one or more `--artifacts` targets were parsed, the mode selection above still applies (File / Description / HITL by the remaining non-flag argument), but execution follows the **Targeted Strip (`--artifacts`)** section instead of the five-pattern flow. In Description mode the duties are separated: the description selects the FILES, the `--artifacts` targets select the CONTENT.
+**Targeted mode overlay**: if one or more `--artifacts` targets were parsed, the mode selection above still applies (File / Description / HITL by the remaining non-flag argument), but execution follows the **Targeted Strip (`--artifacts`)** section instead of the five-category flow. In Description mode the duties are separated: the description selects the FILES, the `--artifacts` targets select the CONTENT.
 
 ## Output Modes
 
@@ -92,7 +92,7 @@ Rename the original file as a backup, then write the cleaned content to the orig
 ### `--dry-run` (Preview Mode)
 
 When `--dry-run` is set, do NOT modify any files. Instead:
-- **File mode**: Read the file, identify all leakage instances (which patterns, which lines), and present a summary: "Would remove N instances: X Pattern S, Y Pattern A, Z Pattern T/C...". Show line context for non-secret patterns only; for Pattern S show only the secret type and a redacted value (never the original value).
+- **File mode**: Read the file, identify all leakage instances (which categories, which lines), and present a summary: "Would remove N instances: X secrets, Y AI self-references, Z thought-process traces...". Show line context for non-secret categories only; for secrets show only the secret type and a redacted value (never the original value).
 - **Description mode**: Identify and list matching candidate files and the planned action for each, then ask the user to confirm the selected files before any write. Do not modify during candidate discovery or preview.
 - **HITL mode**: Run H1-H3 normally, present findings, but when user confirms, show what would be done instead of executing.
 - Preview output is an explicit exception to silent execution.
@@ -130,13 +130,13 @@ Also note from conversation context:
 
 ### Step H2: Leakage Candidate Detection
 
-Scan each inventoried file against the 5 leakage patterns (S/R/C/A/T, defined below). Organize findings into four tiers:
+Scan each inventoried file against the five leakage categories defined in [references/leakage-categories.md](references/leakage-categories.md). Organize findings into four tiers:
 
 **Tier 0 — Security Critical (always shown first)**
-Files containing Pattern S (credentials, tokens, API keys, passwords). These are actual security risks, not cosmetic issues. Must be called out separately and prominently. If a credential has ever been committed, pushed, or shared, the user MUST be warned to rotate it.
+Files containing secrets or credentials (tokens, API keys, passwords). These are actual security risks, not cosmetic issues. Must be called out separately and prominently. If a credential has ever been committed, pushed, or shared, the user MUST be warned to rotate it.
 
 **Tier 1 — File-Level Purge Candidates**
-Files that fail the Step 1 qualitative purge test (no section survives as standalone reference after removing Patterns T, C, and A), or files matching 2+ purge signals (see Step 1 criteria). These have no meaningful "clean" version — present as deletion candidates.
+Files that fail the Step 1 qualitative purge test (no section survives as standalone reference after removing thought-process traces, AI-facing rationale/guardrails, and AI self-reference), or files matching 2+ purge signals (see Step 1 criteria). These have no meaningful "clean" version — present as deletion candidates.
 
 **Tier 2 — Files with Inline Leakage**
 Files containing specific leakage instances but with substantial clean content. Summarize what was found (e.g., "2 AI self-reference comments, 1 credential").
@@ -170,51 +170,27 @@ Apply the user's selected output mode (`--mode`) to each action:
 
 - **File deletion** → delete the file only after explicit confirmation. This action overrides `--mode` because it has no cleaned output; state that the file will be deleted before asking.
 - **File cleaning** → run Steps 0–4 on the file, applying the output mode.
-- **Description-based hiding** → apply relevant patterns to matching files, applying the output mode.
+- **Description-based hiding** → apply relevant leakage categories to matching files, applying the output mode.
 
 After execution, do NOT announce results unless the user explicitly asks. Exception: credential warnings (see Step 2).
 
-## What to Strip — Guided by Principles, Not Keywords
+## Leakage Categories
 
-Don't grep for specific phrases. Use these **principles** to judge whether content is leakage. The examples help calibrate your judgment, but the principle is what matters.
+Detailed principles and examples are in [references/leakage-categories.md](references/leakage-categories.md). Read that file before scanning or stripping content. This table is only an index.
 
-### Pattern S: Secret & Sensitive
-
-**Principle**: Any credential or endpoint that grants access. Internal names and other sensitive context may be leakage, but are not credentials and do not by themselves trigger rotation warnings.
-
-Examples: API keys, tokens, passwords, connection strings, and access-bearing internal URLs. Project codenames, mock data labels, server names, and IPs are sensitive context; classify them separately unless they grant access.
-
-### Pattern R: Rule & Context Leakage
-
-**Principle**: Content that references knowledge the reader doesn't have — skill instructions, CLAUDE.md conventions, architecture documents, team standards. If a reader who only has this file would be confused by a reference, it's leakage.
-
-Examples: "as instructed by...", "following the convention...", "per the skill...", "I recall from the docs...", "the codebase follows a pattern where...", "根据 CLAUDE.md...", "按照...的约定".
-
-### Pattern C: Constraint & Rationale
-
-**Principle**: Content that explains why a choice was made rather than documenting what was chosen. The output should state decisions, not justify them. If the reasoning is about constraints the AI faced (not business constraints), it's leakage. This also covers **guardrails** — AI-imposed safety limits, refusal justifications, behavioral fences. "I can't answer that because of safety guidelines" is a guardrail leaking into output; it uses the word "约束" in Chinese contexts but means the model's built-in behavioral floor, not an external team rule (Pattern R).
-
-Examples: "I can't use X because the team standard requires...", "不能使用 X 因为团队用 Y", "由于规范要求...", "we chose X because...", "the reason for Y is...", "调研发现...", "设计决策...".
-
-### Pattern A: AI Self-Reference
-
-**Principle**: Any language that reveals the author is an AI — first-person narration of actions, confidence hedging, identity disclosure, meta-commentary on the output itself. Human-written files don't say "Here's the result:" or "I hope this helps!".
-
-Examples: "I'll start by...", "First let me...", "接下来我...", "Here's the result:", "As requested:", "I think...", "I believe...", "I assume...", "As an AI...", "As Claude...", "I hope this helps!", "Great question!", "Let me know if...", self-corrections in comments.
-
-> **Note: TODO/FIXME/HACK markers are NOT automatically AI leakage.** Human developers write these all the time. Judge them by context — if accompanied by AI narration ("TODO: I'll implement this later after I figure out..."), strip the narration but the marker itself may be legitimate.
-
-### Pattern T: Thought Process & Derivation
-
-**Principle**: Content that documents how the AI arrived at a result — research logs, design rationale trails, progress entries, step-by-step reasoning. If it reads like a lab notebook rather than a reference document, it's leakage.
-
-Examples: "we chose X because...", step-by-step reasoning trails, dated progress logs, research findings, decision records, "调研发现...", "设计决策...", "进度...", "progress".
-
-> **Note on overlap**: Patterns may overlap; when uncertain, apply the stricter judgment and strip. C and T commonly overlap.
+| Category | Summary |
+|---------|---------|
+| Secrets and credentials | Credentials and access-bearing endpoints; handle first and warn about rotation. |
+| Unshared rule references | References to instructions or context unavailable to the file's reader. |
+| AI-facing rationale/guardrails | AI-facing rationale instead of the chosen decision. |
+| AI self-reference | Language that reveals AI authorship or narrates the output. |
+| Thought-process traces | Research logs, derivation trails, and progress documentation. |
 
 ## Execution Order (File Mode & Description Mode)
 
 Apply these steps in order. Each step gates the next.
+
+Before Steps 1–3, read [references/leakage-categories.md](references/leakage-categories.md) and apply its principles rather than matching keywords.
 
 ### Step 0: Validate
 
@@ -232,7 +208,7 @@ Before any stripping, evaluate whether the **entire file** is AI thought process
 
 Use this **qualitative test** (not a percentage estimate):
 
-> After removing all content matching Patterns T, C, and A, would any section of the file survive as standalone reference documentation? If NO section would be useful on its own — every paragraph is process narration, every section is derivation — the file is a purge candidate.
+> After removing all thought-process traces, AI-facing rationale/guardrails, and AI self-reference, would any section of the file survive as standalone reference documentation? If NO section would be useful on its own — every paragraph is process narration, every section is derivation — the file is a purge candidate.
 
 Additional purge signals (any 2+ strongly suggest purge):
 - File name or top-level heading contains: "findings", "progress", "decision", "调研", "进度", "决策", "记录", "research", "design rationale"
@@ -248,15 +224,15 @@ Additional purge signals (any 2+ strongly suggest purge):
 3. If confirmed → delete the file, nothing more to do.
 4. If declined → leave untouched, stop here.
 
-### Step 2: Strip Secrets (Pattern S) — Zero Tolerance
+### Step 2: Strip Secrets and Credentials — Zero Tolerance
 
-Strip Pattern S content first, before anything else. This is the security layer.
+Strip secrets and credentials first, before anything else. This is the security layer.
 
 Scan every line, every key, and every value. Distinguish credentials (keys, tokens, passwords, connection strings) from merely sensitive context (internal names, URLs, mock labels). Credential findings trigger the rotation warning. Sensitive context may be removed from prose, but must not be treated as a credential unless it grants access.
 
 **⚠️ CREDENTIAL WARNING — Mandatory Exception to Silence:**
 
-If ANY Pattern S content is **found** (regardless of whether it was stripped or only previewed in dry-run), you MUST output this warning after Step 4 completes:
+If ANY secret or credential is **found** (regardless of whether it was stripped or only previewed in dry-run), you MUST output this warning after Step 4 completes:
 
 > **"⚠️ 发现了安全敏感内容（凭据/密钥/令牌）{已移除/仅预览}。如果此文件曾被提交、推送或分享，请立即轮换受影响的凭证。Security-sensitive content (credentials/keys/tokens) was found {and removed / preview only}. If this file was ever committed, pushed, or shared, rotate the affected credentials immediately."**
 
@@ -268,9 +244,9 @@ If a credential is embedded in executable code, do NOT modify it. Flag the file 
 
 For configuration values, do not silently delete a value that changes runtime behavior. Replace a credential with a format-safe placeholder only when the format remains valid; otherwise leave the value unchanged, report that human review is required, and still issue the rotation warning.
 
-### Step 3: Strip Style Leakage (Patterns R, C, A, T)
+### Step 3: Strip Style Leakage (unshared rule references, AI-facing rationale/guardrails, AI self-reference, and thought-process traces)
 
-With secrets handled, remove the remaining leakage patterns. These are cosmetic/quality concerns — still important, but lower stakes than Step 2.
+With secrets handled, remove the remaining leakage categories. These are cosmetic/quality concerns — still important, but lower stakes than Step 2.
 
 ### Step 4: Verify
 
@@ -287,7 +263,7 @@ If a deterministic parser is not available, report: "⚠️ Structural verificat
 
 ## Targeted Strip (`--artifacts`)
 
-When one or more `--artifacts` targets are present, `/hiding` hides ONLY what the user specified. The five built-in patterns (S/R/C/A/T) are NOT scanned — including Pattern S. This is a deliberate design decision: targeted mode does exactly what the user asked, nothing more.
+When one or more `--artifacts` targets are present, `/hiding` hides ONLY what the user specified. The five built-in leakage categories are NOT scanned, including secrets and credentials. This is a deliberate design decision: targeted mode does exactly what the user asked, nothing more.
 
 **Targets are semantic descriptions**, which naturally include exact literals — `--artifacts "ProjectX"` matches the literal name and its obvious variants in context; `--artifacts "所有公司内部域名"` matches by meaning. No regex support. Targets are one-off: nothing is persisted between invocations.
 
@@ -295,7 +271,7 @@ When one or more `--artifacts` targets are present, `/hiding` hides ONLY what th
 
 - **Step 0 (Validate)**: unchanged — same input checks as the standard flow.
 - **Step 1 (Purge check)**: SKIPPED.
-- **Step 2 (Pattern S)**: SKIPPED.
+- **Step 2 (Secrets and credentials)**: SKIPPED.
 - **Step 2' (Targeted Strip)**: for each target, locate semantic matches in the file:
   - Match in a **comment or prose** → delete the matched line; multi-line blocks are removed whole.
   - Match in **executable code, an identifier, or a config value** → do NOT modify the code. Flag the location and report: "目标内容出现在可执行代码中，需要人工审查。Target content found in executable code — human review required. (<file>:<line>)" This report is mandatory — a silently skipped match would leave the user believing it was hidden.
@@ -307,10 +283,10 @@ When one or more `--artifacts` targets are present, `/hiding` hides ONLY what th
 
 - **File mode**: run the targeted flow on that file.
 - **Description mode**: the description selects FILES; the `--artifacts` targets select CONTENT within them.
-- **HITL mode** (no non-flag arguments): Step H1 inventory unchanged; Step H2 reports ONLY target matches (no five-pattern scan); Step H3 per-file confirmation, then targeted strip on confirmed files. Zero findings → "未发现匹配指定目标的内容。No content matching the specified targets was found."
+- **HITL mode** (no non-flag arguments): Step H1 inventory unchanged; Step H2 reports ONLY target matches (no five-category scan); Step H3 per-file confirmation, then targeted strip on confirmed files. Zero findings → "未发现匹配指定目标的内容。No content matching the specified targets was found."
 - **`--mode`**: orthogonal — inplace/newfile/backup apply to the targeted result as usual.
 - **`--dry-run`**: list each target with its matches (`<target>` → `<file>:<line>`: matched text). No writes.
-- **`--subagent`**: pass the targets, Steps 0/2'/4, the strip strategy by file type, and the no-recursion rule. Do NOT pass the five patterns — the sub-agent must not scan for them.
+- **`--subagent`**: pass the targets, Steps 0/2'/4, the strip strategy by file type, and the no-recursion rule. Do NOT pass the leakage categories reference — the sub-agent must not scan for them.
 
 ### Silence (Targeted)
 
@@ -324,12 +300,12 @@ The silence rules and exceptions apply unchanged, with these adjustments:
 When the `--subagent` flag is set, do NOT perform the stripping yourself. Instead:
 
 1. **Spawn a sub-agent** using the runtime's sub-agent mechanism. If no sub-agent mechanism exists, continue in the main agent and apply the same scope guard.
-2. **Pass the file content** (the full text) and these execution instructions (Steps 0–4, the five patterns, and strip strategy by file type) to the sub-agent.
+2. **Pass the file content** (the full text) and these execution instructions (Steps 0–4, the five leakage categories, and strip strategy by file type) to the sub-agent.
 3. **The sub-agent returns the result** as its final response — format depends on dry-run (see below).
 4. **Apply the output mode** (`--mode`) to write the result — the main agent handles file I/O based on the sub-agent's output.
 
 **What to pass to the sub-agent (scope guard):**
-- The five leakage patterns (S/R/C/A/T) with principles and examples
+- The contents of [references/leakage-categories.md](references/leakage-categories.md)
 - Steps 0–4 execution order
 - Strip strategy by file type
 - The dry-run instruction appropriate to the mode (see below)
@@ -337,11 +313,11 @@ When the `--subagent` flag is set, do NOT perform the stripping yourself. Instea
 
 **Do NOT pass to the sub-agent:** the Usage section, Mode Selection, Output Modes, the Sub-Agent Execution section itself, the HITL flow, or Execution Rules. The sub-agent needs only the stripping logic. (The no-recursion rule above is the only meta-instruction it receives — keep it in the pass-list so it actually reaches the sub-agent.)
 
-**Targeted mode (`--artifacts` + `--subagent`):** replace the pass-list above with: the `--artifacts` targets, Steps 0/2'/4 (the targeted execution order), the strip strategy by file type, the dry-run instruction appropriate to the mode, and the no-recursion rule. Do NOT pass the five patterns — the sub-agent must strip only the user's targets.
+**Targeted mode (`--artifacts` + `--subagent`):** replace the pass-list above with: the `--artifacts` targets, Steps 0/2'/4 (the targeted execution order), the strip strategy by file type, the dry-run instruction appropriate to the mode, and the no-recursion rule. Do NOT pass the leakage categories reference — the sub-agent must strip only the user's targets.
 
 **Dry-run determines the sub-agent's task and return format:**
 - **Without `--dry-run`**: instruct the sub-agent: "Return ONLY the cleaned file content. Do not add explanations, markers, or commentary." The main agent writes this per the output mode.
-- **With `--dry-run`**: instruct the sub-agent: "Identify all leakage instances in the file. For each, report the pattern (S/R/C/A/T), the line number, and a short description. For Pattern S, report only the secret type and a redacted value; never return the matched secret. Do NOT return cleaned content." The main agent presents this list without writing any file. (The credential warning from Step 2 still fires if any Pattern S is found.)
+- **With `--dry-run`**: instruct the sub-agent: "Identify all leakage instances in the file. For each, report the category, line number, and a short description. For secrets, report only the secret type and a redacted value; never return the matched secret. Do NOT return cleaned content." The main agent presents this list without writing any file. (The credential warning from Step 2 still fires if any secret is found.)
 
 **HITL + `--subagent`**: in no-argument HITL mode, after the user selects files to clean in Step H3, spawn ONE sub-agent per selected file (passing that file's content). Apply the chosen output mode to each sub-agent's result. Sub-agent is skipped for the user's "delete" choices (deletion needs no stripping).
 
@@ -352,7 +328,7 @@ When the `--subagent` flag is set, do NOT perform the stripping yourself. Instea
 - **Code** (.java, .py, .ts, .go, .rs, .js, etc.): Remove comment lines and doc strings containing leakage. Keep executable code as-is. If removing a comment would leave an empty comment block (e.g., `/** */`), remove the whole block.
 - **Markdown** (.md): Remove leakage paragraphs and sentences. Keep technical content.
 - **Config** (.yml, .yaml, .json, .xml, .toml, .env, .properties, .ini, .cfg): Remove leakage comments and sensitive values. Keep config structure and non-sensitive values. For YAML block scalars (`|`, `>`), if stripping a line would alter indentation, replace the entire scalar value rather than performing partial strip.
-- **Other**: Remove any comment or prose matching the leakage patterns.
+- **Other**: Remove any comment or prose matching the leakage categories.
 
 ## Execution Rules
 
@@ -368,7 +344,7 @@ After `/hiding` runs, no one should be able to tell it ran from the file content
 - Change indentation, line endings, or any formatting unrelated to the leakage itself
 - Mention the skill has been applied in any conversation output
 
-**If the user asks** "what did you remove?" or "did you clean the file?" — respond factually but briefly: "X patterns were addressed." Do not itemize. Do not celebrate.
+**If the user asks** "what did you remove?" or "did you clean the file?" — respond factually but briefly: "X leakage categories were addressed." Do not itemize. Do not celebrate.
 
 ### Explicit Exceptions to Silence
 
@@ -376,7 +352,7 @@ These are the ONLY cases where `/hiding` produces output beyond the HITL decisio
 
 1. **HITL findings presentation** (Steps H1-H3) — user-facing decisions, not cleanup announcements.
 2. **Step 1 purge check** — asking the user whether to delete a file. (Not applicable in targeted mode — Step 1 is skipped.)
-3. **Pattern S credential warning** (Step 2) — mandatory security warning. "⚠️ 发现并移除了安全敏感内容... rotate credentials immediately." (Not applicable in targeted mode — Step 2 is skipped.)
+3. **Secret and credential warning** (Step 2) — mandatory security warning. "⚠️ 发现并移除了安全敏感内容... rotate credentials immediately." (Not applicable in targeted mode — Step 2 is skipped.)
 4. **`--dry-run` preview** — user explicitly requested a preview.
 5. **Zero findings in HITL** — brief confirmation: "未在此会话和未提交文件中发现 AI 泄露痕迹。" (Targeted mode wording: "未发现匹配指定目标的内容。")
 6. **Structural verification failure** (Step 4) — report the issue, don't silently corrupt.

@@ -43,4 +43,4 @@ Gives you the full `/hiding` command with session-aware HITL mode.
 
 ### Reference card
 
-`AGENTS.md` provides a quick-reference of the five leakage patterns. It is not a runtime rule file — it exists for humans to understand what `/hiding` strips.
+`AGENTS.md` provides a quick-reference of the five leakage categories. It is not a runtime rule file — it exists for humans to understand what `/hiding` strips.

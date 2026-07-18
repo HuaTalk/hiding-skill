@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Targeted hiding** (`--artifacts <target>`): remove only user-specified artifacts without running the five built-in leakage scans. The flag is repeatable and composes with output, preview, sub-agent, and HITL modes.
-- **Guardrail leakage coverage**: Pattern C now explicitly covers AI safety limits, refusal justifications, and behavioral fences.
+- **Guardrail leakage coverage**: the AI-facing rationale/guardrails category explicitly covers AI safety limits, refusal justifications, and behavioral fences.
 
 ### Changed
 
@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Output-target collision safety**: `newfile`/`backup` never overwrite an existing target — a numbered alternative (`-cleaned-2`, `.bak-2`) is used and reported in one line.
 - **`--dry-run`**: preview all would-be changes without modifying files, in every mode (File, Description, HITL).
 - **`--subagent`**: delegate stripping to an isolated sub-agent that sees only the file content and the stripping rules (scope-guarded, no recursion).
-- **Credential-rotation warnings**: whenever Pattern S content is *found* — stripped or merely previewed — a mandatory rotate-credentials warning fires. The only mandatory exception to silent execution.
+- **Credential-rotation warnings**: whenever secrets or credentials are *found* — stripped or merely previewed — a mandatory rotate-credentials warning fires. The only mandatory exception to silent execution.
 - **Git-uncommitted discovery**: no-argument HITL mode inventories session files *and* uncommitted git changes (tracked modifications + untracked user artifacts).
 - **Flag validation**: unknown or malformed flags are explicit errors, never silently swallowed into Description mode.
 - Expanded known-extension list for File-mode detection.
