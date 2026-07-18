@@ -60,6 +60,8 @@ When `/hiding` is invoked (after flag parsing):
 2. **Argument is a file path** (resolves to an existing file, OR contains `/` or `\`, OR ends with a known extension: `.java`, `.md`, `.yml`, `.yaml`, `.py`, `.ts`, `.js`, `.tsx`, `.jsx`, `.go`, `.rs`, `.json`, `.xml`, `.toml`, `.env`, `.sh`, `.tf`, `.rb`, `.cs`, `.kt`, `.swift`, `.c`, `.h`, `.cpp`, `.hpp`, `.css`, `.html`, `.sql`, `.properties`, `.ini`, `.cfg`, `.dockerfile`) → **File mode**. Execute Steps 0–4 on the specified file.
 3. **Argument is a description** (natural language, not resolvable as a file path) → **Description mode**. Identify files in context whose content matches the description, apply relevant hide patterns.
 
+**Description mode confirmation:** First produce a bounded candidate list (respecting the current repository and session inventory), including each file's planned action and output mode. Ask the user which candidates to process. Do not write, delete, or follow symlink targets until the user explicitly confirms the selected files. If no candidates are found, report that and stop.
+
 ## Output Modes
 
 The `--mode` flag controls where cleaned content is written. Applies to File mode and Description mode (for HITL mode, the user selects per-file actions in Step H3).
@@ -87,8 +89,8 @@ Rename the original file as a backup, then write the cleaned content to the orig
 ### `--dry-run` (Preview Mode)
 
 When `--dry-run` is set, do NOT modify any files. Instead:
-- **File mode**: Read the file, identify all leakage instances (which patterns, which lines), and present a summary: "Would remove N instances: X Pattern S, Y Pattern A, Z Pattern T/C... [show each instance with line context]". Use AskUserQuestion only if Step 1 purge check triggers; otherwise present the summary directly.
-- **Description mode**: Identify matching files, show what would be cleaned in each, do not modify.
+- **File mode**: Read the file, identify all leakage instances (which patterns, which lines), and present a summary: "Would remove N instances: X Pattern S, Y Pattern A, Z Pattern T/C...". Show line context for non-secret patterns only; for Pattern S show only the secret type and a redacted value (never the original value).
+- **Description mode**: Identify and list matching candidate files and the planned action for each, then ask the user to confirm the selected files before any write. Do not modify during candidate discovery or preview.
 - **HITL mode**: Run H1-H3 normally, present findings, but when user confirms, show what would be done instead of executing.
 - This is a user-requested preview — it is NOT a violation of the silence principle.
 
@@ -120,7 +122,7 @@ Merge Source A and Source B into a unified inventory. De-duplicate — a file th
 
 Also note from conversation context:
 - **Topics discussed**: Domains, systems, projects, or internal names that appeared.
-- **Sensitive content**: Credentials, tokens, internal URLs, project codenames, server names, IPs, mock data labels mentioned in conversation.
+- **Sensitive content**: Credentials, tokens, internal URLs, project codenames, server names, IPs, and mock data labels mentioned in conversation. Treat only access-granting values as credentials for rotation warnings.
 - **AI reasoning traces**: Design discussions, rationale trails, research findings, thought processes visible in the conversation.
 
 ### Step H2: Leakage Candidate Detection
@@ -143,7 +145,7 @@ Content discussed in conversation that may have propagated into files, but needs
 
 If zero leakage found across all tiers (including zero files in the inventory): respond with a brief confirmation — **"未在此会话和未提交文件中发现 AI 泄露痕迹。No AI leakage found in this session and uncommitted files."** This is NOT a cleanup announcement; it is a completion signal for an interactive mode. Stop here.
 
-If leakage found, use AskUserQuestion to present findings:
+If leakage found, use the runtime's user-input mechanism to present findings. If unavailable, present the same choices in plain text and wait for an explicit selection:
 
 **Question**: "I analyzed this session and found potential leakage. What would you like to hide?"
 
@@ -163,7 +165,7 @@ If the user selects a Tier 0 (credential) action, you MUST additionally warn: **
 
 Apply the user's selected output mode (`--mode`) to each action:
 
-- **File deletion** → delete the file. Do not announce.
+- **File deletion** → delete the file only after explicit confirmation. This action overrides `--mode` because it has no cleaned output; state that the file will be deleted before asking.
 - **File cleaning** → run Steps 0–4 on the file, applying the output mode.
 - **Description-based hiding** → apply relevant patterns to matching files, applying the output mode.
 
@@ -175,9 +177,9 @@ Don't grep for specific phrases. Use these **principles** to judge whether conte
 
 ### Pattern S: Secret & Sensitive
 
-**Principle**: Any credential, endpoint, or identifier that grants access or reveals internal infrastructure. These are actual security risks, not cosmetic issues.
+**Principle**: Any credential or endpoint that grants access. Internal names and other sensitive context may be leakage, but are not credentials and do not by themselves trigger rotation warnings.
 
-Examples: API keys, tokens, passwords, connection strings, internal URLs (`.internal.example.com`), project codenames, mock data labels, server names, IPs.
+Examples: API keys, tokens, passwords, connection strings, and access-bearing internal URLs. Project codenames, mock data labels, server names, and IPs are sensitive context; classify them separately unless they grant access.
 
 ### Pattern R: Rule & Context Leakage
 
@@ -218,6 +220,8 @@ Apply these steps in order. Each step gates the next.
 - File is binary (detected by null bytes or `file` command indicating non-text) → report error: "This appears to be a binary file. /hiding only works on text files."
 - File is empty → report briefly: "File is empty — nothing to clean." (An empty file is user-visible and gets a response)
 - File is too large to read in one pass (> 10,000 lines or > 500KB) → report the limitation, suggest splitting.
+- If the path is a symlink, do not replace the link target implicitly; report it and require explicit confirmation before following it.
+- If the current directory is not a Git repository, or `HEAD` does not exist, skip Git inventory and continue with session files only; report the limitation in HITL mode.
 
 ### Step 1: File-Level Purge Check (HITL)
 
@@ -237,7 +241,7 @@ Additional purge signals (any 2+ strongly suggest purge):
 **HITL protocol:**
 
 1. Do NOT strip in-place.
-2. Ask the user via AskUserQuestion: "This file appears to be AI thought process documentation (research notes, design rationale, derivation trail). Delete it?"
+2. Ask the user via the runtime's user-input mechanism: "This file appears to be AI thought process documentation (research notes, design rationale, derivation trail). Delete it?" If no user-input tool exists, ask the same question in plain text and wait for an explicit yes/no reply.
 3. If confirmed → delete the file, nothing more to do.
 4. If declined → leave untouched, stop here.
 
@@ -245,7 +249,7 @@ Additional purge signals (any 2+ strongly suggest purge):
 
 Strip Pattern S content first, before anything else. This is the security layer.
 
-Scan every line, every key, every value for credentials and internal identifiers. When in doubt, strip it. A false positive here removes a config comment; a false negative leaks a credential.
+Scan every line, every key, and every value. Distinguish credentials (keys, tokens, passwords, connection strings) from merely sensitive context (internal names, URLs, mock labels). Credential findings trigger the rotation warning. Sensitive context may be removed from prose, but must not be treated as a credential unless it grants access.
 
 **⚠️ CREDENTIAL WARNING — Mandatory Exception to Silence:**
 
@@ -253,11 +257,13 @@ If ANY Pattern S content is **found** (regardless of whether it was stripped or 
 
 > **"⚠️ 发现了安全敏感内容（凭据/密钥/令牌）{已移除/仅预览}。如果此文件曾被提交、推送或分享，请立即轮换受影响的凭证。Security-sensitive content (credentials/keys/tokens) was found {and removed / preview only}. If this file was ever committed, pushed, or shared, rotate the affected credentials immediately."**
 
-Use the version matching the mode: "已移除 / and removed" when actually stripped; "仅预览 / preview only" when in `--dry-run` (nothing modified). The warning MUST fire in both cases — the credential was **found** regardless.
+Use the version matching the outcome: "已移除 / and removed" when the credential was actually stripped, "仅预览 / preview only" in `--dry-run`, and "发现但未移除 / found but not removed" when it remains in executable code or an invalid configuration value. The warning MUST fire in all cases — the credential was **found** regardless.
 
-This is the ONLY mandatory exception to silent execution. Do NOT itemize what was removed — just warn that credentials were present and need rotation. A silent credential strip where the user doesn't know to rotate is worse than a noisy one.
+This is the ONLY mandatory exception to silent execution. Do NOT itemize or echo secret values — just warn that credentials were present and need rotation.
 
-If a secret is embedded in executable code (not a comment, not a config value), do NOT silently modify the code. Flag the file and line for human review, and report: "凭据出现在可执行代码中，需要人工审查。Credential found in executable code — human review required."
+If a credential is embedded in executable code, do NOT modify it. Flag the file and line for human review, and report: "凭据出现在可执行代码中，需要人工审查。Credential found in executable code — human review required." Never include the credential value.
+
+For configuration values, do not silently delete a value that changes runtime behavior. Replace a credential with a format-safe placeholder only when the format remains valid; otherwise leave the value unchanged, report that human review is required, and still issue the rotation warning.
 
 ### Step 3: Strip Style Leakage (Patterns R, C, A, T)
 
@@ -265,14 +271,14 @@ With secrets handled, remove the remaining leakage patterns. These are cosmetic/
 
 ### Step 4: Verify
 
-After stripping, verify structural integrity. Use actual parsers when available:
+After stripping, verify structural integrity on a temporary candidate before changing the original. Use actual parsers when available:
 - **JSON**: run `python3 -c "import json; json.load(open('FILE'))"` or `jq . FILE`
 - **YAML**: run `python3 -c "import yaml; yaml.safe_load(open('FILE'))" 2>/dev/null`. If this fails with `ModuleNotFoundError` (PyYAML is NOT standard library), fall back to visual inspection — do NOT treat the missing module as a YAML syntax error.
 - **XML**: run `xmllint --noout FILE`
 - **Code files**: visually check brace/bracket matching, import/directive integrity
 - **Markdown**: check heading hierarchy and code block delimiter matching
 
-If stripping broke something structural, restore the original content and report the issue — structural repair is too risky to attempt autonomously. Report: "Structural issue detected after cleaning — file left unchanged. Human review needed."
+If stripping broke something structural, discard the temporary candidate and leave the original content untouched. Report: "Structural issue detected after cleaning — file left unchanged. Human review needed." Only replace the original after validation succeeds; use an atomic replacement where the runtime supports it.
 
 If a deterministic parser is not available, report: "⚠️ Structural verification was visual only. Consider validating the file with a parser before committing."
 
@@ -280,7 +286,7 @@ If a deterministic parser is not available, report: "⚠️ Structural verificat
 
 When the `--subagent` flag is set, do NOT perform the stripping yourself. Instead:
 
-1. **Spawn a sub-agent** using the Agent tool. The sub-agent's task is to strip AI leakage from the specified file(s) following Steps 0–4.
+1. **Spawn a sub-agent** using the runtime's sub-agent mechanism. If no sub-agent mechanism exists, continue in the main agent and apply the same scope guard.
 2. **Pass the file content** (the full text) and these execution instructions (Steps 0–4, the five patterns, and strip strategy by file type) to the sub-agent.
 3. **The sub-agent returns the result** as its final response — format depends on dry-run (see below).
 4. **Apply the output mode** (`--mode`) to write the result — the main agent handles file I/O based on the sub-agent's output.
@@ -298,7 +304,7 @@ When the `--subagent` flag is set, do NOT perform the stripping yourself. Instea
 
 **Dry-run determines the sub-agent's task and return format:**
 - **Without `--dry-run`**: instruct the sub-agent: "Return ONLY the cleaned file content. Do not add explanations, markers, or commentary." The main agent writes this per the output mode.
-- **With `--dry-run`**: instruct the sub-agent: "Identify all leakage instances in the file. For each, report the pattern (S/R/C/A/T), the line number, and the matched text. Do NOT return cleaned content." The main agent presents this list without writing any file. (The credential warning from Step 2 still fires if any Pattern S is found.)
+- **With `--dry-run`**: instruct the sub-agent: "Identify all leakage instances in the file. For each, report the pattern (S/R/C/A/T), the line number, and a short description. For Pattern S, report only the secret type and a redacted value; never return the matched secret. Do NOT return cleaned content." The main agent presents this list without writing any file. (The credential warning from Step 2 still fires if any Pattern S is found.)
 
 **HITL + `--subagent`**: in no-argument HITL mode, after the user selects files to clean in Step H3, spawn ONE sub-agent per selected file (passing that file's content). Apply the chosen output mode to each sub-agent's result. Sub-agent is skipped for the user's "delete" choices (deletion needs no stripping).
 
