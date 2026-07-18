@@ -10,9 +10,9 @@ metadata:
 
 # /hiding
 
-Strip AI leakage from files. Cleaned files should read as if written by a human — no traces of AI reasoning, no rule citations, no self-reference.
+Strip AI leakage from files so they read as human-written: no AI reasoning traces, rule citations, or self-reference.
 
-**Scope**: Files only (code, config, markdown, docs). Does NOT modify agent replies or conversation output.
+**Scope**: Code, config, markdown, and documentation files only. Agent replies and conversation output are out of scope.
 
 ## Usage
 
@@ -33,11 +33,8 @@ Strip AI leakage from files. Cleaned files should read as if written by a human 
 **Examples:**
 ```
 /hiding --mode newfile file.java          Clean file.java, output to file-cleaned.java
-/hiding --mode backup file.java           Rename original to file.java.bak, write cleaned version
 /hiding --dry-run file.java               Show what would be stripped, don't modify
-/hiding --subagent file.java              Use sub-agent to strip leakage
 /hiding --mode newfile --subagent --dry-run file.java   Preview sub-agent output to new file
-/hiding --dry-run                         HITL preview: show findings without executing
 ```
 
 ### Flag Parsing
@@ -76,7 +73,6 @@ Create a new file with cleaned content; leave the original untouched.
 - Naming: `<stem>-cleaned.<ext>` (e.g., `UserService.java` → `UserService-cleaned.java`)
 - Extension-less files: `<name>-cleaned` (e.g., `Dockerfile` → `Dockerfile-cleaned`)
 - If the target name already exists, do NOT overwrite it — it may be a hand-written file. Write to `<stem>-cleaned-2.<ext>` instead, incrementing (`-3`, `-4`, …) until a free name is found, and report one line: "`<target>` already existed — wrote to `<alternative>` instead." (Exception 9 — output-target collision.)
-- Otherwise do NOT announce the new file name. The file simply appears.
 
 ### `backup`
 
@@ -84,7 +80,6 @@ Rename the original file as a backup, then write the cleaned content to the orig
 - Rename original: `<name>.<ext>` → `<name>.<ext>.bak` (e.g., `config.yml` → `config.yml.bak`)
 - Write cleaned content to `<name>.<ext>` (the original name)
 - If `<name>.<ext>.bak` already exists, do NOT overwrite it — it may hold the true original from an earlier run. Rename the original to `<name>.<ext>.bak-2` instead, incrementing until a free name is found, and report one line: "`<name>.<ext>.bak` already existed — original saved as `<alternative>`." (Exception 9 — output-target collision.)
-- Otherwise do NOT announce the backup operation.
 
 ### `--dry-run` (Preview Mode)
 
@@ -92,7 +87,7 @@ When `--dry-run` is set, do NOT modify any files. Instead:
 - **File mode**: Read the file, identify all leakage instances (which patterns, which lines), and present a summary: "Would remove N instances: X Pattern S, Y Pattern A, Z Pattern T/C...". Show line context for non-secret patterns only; for Pattern S show only the secret type and a redacted value (never the original value).
 - **Description mode**: Identify and list matching candidate files and the planned action for each, then ask the user to confirm the selected files before any write. Do not modify during candidate discovery or preview.
 - **HITL mode**: Run H1-H3 normally, present findings, but when user confirms, show what would be done instead of executing.
-- This is a user-requested preview — it is NOT a violation of the silence principle.
+- Preview output is an explicit exception to silent execution.
 
 ## Session-Aware HITL (No-Argument Mode)
 
@@ -207,7 +202,7 @@ Examples: "I'll start by...", "First let me...", "接下来我...", "Here's the 
 
 Examples: "we chose X because...", step-by-step reasoning trails, dated progress logs, research findings, decision records, "调研发现...", "设计决策...", "进度...", "progress".
 
-> **Note on overlap**: Patterns intentionally overlap at the edges. When in doubt, apply the stricter judgment. The goal is not perfect classification — it's removing everything that shouldn't be there. Pattern C (constraint rationale) and Pattern T (thought process) have significant overlap; when they blur together, stripping is the correct action.
+> **Note on overlap**: Patterns may overlap; when uncertain, apply the stricter judgment and strip. C and T commonly overlap.
 
 ## Execution Order (File Mode & Description Mode)
 
@@ -291,8 +286,6 @@ When the `--subagent` flag is set, do NOT perform the stripping yourself. Instea
 3. **The sub-agent returns the result** as its final response — format depends on dry-run (see below).
 4. **Apply the output mode** (`--mode`) to write the result — the main agent handles file I/O based on the sub-agent's output.
 
-**Why use a sub-agent?** A sub-agent has a fresh context without the conversation history. It sees only the file content and the hiding instructions. This isolation can produce more disciplined stripping — the sub-agent has no attachment to the content it didn't create and no knowledge of the "intent" behind the original generation. It judges purely by the principles.
-
 **What to pass to the sub-agent (scope guard):**
 - The five leakage patterns (S/R/C/A/T) with principles and examples
 - Steps 0–4 execution order
@@ -319,11 +312,9 @@ When the `--subagent` flag is set, do NOT perform the stripping yourself. Instea
 
 ## Execution Rules
 
-### Why Silence Is Essential
+### Silent Execution
 
-The `/hiding` operation creates an illusion: that these files were originally written by a human. Every trace of cleanup threatens this illusion.
-
-The target: **after `/hiding` runs, no one should be able to tell it ran** — not from the file content, not from the conversation, not from any side effect.
+After `/hiding` runs, no one should be able to tell it ran from the file content, conversation, or side effects.
 
 **Do not:**
 - Announce what was removed or list cleaned items
