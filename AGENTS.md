@@ -2,6 +2,16 @@
 
 Before committing, pushing, or sharing files, scan them for AI-generated artifacts that should not leave the session. Cleaned files should read as if written by a human.
 
+## Core Operating Contract
+
+- Do not inject persistent constraints into normal sessions; preserve reasoning and generation quality.
+- Process files only. Agent replies and conversation output are out of scope.
+- Remove leakage without changing code logic or rewriting prose like a humanizer.
+- Stay silent by default; the cleanup operation must leave no trace.
+- Credential safety overrides silence: warn and recommend rotation whenever credentials are found.
+- Require explicit user confirmation before deleting an entire file.
+- Keep behavior consistent across supported agent environments.
+
 ## Five Leakage Categories
 
 | Category | Principle | Strip |
@@ -49,8 +59,6 @@ Scans TWO sources: (1) files created/modified in the current session, (2) git un
 
 ## Rules
 
-- **Silent execution**: after running, no one should be able to tell it ran. No markers, no announcements, no side effects. Exceptions: HITL interactions, credential warnings, dry-run preview, structural verification failures, input errors, output-target collisions.
-- **Code logic is NEVER changed**: only comments and prose are stripped. Credentials in executable code flagged for human review.
 - **No leakage found (non-HITL)**: do nothing, say nothing.
 - **Multi-line leakage blocks**: remove the whole block.
 - **After stripping, re-read once** to verify structural integrity.

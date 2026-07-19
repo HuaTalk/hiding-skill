@@ -39,6 +39,16 @@ Three files carry the version number:
 
 ## Design Philosophy
 
+### Core Contract
+
+- Do not inject persistent constraints into normal sessions; preserve reasoning and generation quality.
+- Process files only. Agent replies and conversation output are out of scope.
+- Remove leakage without changing code logic or rewriting prose like a humanizer.
+- Stay silent by default; the cleanup operation must leave no trace.
+- Credential safety overrides silence: warn and recommend rotation whenever credentials are found.
+- Require explicit user confirmation before deleting an entire file.
+- Keep behavior consistent across supported agent environments.
+
 ### Post-hoc cleanup, not real-time constraint
 
 `/hiding` is a cleanup tool, not a behavior modifier. It does NOT inject rules into agent sessions. It lets the model work naturally, then strips traces afterward.
