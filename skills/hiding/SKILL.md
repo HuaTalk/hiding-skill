@@ -14,6 +14,16 @@ Strip AI leakage from files so they read as human-written: no AI reasoning trace
 
 **Scope**: Code, config, markdown, and documentation files only. Agent replies and conversation output are out of scope.
 
+## Core Contract
+
+- Do not inject persistent constraints into normal sessions.
+- Process files only; do not modify agent replies or conversation output.
+- Remove leakage without changing code logic or doing humanizer-style rewrites.
+- Stay silent unless a documented exception applies.
+- Always warn and recommend rotation when credentials are found.
+- Require explicit confirmation before deleting an entire file.
+- Preserve behavior across supported agent environments.
+
 ## Usage
 
 ```

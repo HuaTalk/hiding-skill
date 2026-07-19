@@ -113,6 +113,16 @@ No markers. No annotations. No one can tell it ran. The code simply reads as if 
 
 `/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. It does not inject rules into your agent's session context. Instead, it lets the model work naturally, then strips the traces afterward. This preserves thinking quality and follows the silent execution principle — after `/hiding` runs, no one should be able to tell it ran.
 
+### Core Principles
+
+- Do not inject persistent constraints into normal sessions; preserve reasoning and generation quality.
+- Process files only. Agent replies and conversation output are out of scope.
+- Remove leakage without changing code logic or rewriting prose like a humanizer.
+- Stay silent by default; the cleanup operation must leave no trace.
+- Credential safety overrides silence: always warn and recommend rotation when credentials are found.
+- Require human confirmation before deleting an entire file.
+- Keep the same behavior across supported agent environments.
+
 Think of it like Fermat's margin note. Fermat didn't show his work — he wrote the theorem and moved on. The proof became legend. `/hiding` gives your code the same mystique: the result stands on its own, with no visible scaffolding. Your colleagues will wonder how you wrote it so cleanly. (See [The Fermat Principle](docs/en/hiding-philosophy.md) for the full, slightly irreverent argument.)
 
 
@@ -128,11 +138,7 @@ Think of it like Fermat's margin note. Fermat didn't show his work — he wrote 
 
 ## Execution Guarantees
 
-- **Silent by default** — after `/hiding` runs, no one should be able to tell it ran. No markers, no announcements, no side effects.
-- **Code logic is NEVER changed** — only comments and prose are stripped.
 - **Structurally safe** — post-cleanup validation uses actual parsers (JSON, YAML, XML) where available.
-- **HITL for deletions** — file-level purge candidates require user confirmation before deletion.
-- **Credential warnings** — Secrets and credential stripping always produces a rotate-credentials warning.
 - **Three output modes** — inplace (default), newfile (original preserved), backup (original renamed to `.bak`).
 
 ## Installation
