@@ -1,259 +1,249 @@
-# /hiding — 清理文件中的 AI 痕迹
+# /hiding
 
-AI skill，在提交、推送或分享前移除文件中的 AI 生成残留内容。
+`/hiding` 是面向编码 Agent 的事后清理 Skill。在文件提交、推送或分享前，它会查找 AI 工作流泄露、凭据和用户指定的敏感内容，并且只移除不会改变代码或运行时行为的部分。
 
-## 功能
+[English](README.md)
 
-`/hiding` 在文件分享前移除 AI 泄露痕迹和用户指定的敏感内容。
+## 快速开始
 
-**作用域**：仅作用于文件（代码、配置、markdown、文档）。不修改 agent 的对话回复。
-
-## 前后对比举例
-
-`/hiding` 从文件中剥离五类 AI 泄露痕迹。以下每个例子展示的内容，在作者看来很自然，但其他人一眼就能认出是 AI 生成的。
-
-### 1. Python 代码 — 面向 AI 的理由/护栏 / 思考过程痕迹
-
-```python
-# 清理前 /hiding
-# 这里不使用Tuple，提升可读性
-def get_user() -> dict[str, str]:
-    ...
-
-# 清理后 /hiding
-def get_user() -> dict[str, str]:
-    ...
-```
-
-注释在向 AI 解释设计选择——但读者从函数签名就能理解，注释是多余的。这类过度解释恰恰暴露了 AI 参与的痕迹，函数签名本身已经足够说明一切。
-
-### 2. Markdown 文档 — 未共享规则引用 / 思考过程痕迹
-
-```md
-清理前 /hiding
-
-> 根据 CLAUDE.md 团队规范，API 层统一走 gRPC
-> 调研记录（2026-07-15）：对比 REST / gRPC / GraphQL 后决定用 gRPC
-
-清理后 /hiding
-
-> API 层统一走 gRPC
-```
-
-规则引用和调研过程是 AI 推理用的脚手架。读者只需要结论。
-
-### 3. 教学文档 — 未共享规则引用
-
-**提示词**：
-> 写一篇面向初学者的 LLM 原理解析，用比喻解释 Transformer，不要用专业术语。
-
-```md
-清理前 /hiding
-
-# 大语言模型原理解析
-
-> **写作说明**：以下内容面向完全不了解技术的读者，用生活化比喻解释 Transformer 架构，避免数学公式和专业术语（如注意力机制、多头注意力、自注意力等）。
-> 根据 CLAUDE.md 规范，每个核心概念配一个类比。
-
-大语言模型（LLM）是一种能预测文本的神经网络。给定一段开头，它会逐个词地补全后面的内容——就像手机输入法的联想功能，只不过规模大了几万倍。
-
-清理后 /hiding
-
-# 大语言模型原理解析
-
-大语言模型（LLM）是一种能预测文本的神经网络。给定一段开头，它会逐个词地补全后面的内容——就像手机输入法的联想功能，只不过规模大了几万倍。
-```
-
-提示词中的写作指令和规则引用泄漏到了文档正文。`/hiding` 清理后，只保留读者真正需要的解释——没有元注释、没有脚手架。
-
-### 4. YAML CI — 面向 AI 的理由/护栏 / 思考过程痕迹
-
-```yaml
-# 清理前 /hiding
-# 团队不允许直接用第三方 action，手写脚本绕过
-# 步骤：拉镜像 → 装依赖 → 跑测试 → 构建 → 上传
-steps:
-
-# 清理后 /hiding
-steps:
-```
-
-约束说明和步骤规划是面向 AI 的解释。workflow 定义本身才是读者需要的内容。
-
-### 5. TypeScript 组件 — AI 自我指涉
-
-```typescript
-// 清理前 /hiding
-// Here's the UserProfile component I created
-// I think memoizing here makes sense since props rarely change
-const UserProfile = memo(({ user }) => {
-
-// 清理后 /hiding
-// Memoized since props rarely change
-const UserProfile = memo(({ user }) => {
-```
-
-"Here's the…" 和 "I think…" 暴露了 AI 作者身份。人类会直接写技术原因。
-
-### 6. Python 凭证 — 凭据与密钥
-
-```python
-# 清理前 /hiding
-OPENAI_API_KEY = "sk-abc123"  # 我这里直接用真实 key 方便测试
-
-# 清理后 /hiding
-OPENAI_API_KEY = "sk-abc123"
-```
-
-内联凭证加上随意的说明是潜在的安全事故。`/hiding` 发现凭证时始终会发出警告。
-
-无标记、无注解、无人能察觉到它执行过。代码看上去就像是人类从一开始就写的那样。
-
-## 设计哲学
-
-`/hiding` 是一个**事后清理**工具，而非实时行为约束。它不在 agent 会话上下文中注入规则，而是让模型自然工作，然后在最后一步统一处理。这样做保留了推理质量，并且遵循了静默执行原则——`/hiding` 执行后，没人能察觉它执行过。
-
-### 核心原则
-
-- 不向日常会话注入持续约束，避免损害推理和生成质量。
-- 只处理文件，不处理 agent 回复和对话输出。
-- 只删除泄露内容和用户指定的敏感内容，不改代码逻辑，不做 humanizer 式改写。
-- 默认静默，清理操作本身不能留下痕迹。
-- 凭据安全高于静默，发现凭据必须告警并提示轮换。
-- 删除整份文件前必须获得用户确认。
-- 在支持的不同 Agent 环境中保持相同的行为。
-
-想想费马的页边笔记。费马没有展示他的证明过程——他写下了定理就直接发表了。证明本身成为了传奇。`/hiding` 让你的代码拥有同样的神秘感：结果自成一体，没有可见的「脚手架」。你的同事会好奇你是怎么写得这么干净的。（详见 [费马原则](docs/en/hiding-philosophy.md)，一个略微不敬的论证。）
-
-详见 [设计取舍：事后清理而非实时约束](docs/zh/design-tradeoffs.md) 的技术论述。
-
-**能力边界**：`/hiding` 处理内容级泄露（凭据、规则引用、推导过程、自指涉）和用户指定的敏感内容，不处理文体级 AI 特征（破折号、三段式、AI 高频词汇）。后者属于 humanizer 类工具的领域，详见 [/hiding 与 humanizer：内容泄露与文体指纹](docs/zh/hiding-vs-humanizer.md)。
-
-## 五类泄露内容
-
-| 模式 | 检测内容 |
-|------|---------|
-| 凭据与密钥 | API 密钥、token、密码、连接字符串、内部 URL |
-| 未共享规则引用 | 引用 CLAUDE.md、skill 指令、读者不具备的团队约定 |
-| 面向 AI 的理由/护栏 | 提示词服从说明、拒绝理由、安全护栏，以及解释如何满足 agent 指令的理由 |
-| AI 自我指涉 | "作为 AI…"、"我认为…"、"以下是结果："、"希望对你有帮助！" |
-| 思考过程痕迹 | 临时推导、中间尝试、会话工作日志和临时的逐步推理 |
-
-## 执行保证
-
-- **结构安全** — 清理后使用实际解析器（JSON、YAML、XML）验证结构完整性。
-- **三种输出模式** — 原地修改（默认）、新建文件（保留原文件）、备份修改（原文件重命名为 .bak）。
-
-## 安装
-
-### 推荐：通过 npx skills（支持 70+ 代理）
+通过 [Agent Skills](https://agentskills.io/) 安装 `/hiding`：
 
 ```bash
 npx skills add HuaTalk/hiding-skill
 ```
 
-一条命令安装到所有编码代理（Claude Code、Codex、Cursor、Windsurf、Gemini CLI、Copilot、Cline 等）。
+然后让 Agent 预览当前会话中修改过的文件：
 
-### Claude Code（原生插件）
-
+```text
+/hiding --dry-run
 ```
+
+需要其他范围时，可以选择[指定文件](#指定文件)、[Git 工作区](#git-工作区)或[额外隐藏内容](#语义目标)。
+
+## 工作方式
+
+`/hiding` 在输出准备接受审查时运行，而不是持续干预 Agent 的正常推理过程。
+
+首先，它判断哪些文件是真正面向用户的产物。Agent 控制状态、规划元数据、构建输出和无关文件会被自动排除。
+
+接着，它扫描五类内置泄露内容、凭据和用户提供的一次性语义目标，并区分可以移除的注释或 prose 与可执行代码、会影响行为的配置。
+
+写入前，它会检查清理后是否仍能留下有用的独立文件，并验证临时候选版本。不安全的修改会交给人工审查；删除整个文件始终需要确认。
+
+例如：
+
+```typescript
+// 清理前
+// 根据 CLAUDE.md，这是我创建的 UserProfile 组件。
+// 我认为应该使用 memo，因为 props 很少变化。
+const UserProfile = memo(({ user }) => {
+
+// 清理后
+// 使用 memo，因为 props 很少变化。
+const UserProfile = memo(({ user }) => {
+```
+
+读者无法获得的规则引用和 AI 叙述会被移除，有用的技术理由和可执行代码会被保留。更多案例见[详细示例](docs/zh/examples.md)。
+
+## 安装
+
+安装方式取决于编码 Agent 加载 Skill 的机制。
+
+### Agent Skills
+
+适用于 Codex、Cursor、Windsurf、Gemini CLI、GitHub Copilot、Cline 以及 Agent Skills 生态支持的其他 Agent：
+
+```bash
+npx skills add HuaTalk/hiding-skill
+```
+
+Agent 兼容性和安装位置由安装器以及各 Agent 的 Skill 实现决定。
+
+### Claude Code
+
+将仓库注册为插件市场：
+
+```text
 /plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
 ```
-```
+
+然后在另一个提示中安装插件：
+
+```text
 /plugin install hiding@hiding
 ```
-（需要分两次发送这两个命令才能完成安装）
 
-重启 Claude Code。`/hiding` 命令即就绪。
+安装完成后重启 Claude Code。
 
-升级：`/plugin update hiding@hiding` + 重启。
+### npm
 
-### npm（配合 skills-npm 使用）
+适用于使用 `skills-npm` 的环境：
 
 ```bash
 npm install -D @huatalk/hiding-skill
 npx skills-npm setup
 ```
 
-### 卸载
+## 基本工作流
 
-| 方式 | 命令 |
-|------|------|
-| npx skills | `npx skills remove hiding` |
-| Claude Code | `/plugin remove hiding` |
+1. **选择产物** - 默认使用当前会话文件；需要精确控制时指定路径；需要审查整个分支时选择 Git 工作区。
+2. **预览** - 添加 `--dry-run`，在不修改文件的情况下查看范围、发现结果和保守排除项。
+3. **分类** - 优先处理凭据，然后处理整文件清理候选、行内泄露和用户指定目标。
+4. **确认** - 会话检查采用 HITL。删除整个文件和跟随符号链接始终需要明确确认。
+5. **清理** - 移除最小且完整的注释或 prose 单元。不会静默修改可执行代码、字符串字面量和影响行为的配置值。
+6. **验证** - 重新读取候选版本，验证结构，检查并发修改，然后应用选定的输出模式。
 
-## 用法
+在直接文件模式下没有发现内容时，`/hiding` 保持静默。安全告警、预览、验证失败和输入错误仍然可见。
 
-```bash
-/hiding [<需要隐藏的内容>...] [--files <文件>...|session|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
+## 包含的能力
 
-/hiding                              # HITL 审阅当前 session 中创建或修改的文件
-/hiding --files <文件>                # 原地清理指定文件
-/hiding --files session              # 默认 session 范围的显式写法
-/hiding --files worktree             # 清理相对主分支有改动的文件
-/hiding "数据来源" --files report.md   # 额外隐藏来源信息
+### 五类泄露内容
+
+| 类别 | 检测内容 |
+|---|---|
+| 凭据与密钥 | API 密钥、令牌、密码、连接字符串和具备访问能力的端点 |
+| 未共享规则引用 | 对 `CLAUDE.md`、Skill 指令或读者无法获得的私有约定的引用 |
+| 面向 AI 的理由与护栏 | 提示词服从说明、拒绝理由、安全护栏，以及解释如何满足 Agent 指令的理由 |
+| AI 自我指涉 | “作为 AI”“我认为”“以下是结果”等叙述 |
+| 思考过程痕迹 | 临时推导、中间尝试、会话日志和临时的逐步推理 |
+
+这些类别是判断原则，不是关键词列表。`TODO`、`FIXME` 和 `HACK` 本身不属于泄露内容。长期有效的架构决策、需求、取舍和调研结论仍然是合理文档。
+
+### 语义目标
+
+开头的位置参数可以在内置扫描之外增加一次性内容目标：
+
+```text
+/hiding "data sources" "internal project name" --files report.md --dry-run
 ```
 
-前置位置参数用于描述需要额外隐藏的内容。每个参数是仅当次生效的语义目标，不是正则表达式；包含空格时需加引号，且必须放在所有 flag 之前。这些目标会补充默认五类扫描和凭证处理，不会替代它们。
+目标是语义短语，不是正则表达式，并且必须位于第一个 flag 之前。匹配到可执行代码、标识符或影响行为的配置时，只报告给人工审查，不自动修改。
 
-`--files` 最多出现一次，可后接一个或多个字面文件路径（到下一个已知 flag 为止），也可使用保留的 selector：`session` 或 `worktree`。selector 必须是唯一值，逗号不是分隔符；同名字面文件需写为 `./session` 或 `./worktree`。不传该参数与 `--files session` 完全等价：`/hiding` 使用当前 session 中创建或修改且符合自动范围的文件，并在写入前展示 HITL 结果。`--mode` 支持 `--mode value` 与 `--mode=value`。
+### 文件选择
 
-`--files worktree` 使用调用 `/hiding` 时所在工作目录对应的 Git 仓库。它比较 `HEAD` 与本地解析出的主分支的 merge base 到当前 worktree 的差异，覆盖分支提交、暂存改动、未暂存改动和未跟踪且未忽略的文件；排除已删除文件、忽略文件、目录和子模块。该选择器不会自动 fetch。无法解析主分支或 merge base 时会报错停止；没有符合范围的文件时会明确提示。
+#### 当前会话
 
-自动选择按优先级判定产出物：明确给出的字面路径直接纳入；已知的 agent/工具控制状态排除；用户要求的任务交付物纳入；随后纳入供人或项目使用的文件，排除仅供 agent 使用的文件。Agent 根据任务和 session 上下文自主完成判断；置信度仍然较低时，`/hiding` 默认保留并跳过该文件，不主动询问。只有跳过会导致用户明确要求无法完成时才请求澄清。使用 `--dry-run` 时只列出这些保守排除项，不扫描它们。
-
-判定依据是所有权、任务目标和目标读者，而不是文件名或是否持久化。`.planning/` 和可识别的 planning-with-files 状态通常属于控制元信息；用户要求的文章、代码改动、ADR、需求文档、最终报告或项目计划则属于产出物。因此，正式报告可以叫 `findings.md`，而持久化的 agent memory 仍应排除。字面量 `--files <path>` 是无条件覆盖方式。
-
-### 参数与标记
-
-| 输入 | 值 | 默认 | 说明 |
-|------|--------|---------|-------------|
-| `<需要隐藏的内容>...` | 前置、用引号包裹的语义目标 | 无 | 要额外隐藏的内容 |
-| `--mode` | `inplace` / `newfile` / `backup` | `inplace` | 输出模式 |
-| `--use-subagent` | （布尔标记） | 关闭 | 由独立上下文子代理返回疑似泄露位置，主代理执行原有 hiding 流程 |
-| `--dry-run` | （布尔标记） | 关闭 | 预览变更，不修改文件 |
-| `--files` | `<文件>...`、`session` 或 `worktree`（最多一次） | `session` | 要扫描和清理的文件 |
-
-```bash
-/hiding --files file.java --mode newfile      # 输出到 file-cleaned.java，保留原文件
-/hiding --files config.yml --mode backup      # 原文件重命名为 .bak，清理版使用原名
-/hiding --files file.java --dry-run           # 预览将要清理的内容
-/hiding --files file.java --use-subagent      # 主代理修改前先进行独立子代理审阅
-/hiding --dry-run                         # HITL 预览，不实际执行
-/hiding --files session --dry-run               # 显式预览当前 session 文件
-/hiding --files README.md config.yml --dry-run   # 预览两个文件
-/hiding --files worktree --dry-run                # 预览解析出的主分支和改动文件
-/hiding "数据来源" "内部规则" --files report.md --dry-run
+```text
+/hiding
+/hiding --files session --dry-run
 ```
 
-目标按语义匹配：`"数据来源"` 包括来源标注和溯源信息，精确的规则名或项目名也包括明显的上下文引用。`/hiding` 只移除能隐藏目标的最小完整语句、段落或注释块。如果命中可执行代码、标识符或影响运行行为的配置，只报告位置供人工处理，不自动修改。
+默认范围是当前 Agent 会话中通过文件编辑工具创建或修改的文件。Git 状态可以提供上下文，但不会扩大该清单。
+
+#### 指定文件
+
+```text
+/hiding --files README.md config.yml --dry-run
+```
+
+字面路径会无条件覆盖自动范围判断。`--files` 最多出现一次，并持续接收路径，直到遇到下一个已知 flag。
+
+#### Git 工作区
+
+```text
+/hiding --files worktree --dry-run
+```
+
+工作区范围会比较 `HEAD` 与本地解析出的主分支之间的 merge base，包括分支提交、暂存变更、未暂存变更和未被忽略的未跟踪文件。它不会获取远端 refs。
+
+`session` 和 `worktree` 是保留的独立 selector。若要处理同名文件，请使用 `./session` 或 `./worktree`。
 
 ### 输出模式
 
 | 模式 | 行为 |
-|------|----------|
-| `inplace`（默认） | 原地修改文件 |
-| `newfile` | 创建 `<名称>-cleaned.<扩展名>`，原文件保持不变 |
-| `backup` | 原文件重命名为 `<名称>.<扩展名>.bak`，清理版写入原文件名 |
+|---|---|
+| `inplace` | 验证后替换原文件；这是默认值 |
+| `newfile` | 写入 `<name>-cleaned.<ext>` 并保留原文件 |
+| `backup` | 将原文件移动到 `<file>.bak`，清理内容写回原路径 |
 
-若目标文件（`-cleaned` 文件或 `.bak`）已存在，`/hiding` 绝不覆盖——改用带序号的替代名（`-cleaned-2`、`.bak-2`），并用一行说明实际使用的文件名。
+已有输出目标绝不会被覆盖，而是使用 `-cleaned-2`、`.bak-2` 等带序号的替代名称。
 
-### 安全：凭证处理
+### 凭据安全
 
-只要**发现**凭据或密钥（API 密钥、令牌、密码）——无论实际剥离还是 `--dry-run` 仅预览——`/hiding` **始终会发出警告**：
+凭据扫描先于任何文体清理或整文件判断。
 
-> ⚠️ 发现了安全敏感内容{已移除/仅预览}。如果此文件曾被提交、推送或分享，请立即轮换受影响的凭证。
+- 只要发现凭据就会提示轮换，包括 `--dry-run`。
+- 报告中的密钥值会被脱敏。
+- 可执行代码中的凭据不会被静默修改。
+- 只有在格式安全占位符能够保持结构时，才替换配置凭据。
+- 如果凭据可能已被提交、推送或分享，即使本地文件已清理也需要轮换。
 
-这是静默执行**唯一的强制性例外**——因为不知道需要轮换的静默凭证剥离，比有声的剥离更危险。
+`/hiding` 属于纵深防御，不能替代专用密钥扫描器。
 
-## 版本
+### 新鲜上下文审查
 
-当前：**0.7.0** —— 用户指定的语义目标、字面路径、当前 session 与 Git worktree 文件选择（`--files`）、输出模式（inplace/newfile/backup）、dry-run 预览、独立上下文子代理审阅、凭证安全告警，以及面向 AI 的理由/护栏泄露覆盖。
+```text
+/hiding --files report.md --use-subagent --dry-run
+```
+
+`--use-subagent` 让具有新鲜上下文的子代理识别候选泄露位置。主代理仍然负责范围、凭据扫描、整文件判断、修改、确认、验证和文件写入。
+
+## 命令参考
+
+```text
+/hiding [<what-to-hide>...] [--files <file>...|session|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
+```
+
+| 输入 | 值 | 默认 |
+|---|---|---|
+| `<what-to-hide>...` | 位于开头的语义目标短语 | 无 |
+| `--files` | 字面路径、`session` 或 `worktree` | `session` |
+| `--mode` | `inplace`、`newfile` 或 `backup` | `inplace` |
+| `--dry-run` | 预览且不写入 | 关闭 |
+| `--use-subagent` | 使用新鲜上下文检测候选项 | 关闭 |
+
+未知 flag、位于 flag 后的目标、重复的 `--files` 和含糊的 selector 组合都会报错。
+
+## 设计原则
+
+- **事后处理，而非持续注入** - 按需执行清理，不让持续的自我审查指令占用每次会话。
+- **处理内容，而非文风** - 移除不应出现在文件中的材料，不通过重写 prose 来模仿人类口吻。
+- **保留决策，移除推导** - 保留长期有效的结论和面向读者的理由，移除私有指令和临时过程。
+- **保持行为** - 不静默修改代码逻辑和运行时可见内容。
+- **证据优先** - 尽可能先预览、解析、重新读取；验证失败时保留原文件。
+
+进一步阅读 [Agent 可移植性](docs/en/agent-portability.md)、[平台原生集成](docs/en/platform-native.md)和[项目设计哲学](docs/en/hiding-philosophy.md)。
+
+## 验证与局限
+
+仓库 CI 验证版本一致性、插件 JSON、英文文档语言隔离和 Skill frontmatter。项目目前尚未发布运行时准确率基准。
+
+检测依赖模型结合上下文判断，可能发生漏检或过度分类。超过 10,000 行或 500 KB 的文件、二进制文件、目录和空文件会被拒绝。JSON、YAML 和 XML 会在解析器可用时进行解析；其他格式可能只进行视觉结构检查。
+
+对于重要文件，应从 `--dry-run` 开始，人工检查凭据和配置发现，然后运行宿主项目自己的格式化器、linter、解析器、测试和密钥扫描器。
+
+## 更新
+
+Agent Skills：
+
+```bash
+npx skills add HuaTalk/hiding-skill
+```
+
+Claude Code：
+
+```text
+/plugin update hiding@hiding
+```
+
+更新后重启 Claude Code。版本详情见[变更记录](CHANGELOG.md)。
 
 ## 负责任使用
 
-`/hiding` 移除的是噪音——泄露的凭据、推论过程、规则引用——让文件作为独立参考材料成立。它**不是**规避披露义务的工具。如果你的雇主、项目或发表渠道要求披露 AI 参与，应遵循该政策；清理文件内容不改变你需要申报的事实。遵守适用于你的披露规则是你自己的责任。
+`/hiding` 改善的是文件内容；它不会抹除作者历史，也不会取代披露义务。如果雇主、项目、客户或发表渠道要求披露 AI 协助，仍应遵守相关政策。
+
+用户指定目标用于合法的隐私和发布清理需求。不得用它隐藏必须保留的署名、来源、许可证、审计记录或重要事实。
+
+## 参与贡献
+
+Skill 行为变更必须在支持的不同 Agent 环境中保持同一契约。请遵循 [CONTRIBUTING.md](CONTRIBUTING.md)，同步更新两个语言版本的 README，并运行：
+
+```bash
+npm test
+```
+
+问题和功能建议通过 [GitHub Issues](https://github.com/HuaTalk/hiding-skill/issues) 跟踪。
 
 ## 许可证
 
-[MIT](LICENSE)
+MIT License，详见 [LICENSE](LICENSE)。

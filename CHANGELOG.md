@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Reorganized both READMEs around a concise quickstart, narrative workflow, platform installation, capability inventory, philosophy, and contribution guidance.
+- Moved detailed bilingual before/after cases into dedicated example pages and corrected credential examples to match the v0.7.0 safety contract.
 - File paths are accepted only through `--files`; leading positional arguments are semantic content targets, never inferred file paths.
 - `session` and `worktree` are reserved, standalone `--files` selectors; neither can be mixed with paths or the other selector. Use `./session` or `./worktree` for literal same-named files. Worktree selection uses local refs only and never fetches.
 - Automatic session and worktree selection now resolves output artifacts autonomously by explicit selection, tool ownership, task goal, and target consumer, in that order. Known control state is excluded, literal paths override all automatic rules, and low-confidence files are preserved and skipped without prompting (`--dry-run` lists them unscanned). Scope clarification is reserved for cases where conservative exclusion would block an explicit request. Filename and persistence alone are not decisive.

@@ -1,256 +1,249 @@
-# /hiding — Strip AI Leakage from Files
+# /hiding
 
-A Claude Code plugin that removes AI-generated artifacts from files before committing, pushing, or sharing.
+`/hiding` is a post-hoc cleanup skill for coding agents. Before files are committed, pushed, or shared, it finds AI workflow leakage, credentials, and user-specified sensitive content, then removes only what can be changed without altering code or runtime behavior.
 
-## What It Does
+[Chinese](README-zh.md)
 
-`/hiding` removes AI leakage and user-specified sensitive content from files before they are shared.
+## Quickstart
 
-**Scope**: Files only (code, config, markdown, docs). Does NOT modify agent replies or conversation output.
-
-## Before/After Examples
-
-`/hiding` strips five categories of AI leakage from files. Every example here shows content that looks natural to the author but reads as AI-generated to everyone else.
-
-### 1. Python Code — AI-facing Rationale / Thought-process Traces
-
-```python
-# Before /hiding
-# Returns dict instead of Tuple for readability
-def get_user() -> dict[str, str]:
-    ...
-
-# After /hiding
-def get_user() -> dict[str, str]:
-    ...
-```
-
-The comment explains a design choice to the AI's own satisfaction — but the reader gains nothing from it. The function signature speaks for itself.
-
-### 2. Markdown Docs — Unshared Rule References / Thought-process Traces
-
-```md
-Before /hiding
-
-> Per CLAUDE.md conventions, all APIs must use gRPC
-> Research notes (2026-07-15): Compared REST, gRPC, and GraphQL — gRPC selected for performance
-
-After /hiding
-
-> All APIs use gRPC
-```
-
-Rule citation and research trail are scaffolding for the AI's own reasoning. The reader only needs the conclusion.
-
-### 3. Teaching Docs — Rule
-
-**Prompt**:
-> Write a beginner-friendly explanation of how LLMs work. Use analogies instead of jargon to explain the Transformer architecture.
-
-```md
-Before /hiding
-
-# How Large Language Models Work
-
-> **Authoring note**: The following is written for readers with no technical background. Use everyday analogies to explain the Transformer, avoid math and jargon (attention mechanism, multi-head attention, self-attention, etc.).
-> Per CLAUDE.md conventions, pair each core concept with a real-world analogy.
-
-A Large Language Model (LLM) is a neural network that predicts text. Give it a sentence starter, and it completes it word by word — like your phone's predictive keyboard, but millions of times larger.
-
-After /hiding
-
-# How Large Language Models Work
-
-A Large Language Model (LLM) is a neural network that predicts text. Give it a sentence starter, and it completes it word by word — like your phone's predictive keyboard, but millions of times larger.
-```
-
-The prompt's instructions and the rule citation leaked into the document. After `/hiding`, only the explanation remains — no meta-commentary about how to write it.
-
-### 4. YAML CI — AI-facing Rationale / Thought-process Traces
-
-```yaml
-# Before /hiding
-# Team policy forbids third-party actions — handwritten script as workaround
-# Steps: pull image → install deps → run tests → build → upload
-steps:
-
-# After /hiding
-steps:
-```
-
-The constraint justification and step-by-step plan are AI-facing rationale. The workflow definition is all the reader needs.
-
-### 5. TypeScript Component — AI Self-reference
-
-```typescript
-// Before /hiding
-// Here's the UserProfile component I created
-// I think memoizing here makes sense since props rarely change
-const UserProfile = memo(({ user }) => {
-
-// After /hiding
-// Memoized since props rarely change
-const UserProfile = memo(({ user }) => {
-```
-
-"Here's the…" and "I think…" betray AI authorship. A human writes the technical reason directly.
-
-### 6. Python Credentials — Secrets and Credentials
-
-```python
-# Before /hiding
-OPENAI_API_KEY = "sk-abc123"  # Using real key here for convenience during testing
-
-# After /hiding
-OPENAI_API_KEY = "sk-abc123"
-```
-
-Inline credentials with casual justification are security accidents waiting to happen. `/hiding` always warns when secrets are found.
-
-No markers. No annotations. No one can tell it ran. The code simply reads as if a human wrote it from the start.
-
-## Design Philosophy
-
-`/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. It does not inject rules into your agent's session context. Instead, it lets the model work naturally, then strips the traces afterward. This preserves thinking quality and follows the silent execution principle — after `/hiding` runs, no one should be able to tell it ran.
-
-### Core Principles
-
-- Do not inject persistent constraints into normal sessions; preserve reasoning and generation quality.
-- Process files only. Agent replies and conversation output are out of scope.
-- Remove leakage and user-specified sensitive content without changing code logic or rewriting prose like a humanizer.
-- Stay silent by default; the cleanup operation must leave no trace.
-- Credential safety overrides silence: always warn and recommend rotation when credentials are found.
-- Require human confirmation before deleting an entire file.
-- Keep the same behavior across supported agent environments.
-
-Think of it like Fermat's margin note. Fermat didn't show his work — he wrote the theorem and moved on. The proof became legend. `/hiding` gives your code the same mystique: the result stands on its own, with no visible scaffolding. Your colleagues will wonder how you wrote it so cleanly. (See [The Fermat Principle](docs/en/hiding-philosophy.md) for the full, slightly irreverent argument.)
-
-
-## Five Leakage Categories
-
-| Category         | What It Catches |
-|-----------------|----------------|
-| Secrets and credentials | API keys, tokens, passwords, connection strings, internal URLs |
-| Unshared rule references | References to CLAUDE.md, skill instructions, team conventions the reader doesn't share |
-| AI-facing rationale/guardrails | Prompt compliance, refusal justification, safety fences, and rationale about satisfying agent instructions |
-| AI self-reference | "As an AI…", "I think…", "Here's the result:", "I hope this helps!" |
-| Thought-process traces | Transient derivations, intermediate attempts, session work logs, and temporary step-by-step reasoning |
-
-## Execution Guarantees
-
-- **Structurally safe** — post-cleanup validation uses actual parsers (JSON, YAML, XML) where available.
-- **Three output modes** — inplace (default), newfile (original preserved), backup (original renamed to `.bak`).
-
-## Installation
-
-### Primary: via npx skills (recommended, 70+ agents)
+Install `/hiding` with [Agent Skills](https://agentskills.io/):
 
 ```bash
 npx skills add HuaTalk/hiding-skill
 ```
 
-One command installs to all your coding agents (Claude Code, Codex, Cursor, Windsurf, Gemini CLI, Copilot, Cline, and more).
+Then ask your agent to preview files changed in the current session:
 
-### Claude Code (native plugin)
-
+```text
+/hiding --dry-run
 ```
+
+Choose another scope when needed: [specific files](#specific-files), [the Git worktree](#git-worktree), or [additional content to hide](#semantic-targets).
+
+## How It Works
+
+`/hiding` runs when the output is ready for review, not throughout the agent's normal reasoning process.
+
+First, it resolves which files are actual user-facing outputs. Agent control state, planning metadata, build output, and unrelated files are excluded automatically.
+
+Next, it scans eligible files for five built-in leakage categories, credentials, and any one-off semantic targets supplied by the user. It distinguishes removable comments and prose from executable code and behavior-affecting configuration.
+
+Before writing, it checks whether the cleanup would leave a useful standalone file and validates a temporary candidate. Unsafe edits are reported for human review; whole-file deletion always requires confirmation.
+
+For example:
+
+```typescript
+// Before
+// Per CLAUDE.md, here's the UserProfile component I created.
+// I think memoizing makes sense because props rarely change.
+const UserProfile = memo(({ user }) => {
+
+// After
+// Memoized because props rarely change.
+const UserProfile = memo(({ user }) => {
+```
+
+The unavailable rule reference and AI narration disappear. The useful technical reason and executable code remain. See [more examples](docs/en/examples.md).
+
+## Installation
+
+Installation depends on how your coding agent loads Skills.
+
+### Agent Skills
+
+Use this for Codex, Cursor, Windsurf, Gemini CLI, GitHub Copilot, Cline, and other agents supported by the Agent Skills ecosystem:
+
+```bash
+npx skills add HuaTalk/hiding-skill
+```
+
+Agent compatibility and install location are determined by the installer and each agent's Skill implementation.
+
+### Claude Code
+
+Register the repository as a plugin marketplace:
+
+```text
 /plugin marketplace add https://github.com/HuaTalk/hiding-skill.git
 ```
-```
+
+Then install the plugin in a separate prompt:
+
+```text
 /plugin install hiding@hiding
 ```
-(You have to send two separate prompts for the install to work)
 
-Restart Claude Code. The `/hiding` command is ready.
+Restart Claude Code after installation.
 
-Upgrade: `/plugin update hiding@hiding` + restart.
+### npm
 
-### npm (for skills-npm users)
+For environments using `skills-npm`:
 
 ```bash
 npm install -D @huatalk/hiding-skill
 npx skills-npm setup
 ```
 
-### Uninstall
+## The Basic Workflow
 
-| Method | Command |
-|--------|---------|
-| npx skills | `npx skills remove hiding` |
-| Claude Code | `/plugin remove hiding` |
+1. **Select outputs** - Use current-session files by default, explicit paths for precise control, or the Git worktree for branch-wide review.
+2. **Preview** - Add `--dry-run` to see scope, findings, and conservative exclusions without modifying files.
+3. **Classify** - Credentials are handled first, followed by file-level purge candidates, inline leakage, and user-specified targets.
+4. **Confirm** - Session review is human-in-the-loop. Whole-file deletion and symlink traversal always require explicit confirmation.
+5. **Clean** - Remove the smallest coherent comment or prose unit. Executable code, string literals, and behavior-affecting values are not silently changed.
+6. **Verify** - Re-read the candidate, validate structure, check for concurrent edits, then apply the selected output mode.
 
-## Usage
+When there are no findings in direct file modes, `/hiding` stays silent. Security warnings, previews, validation failures, and input errors remain visible.
 
-```bash
-/hiding [<what-to-hide>...] [--files <file>...|session|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
+## What's Inside
 
-/hiding                              # HITL review of files created or modified in this session
-/hiding --files <file>               # Clean a specific file in-place
-/hiding --files session              # Explicit form of the default session scope
-/hiding --files worktree             # Clean files changed from the primary branch
-/hiding "data sources" --files report.md   # Also hide source attribution
+### Five Leakage Categories
+
+| Category | What it catches |
+|---|---|
+| Secrets and credentials | API keys, tokens, passwords, connection strings, and access-bearing endpoints |
+| Unshared rule references | References to `CLAUDE.md`, Skill instructions, or private conventions the reader cannot access |
+| AI-facing rationale and guardrails | Prompt compliance, refusal justification, safety fences, and reasoning about satisfying agent instructions |
+| AI self-reference | "As an AI", "I think", "Here's the result", and similar narration |
+| Thought-process traces | Transient derivations, intermediate attempts, session logs, and temporary step-by-step reasoning |
+
+These are judgment principles, not a keyword list. `TODO`, `FIXME`, and `HACK` are not leakage by themselves. Durable architecture decisions, requirements, trade-offs, and research conclusions remain valid documentation.
+
+### Semantic Targets
+
+Leading positional arguments add one-off content goals to the built-in scan:
+
+```text
+/hiding "data sources" "internal project name" --files report.md --dry-run
 ```
 
-Leading positional arguments describe additional content to hide. Each argument is a one-off semantic target, not a regex; quote phrases containing spaces and place all targets before the first flag. Targets augment the five-category scan and credential handling rather than replacing them.
+Targets are semantic phrases, not regular expressions. They must appear before the first flag. Matches in executable code, identifiers, or behavior-affecting configuration are reported for human review rather than modified automatically.
 
-`--files` appears at most once. It accepts one or more literal file paths ending at the next known flag, or one reserved selector: `session` or `worktree`. A selector must be the only value; commas are not separators. Use `./session` or `./worktree` for literal same-named files. Omitting the flag is exactly equivalent to `--files session`: `/hiding` uses eligible files created or modified in the current session and presents HITL findings before writing. `--mode` accepts both `--mode value` and `--mode=value`.
+### File Selection
 
-`--files worktree` uses the Git repository and working directory where `/hiding` is invoked. It compares the merge base of `HEAD` and the locally resolved primary branch with the current worktree, selecting branch commits, staged changes, unstaged changes, and untracked non-ignored files. Deleted files, ignored files, directories, and submodules are excluded. It never fetches. If no primary branch or merge base can be resolved, it stops with an error; if no eligible files changed, it reports that explicitly.
+#### Current Session
 
-Automatic selection resolves output artifacts in priority order: explicit literal paths are included; known agent/tool control state is excluded; requested task deliverables are included; then human/project-consumed files are included while agent-only files are excluded. The agent makes this decision autonomously from task/session context. If confidence remains low, `/hiding` preserves and skips the file without asking; it asks only when skipping would prevent an explicit request from being completed. Under `--dry-run`, it lists conservative exclusions without scanning them.
-
-This is based on ownership, task goal, and audience, not filename or persistence alone. `.planning/` and recognizable planning-with-files state are normally control metadata, while a user-requested article, code change, ADR, requirements document, final report, or project plan is an output artifact. A formal `findings.md` report may therefore be included; persistent agent memory remains excluded. A literal `--files <path>` is the unconditional override.
-
-### Arguments And Flags
-
-| Input | Values | Default | Description |
-|-------|--------|---------|-------------|
-| `<what-to-hide>...` | leading quoted semantic targets | none | Additional content to hide |
-| `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Where to write cleaned output |
-| `--use-subagent` | (flag) | off | Get candidate leakage locations from a fresh-context sub-agent; the main agent applies the normal hiding workflow |
-| `--dry-run` | (flag) | off | Preview changes without modifying files |
-| `--files` | `<file>...`, `session`, or `worktree` (at most once) | `session` | Files to scan and clean |
-
-```bash
-/hiding --files file.java --mode newfile       # Output to file-cleaned.java, leave original
-/hiding --files config.yml --mode backup       # Rename original to .bak, write cleaned
-/hiding --files file.java --dry-run            # Preview what would change
-/hiding --files file.java --use-subagent       # Get an independent review before the main agent edits
-/hiding --dry-run                         # HITL preview without executing
-/hiding --files session --dry-run                # Explicit preview of current-session files
-/hiding --files README.md config.yml --dry-run   # Preview two files
-/hiding --files worktree --dry-run                # Preview the resolved base and changed files
-/hiding "data sources" "internal rules" --files report.md --dry-run
+```text
+/hiding
+/hiding --files session --dry-run
 ```
 
-Target matching is semantic: `"data sources"` includes source attributions and provenance, while an exact rule or project name includes obvious contextual references. `/hiding` removes the smallest coherent prose or comment unit that hides the target. Matches in executable code, identifiers, or behavior-affecting configuration are reported for human review and are never modified automatically.
+The default scope is files created or modified through file-editing tools in the current agent session. Git status may provide context but does not expand this inventory.
+
+#### Specific Files
+
+```text
+/hiding --files README.md config.yml --dry-run
+```
+
+Literal paths are unconditional scope overrides. `--files` may appear once and accepts paths until the next recognized flag.
+
+#### Git Worktree
+
+```text
+/hiding --files worktree --dry-run
+```
+
+Worktree scope compares `HEAD` with the merge base of the locally resolved primary branch. It includes branch commits, staged changes, unstaged changes, and untracked non-ignored files. It never fetches remote refs.
+
+`session` and `worktree` are reserved standalone selectors. Use `./session` or `./worktree` for literal files with those names.
 
 ### Output Modes
 
 | Mode | Behavior |
-|------|----------|
-| `inplace` (default) | Modify file in place — classic `/hiding` |
-| `newfile` | Create `<name>-cleaned.<ext>`, leave original untouched |
-| `backup` | Rename original to `<name>.<ext>.bak`, write cleaned to original name |
+|---|---|
+| `inplace` | Replace the original after validation; this is the default |
+| `newfile` | Write `<name>-cleaned.<ext>` and preserve the original |
+| `backup` | Move the original to `<file>.bak` and write cleaned content to the original path |
 
-If the target (`-cleaned` file or `.bak`) already exists, `/hiding` never overwrites it — it writes to a numbered alternative (`-cleaned-2`, `.bak-2`) and reports which name it used.
+Existing output targets are never overwritten. Numbered alternatives such as `-cleaned-2` and `.bak-2` are used instead.
 
-### Security: Credential Handling
+### Credential Safety
 
-When secrets or credentials (API keys, tokens, passwords) are **found** — whether stripped or only previewed via `--dry-run` — `/hiding` **always warns**:
+Credentials are scanned before any style cleanup or purge decision.
 
-> ⚠️ Security-sensitive content was found {and removed / preview only}. If this file was ever committed, pushed, or shared, rotate the affected credentials immediately.
+- A discovered credential always triggers a rotation warning, including under `--dry-run`.
+- Secret values are redacted from reports.
+- Credentials in executable code are not silently edited.
+- Configuration credentials are replaced only when a format-safe placeholder preserves structure.
+- If a credential may have been committed, pushed, or shared, rotate it even if the local file is cleaned.
 
-This is the only mandatory exception to silent execution — because a silent credential strip where the user doesn't know to rotate is worse than a noisy one.
+`/hiding` is defense in depth, not a replacement for a dedicated secret scanner.
 
-## Version
+### Fresh-Context Review
 
-Current: **0.7.0** — User-specified semantic targets, literal, current-session, and Git-worktree file selection (`--files`), output modes (inplace/newfile/backup), dry-run preview, fresh-context sub-agent review, credential security warnings, and AI-facing rationale/guardrail coverage.
+```text
+/hiding --files report.md --use-subagent --dry-run
+```
+
+`--use-subagent` asks a fresh-context sub-agent to identify candidate leakage locations. The main agent still owns scope, credential scanning, purge decisions, edits, confirmations, validation, and file writes.
+
+## Command Reference
+
+```text
+/hiding [<what-to-hide>...] [--files <file>...|session|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
+```
+
+| Input | Values | Default |
+|---|---|---|
+| `<what-to-hide>...` | Leading semantic target phrases | None |
+| `--files` | Literal paths, `session`, or `worktree` | `session` |
+| `--mode` | `inplace`, `newfile`, or `backup` | `inplace` |
+| `--dry-run` | Preview without writes | Off |
+| `--use-subagent` | Fresh-context candidate detection | Off |
+
+Unknown flags, targets placed after flags, repeated `--files`, and ambiguous selector combinations are errors.
+
+## Philosophy
+
+- **Post-hoc, not always-on** - Cleanup runs on demand and does not consume every session with persistent self-censorship instructions.
+- **Content, not style** - The Skill removes material that should not be in the file; it does not rewrite prose to imitate a human voice.
+- **Decisions over derivations** - Keep durable conclusions and reader-facing rationale; remove private instructions and transient process trails.
+- **Behavior preservation** - Code logic and runtime-visible content are never silently changed.
+- **Evidence over claims** - Preview, parse where possible, re-read, and preserve the original when verification fails.
+
+Read more about [agent portability](docs/en/agent-portability.md), [platform-native integration](docs/en/platform-native.md), and the [project philosophy](docs/en/hiding-philosophy.md).
+
+## Validation and Limitations
+
+Repository CI validates version consistency, plugin JSON, English-document language separation, and Skill frontmatter. The project does not yet publish runtime accuracy benchmarks.
+
+Detection relies on contextual model judgment and may miss or over-classify content. Files over 10,000 lines or 500 KB, binary files, directories, and empty files are rejected. JSON, YAML, and XML use parsers where available; other formats may receive visual structural verification.
+
+For important files, start with `--dry-run`, inspect credential and configuration findings manually, then run the host project's formatter, linter, parser, tests, and secret scanner.
+
+## Updating
+
+Agent Skills:
+
+```bash
+npx skills add HuaTalk/hiding-skill
+```
+
+Claude Code:
+
+```text
+/plugin update hiding@hiding
+```
+
+Restart Claude Code after updating. See the [changelog](CHANGELOG.md) for release details.
 
 ## Responsible Use
 
-`/hiding` removes noise — leaked credentials, reasoning scaffolding, rule citations — so files stand on their own as reference material. It is **not** a tool for evading disclosure obligations. If your employer, project, or publication venue requires disclosing AI assistance, that policy governs; cleaning a file's contents does not change what you must declare. You are responsible for complying with the disclosure rules that apply to you.
+`/hiding` improves the contents of files; it does not erase authorship history or override disclosure obligations. If an employer, project, client, or publication venue requires disclosure of AI assistance, that policy still governs.
+
+User-specified targets are intended for legitimate privacy and release-hygiene needs. Do not use them to conceal required attribution, provenance, licensing, audit records, or material facts.
+
+## Contributing
+
+Changes to Skill behavior must preserve the same contract across supported agent environments. Follow [CONTRIBUTING.md](CONTRIBUTING.md), update both language versions of the README, and run:
+
+```bash
+npm test
+```
+
+Issues and feature requests are tracked in [GitHub Issues](https://github.com/HuaTalk/hiding-skill/issues).
 
 ## License
 
-[MIT](LICENSE)
+MIT License - see [LICENSE](LICENSE).
