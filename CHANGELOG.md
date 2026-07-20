@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unknown or malformed flags, targets after the first flag, and ambiguous values are explicit errors.
 - Credential handling distinguishes access-bearing secrets from sensitive context, preserves executable code and unsafe-to-rewrite configuration values, and validates a temporary candidate before replacing the original.
 - Credential detection now precedes purge decisions, and `--use-subagent` is detection-only; the main agent retains the original purge, security, editing, validation, and output workflow.
+- Skill instructions and runtime messages are now English-only; the concise frontmatter description retains Chinese trigger terms for discovery.
 
 ### Fixed
 

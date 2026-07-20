@@ -1,6 +1,6 @@
 ---
 name: hiding
-description: Strip AI leakage and user-specified sensitive content from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的 AI 残留痕迹和用户指定的敏感内容。Supports leading semantic targets, explicit paths, current-session changes, or Git worktree changes, output modes, dry-run preview, fresh-context sub-agent review, and credential-security warnings. 支持使用前置语义目标指定需隐藏的内容、选择明确路径、当前 session 改动或 Git worktree 改动、输出模式、预览、独立子代理审阅和凭证安全告警。
+description: Remove AI leakage and specified sensitive content from files before commit, push, or sharing. Supports file, session, and worktree scopes, dry runs, output modes, and sub-agent detection. 中文触发词：隐藏 AI 痕迹、清理 AI 泄露、提交前清理、隐藏数据来源、隐藏指定规则。
 argument-hint: "[<what-to-hide>...] [--files <file>...|session|worktree] [options]"
 metadata:
   author: HuaTalk
@@ -131,7 +131,7 @@ Scan only eligible inventory files using [references/leakage-categories.md](refe
 
 ### Step H3: Present Findings (HITL)
 
-For zero findings, including an empty inventory, say **"未在当前 session 中创建或修改的文件中发现 AI 泄露痕迹。No AI leakage found in files created or modified in the current session."** If user targets were supplied, include **"或用户指定的内容 / or user-specified content"** in that message.
+For zero findings, including an empty inventory, say **"No AI leakage found in files created or modified in the current session."** If user targets were supplied, include **"or user-specified content"** in that message.
 
 Otherwise present Tier 0 first, then per-file delete/clean choices, Tier 3 concerns, `Hide everything found`, and `Nothing`. Use the runtime input mechanism or plain text and wait for explicit selection. Selecting Tier 0 also triggers the rotation warning.
 
@@ -159,7 +159,7 @@ Never echo or itemize secret values. Credentials in executable code require huma
 
 The warning fires after the outcome is known even if the file is deleted as a purge candidate or left unchanged:
 
-> **"⚠️ 发现了安全敏感内容（凭据/密钥/令牌）{已移除/仅预览/发现但未移除}。如果此文件曾被提交、推送或分享，请立即轮换受影响的凭证。Security-sensitive content (credentials/keys/tokens) was found {and removed / preview only / but not removed}. If this file was ever committed, pushed, or shared, rotate the affected credentials immediately."**
+> **"Security-sensitive content (credentials/keys/tokens) was found {and removed / preview only / but not removed}. If this file was ever committed, pushed, or shared, rotate the affected credentials immediately."**
 
 ### Step 2: File-Level Purge Check (HITL)
 
@@ -221,7 +221,7 @@ These are the ONLY cases where `/hiding` produces output beyond the HITL decisio
 
 1. **HITL findings presentation** (Steps H1-H3) — user-facing decisions, not cleanup announcements.
 2. **Step 2 purge check** — asking the user whether to delete a file.
-3. **Secret and credential warning** (Step 1) — mandatory security warning. "⚠️ 发现并移除了安全敏感内容... rotate credentials immediately."
+3. **Secret and credential warning** (Step 1) — mandatory security warning; tell the user to rotate affected credentials immediately.
 4. **`--dry-run` preview** — user explicitly requested a preview.
 5. **Zero findings in Session HITL** — brief confirmation; mention user-specified content only when targets were supplied.
 6. **Session inventory unavailable** — report the limitation and stop instead of substituting Git changes.
