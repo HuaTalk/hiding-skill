@@ -1,6 +1,10 @@
 # Hiding
 
-`/hiding` is a post-hoc cleanup skill for coding agents. Before files are committed, pushed, or shared, it finds AI workflow leakage, credentials, and user-specified sensitive content, then removes only what can be changed without altering code or runtime behavior.
+**Ship the work, not the agent's working notes.**
+
+Hiding is a release-hygiene skill for coding agents. Before you commit, push, or share files, it removes private instruction references, AI narration, transient reasoning, and user-specified content from comments and prose. It catches credentials first, preserves executable code, and reports unsafe configuration changes for review.
+
+> Hiding cleans file contents. It does not erase provenance or replace any required disclosure of AI assistance.
 
 [Chinese](README-zh.md)
 
@@ -16,6 +20,12 @@ Then ask your agent to preview files changed in the current session:
 
 ```text
 /hiding --dry-run
+```
+
+Review the findings, then apply the cleanup:
+
+```text
+/hiding
 ```
 
 Choose another scope when needed: [specific files](#specific-files), [the Git worktree](#git-worktree), or [additional content to hide](#semantic-targets).
@@ -165,7 +175,7 @@ Credentials are scanned before any style cleanup or purge decision.
 - A discovered credential always triggers a rotation warning, including under `--dry-run`.
 - Secret values are redacted from reports.
 - Credentials in executable code are not silently edited.
-- Configuration credentials are replaced only when a format-safe placeholder preserves structure.
+- Configuration credentials are replaced only when a format-safe placeholder preserves structure; otherwise they remain unchanged and are reported for human review.
 - If a credential may have been committed, pushed, or shared, rotate it even if the local file is cleaned.
 
 `/hiding` is defense in depth, not a replacement for a dedicated secret scanner.
