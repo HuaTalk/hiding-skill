@@ -54,10 +54,7 @@ Parse zero or more semantic targets first, followed by flags. Each leading posit
 
 `--mode` accepts `--mode value` and `--mode=value`. `--files` appears at most once and consumes one or more values until the next recognized flag. Do not split values on commas. The exact single values `session` and `worktree` are reserved selectors. Each must be the only `--files` value; never mix a selector with paths or another selector. Use `./session` or `./worktree` for literal same-named files.
 
-1. **Explicit files**: resolve, de-duplicate, and pass Step 0 for every listed file before modifying any of them; then run Steps 1-4 on each. Never interpret a file path as content to hide. Every file receives the built-in scan plus any user targets. Explicit literal paths override the automatic scope exclusions below.
-2. **Session selector**: `--files session` uses every file created or modified through file-editing tools in the current session and runs Session HITL before writing. Do not add files merely because they have uncommitted Git changes.
-3. **Git worktree selector**: `--files worktree` selects files changed in the Git worktree where the skill is invoked, relative to its primary branch. Follow `Git Worktree Selection` below; do not use conversation/session file inventory.
-4. **Default**: omitting `--files` is exactly equivalent to `--files session`.
+After parsing, process literal paths directly (bypassing automatic scope); follow the Session HITL or Git Worktree Selection section for `session` and `worktree`. Omitting `--files` is exactly equivalent to `--files session`.
 
 Reject positional targets after the first flag, repeated `--files`, `--files=<file>`, unknown flags, invalid/missing `--mode`, and missing `--files` paths. A recognized flag ends the file list and is not a path. Report the error rather than guessing intent.
 
