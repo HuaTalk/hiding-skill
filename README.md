@@ -1,4 +1,4 @@
-# /hiding
+# Hiding
 
 `/hiding` is a post-hoc cleanup skill for coding agents. Before files are committed, pushed, or shared, it finds AI workflow leakage, credentials, and user-specified sensitive content, then removes only what can be changed without altering code or runtime behavior.
 
