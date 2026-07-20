@@ -182,7 +182,7 @@ npx skills-npm setup
 ## Usage
 
 ```bash
-/hiding [<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--subagent] [--artifacts <target>]...
+/hiding [<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent] [--artifacts <target>]...
 
 /hiding                              # Session-aware HITL — scans session files + git uncommitted
 /hiding <file>                       # Clean a specific file in-place
@@ -196,7 +196,7 @@ npx skills-npm setup
 | Flag | Values | Default | Description |
 |------|--------|---------|-------------|
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Where to write cleaned output |
-| `--subagent` | (flag) | off | Use sub-agent for cleaner isolation |
+| `--use-subagent` | (flag) | off | Use a sub-agent for cleaner isolation |
 | `--dry-run` | (flag) | off | Preview changes without modifying files |
 | `--artifacts` | `"<target>"` (repeatable) | (none) | Targeted mode: hide only the specified content — skips the five built-in leakage categories |
 
@@ -204,7 +204,7 @@ npx skills-npm setup
 /hiding --mode newfile file.java          # Output to file-cleaned.java, leave original
 /hiding --mode backup config.yml          # Rename original to .bak, write cleaned
 /hiding --dry-run file.java               # Preview what would change
-/hiding --subagent file.java              # Strip via sub-agent for extra discipline
+/hiding --use-subagent file.java          # Strip via sub-agent for extra discipline
 /hiding --dry-run                         # HITL preview without executing
 /hiding --artifacts "ProjectX" file.java    # Remove only ProjectX references
 /hiding --artifacts "ProjectX" --artifacts "internal domains" --dry-run file.java   # Preview two targets

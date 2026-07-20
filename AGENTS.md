@@ -48,7 +48,7 @@ Target collision (`newfile`/`backup`): never overwrite an existing target — us
 | Flag | Effect |
 |------|--------|
 | `--dry-run` | Preview changes without modifying files (credential warning still fires) |
-| `--subagent` | Delegate stripping to a sub-agent for cleaner isolation (scope: leakage categories + Steps 0–4 + strip strategy only; no recursion) |
+| `--use-subagent` | Delegate stripping to a sub-agent for cleaner isolation (scope: leakage categories + Steps 0–4 + strip strategy only; no recursion) |
 | `--mode <inplace\|newfile\|backup>` | Set output mode (invalid value → error, no silent fallback) |
 | `--artifacts "<target>"` (repeatable) | Targeted mode: hide ONLY content matching the target(s). Skips the five-category scan entirely, including secrets and credentials (no credential scan/warning). Comments/prose matches deleted; matches in executable code flagged for human review (mandatory report). Zero matches → silent. |
 
