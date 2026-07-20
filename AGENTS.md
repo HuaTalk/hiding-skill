@@ -57,7 +57,7 @@ Leading positional arguments are one-off semantic targets that augment the five-
 | Flag | Effect |
 |------|--------|
 | `--dry-run` | Preview changes without modifying files (credential warning still fires) |
-| `--use-subagent` | Ask a fresh-context sub-agent to identify candidate leakage only; the main agent still performs all confirmation, security, editing, validation, output, and write logic. If unavailable, report the fallback. |
+| `--use-subagent` | Ask a fresh-context sub-agent to identify candidate leakage only. Before spawning, the main agent resolves the target and `references/leakage-categories.md` to absolute paths from the loaded Skill location; a missing reference is an installation error. The main agent retains all confirmation, security, editing, validation, output, and write logic. If sub-agents are unavailable, report the fallback. |
 | `--mode <inplace\|newfile\|backup>` | Set output mode (invalid value → error, no silent fallback) |
 | `--files <file>...` or `--files worktree` (at most once) | Select literal paths, or use the reserved single value `worktree` for files changed from the primary-branch merge base through the invocation-time Git worktree. Never mix `worktree` with paths; use `./worktree` for a literal same-named file. Without this flag, use files created or modified in the current session. |
 

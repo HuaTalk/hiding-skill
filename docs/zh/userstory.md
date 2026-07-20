@@ -69,7 +69,7 @@ npx skills add HuaTalk/hiding-skill
 > **以便** commit 之后看起来像我自己写的
 
 ```
-/hiding src/main/java/com/example/UserService.java
+/hiding --files src/main/java/com/example/UserService.java
 ```
 
 **理想体验：**
@@ -105,7 +105,7 @@ npx skills add HuaTalk/hiding-skill
 > **以便** 这个 key 不会出现在 git 历史里
 
 ```
-/hiding config/application.yml
+/hiding --files config/application.yml
 ```
 
 **理想体验：**
@@ -128,7 +128,7 @@ npx skills add HuaTalk/hiding-skill
 > **以便** 文档读起来像一份纯粹的决策记录，而不是 AI 的思考笔记
 
 ```
-/hiding docs/design-proposal.md
+/hiding --files docs/design-proposal.md
 ```
 
 **理想体验：**
@@ -205,7 +205,7 @@ npx skills add HuaTalk/hiding-skill
 > **以便** 交付给客户时不会暴露测试数据
 
 ```
-/hiding mock data
+/hiding "mock data"
 ```
 
 **理想体验：** 搜索上下文中所有匹配"mock data"描述的文件，应用相关隐藏模式，静默执行。
@@ -226,7 +226,7 @@ npx skills add HuaTalk/hiding-skill
 > **以便** 对外发布前不暴露内部信息
 
 ```
-/hiding Project Nebula
+/hiding "Project Nebula"
 ```
 
 **当前状态：** ⚠️ 与 US-11 相同的问题——范围未定义，静默修改大量文件无反馈。
@@ -306,7 +306,7 @@ Day 0   安装     npx skills add HuaTalk/hiding-skill
 
 Day 1   日常使用  让Claude生成 UserService.java
         git add .
-        /hiding UserService.java → （静默完成）
+        /hiding --files UserService.java → （静默完成）
         git commit → 干净的提交！
         ✅ "aha moment"
 

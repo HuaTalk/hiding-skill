@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Credential handling distinguishes access-bearing secrets from sensitive context, preserves executable code and unsafe-to-rewrite configuration values, and validates a temporary candidate before replacing the original.
 - Credential detection now precedes purge decisions, and `--use-subagent` is detection-only; the main agent retains the original purge, security, editing, validation, and output workflow.
 
+### Fixed
+
+- `--use-subagent` now receives absolute target and leakage-category reference paths resolved from the installed Skill, so invocation from another project cannot lose the category definitions.
+- Remaining documentation examples now use `--files` for file selection and quote multi-word semantic targets under the v0.7.0 argument grammar.
+
 ## [0.6.0] - Unreleased
 
 ### Added
