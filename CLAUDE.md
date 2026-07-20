@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Identity
 
-A standalone Claude Code plugin repository. Only the `/hiding` skill lives here — strip AI leakage from files before committing, pushing, or sharing.
+A standalone Claude Code plugin repository. Only the `/hiding` skill lives here — strip AI leakage and user-specified sensitive content from files before committing, pushing, or sharing.
 
 **No source code, no build, no tests.** This repo consists entirely of skill definitions and documentation.
 
@@ -39,6 +39,16 @@ Three files carry the version number:
 
 ## Design Philosophy
 
+### Core Contract
+
+- Do not inject persistent constraints into normal sessions; preserve reasoning and generation quality.
+- Process files only. Agent replies and conversation output are out of scope.
+- Remove leakage without changing code logic or rewriting prose like a humanizer.
+- Stay silent by default; the cleanup operation must leave no trace.
+- Credential safety overrides silence: warn and recommend rotation whenever credentials are found.
+- Require explicit user confirmation before deleting an entire file.
+- Keep behavior consistent across supported agent environments.
+
 ### Post-hoc cleanup, not real-time constraint
 
 `/hiding` is a cleanup tool, not a behavior modifier. It does NOT inject rules into agent sessions. It lets the model work naturally, then strips traces afterward.
@@ -63,14 +73,14 @@ Rationale (full argument in `docs/zh/design-tradeoffs.md`):
 
 3. **Chinese documentation is user-facing only**: `README-zh.md` and `docs/zh/` exist for Chinese-speaking users. English docs live in `docs/en/`. All maintainer-facing content (this file, scripts, CI, SKILL.md body) is English.
 
-4. **Version `0.6.0`**, installation path `hiding@hiding`. Features: output modes (inplace/newfile/backup), `--dry-run`, `--subagent`, credential-rotation warnings, git-uncommitted discovery.
+4. **Version `0.7.0`**, installation path `hiding@hiding`. Features: leading user-specified semantic targets, literal-path, current-session, and Git-worktree file selection (`--files`), output modes (inplace/newfile/backup), `--dry-run`, `--use-subagent`, and credential-rotation warnings. `--files worktree` compares the primary-branch merge base with the worktree where the skill is invoked; omitting `--files` is equivalent to `--files session`.
 
 ## Maintenance
 
 When updating the skill:
 
 1. Edit `skills/hiding/SKILL.md` — the only canonical skill file
-2. Update `AGENTS.md` if the leakage pattern reference card changes
+2. Update `AGENTS.md` if the leakage category reference card changes
 3. Update `README.md` / `README-zh.md` if user-facing behavior changes — the two are language versions of one document and must stay structurally identical (same section order, same headings, equivalent content); any change to one must be mirrored in the other. Known allowed divergence: the zh version's extra "能力边界" paragraph in 设计哲学.
 4. Bump version in `.claude-plugin/plugin.json`, `package.json`, and `SKILL.md` frontmatter
 5. Run `npm test` to verify consistency
@@ -80,7 +90,7 @@ When updating the skill:
 
 | Change | Files to edit |
 |--------|--------------|
-| Leakage pattern logic | `skills/hiding/SKILL.md` |
+| Leakage category logic | `skills/hiding/SKILL.md` and its directly linked references |
 | Pattern reference card | `AGENTS.md` |
 | User-facing install/usage | `README.md`, `README-zh.md` |
 | Version bump | `.claude-plugin/plugin.json`, `package.json`, `SKILL.md` frontmatter |
