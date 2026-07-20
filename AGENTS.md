@@ -1,6 +1,6 @@
 # Hiding — strip AI leakage from files
 
-Before committing, pushing, or sharing files, scan them for AI-generated artifacts that should not leave the session. Cleaned files should read as if written by a human.
+Before committing, pushing, or sharing files, scan them for AI-generated artifacts and user-specified sensitive content that should not leave the session.
 
 ## Core Operating Contract
 
@@ -28,7 +28,7 @@ Note: TODO/FIXME/HACK markers are NOT automatically AI leakage — human develop
 ## Execution Order
 
 1. **Validate**: file exists, not binary, not directory, not too large (> 10K lines / 500KB)
-2. **Purge check**: if removing thought-process traces, AI-facing rationale/guardrails, and AI self-reference leaves no section viable as standalone reference — ask before deleting
+2. **Purge check**: if removing thought-process traces, AI-facing rationale/guardrails, AI self-reference, and user-target matches leaves no section viable as standalone reference — ask before deleting
 3. **Strip secrets and credentials** first, before anything else. Mandatory warning if credentials found.
 4. **Strip style leakage** (unshared rule references, AI-facing rationale/guardrails, AI self-reference, and thought-process traces): cosmetic/quality concerns
 5. **Verify**: use actual parsers (Python json/yaml, xmllint, jq) where available; visual check as fallback
@@ -43,20 +43,28 @@ Note: TODO/FIXME/HACK markers are NOT automatically AI leakage — human develop
 
 Target collision (`newfile`/`backup`): never overwrite an existing target — use a numbered alternative (`-cleaned-2`, `.bak-2`, incrementing) and report the name used in one line.
 
-## Flags
+## Arguments And Flags
+
+Leading positional arguments are one-off semantic targets that augment the five-category scan. Quote multi-word targets and place every target before the first flag:
+
+```bash
+/hiding "data sources" "internal review rules" --files report.md
+```
 
 | Flag | Effect |
 |------|--------|
 | `--dry-run` | Preview changes without modifying files (credential warning still fires) |
-| `--use-subagent` | Delegate stripping to a fresh-context sub-agent; if unavailable, report the fallback and continue in the main agent with the same scope guard (no recursion) |
+| `--use-subagent` | Ask a fresh-context sub-agent to read only the target file and applicable rules, then return edit suggestions; the main agent applies and validates them. If unavailable, report the fallback. |
 | `--mode <inplace\|newfile\|backup>` | Set output mode (invalid value → error, no silent fallback) |
-| `--artifacts "<target>"` (repeatable) | Targeted mode: hide ONLY content matching the target(s). Skips the five-category scan entirely, including secrets and credentials (no credential scan/warning). Comments/prose matches deleted; matches in executable code flagged for human review (mandatory report). Zero matches → silent. |
+| `--files <file>...` or `--files worktree` (at most once) | Select literal paths, or use the reserved single value `worktree` for files changed from the primary-branch merge base through the invocation-time Git worktree. Never mix `worktree` with paths; use `./worktree` for a literal same-named file. Without this flag, use files created or modified in the current session. |
 
-Unknown/misspelled flags → error (not swallowed into description mode).
+Targets are natural-language descriptions, not regexes. In comments or prose, remove the smallest coherent unit that hides the target. Never change executable code, identifiers, or behavior-affecting config values; report those matches for human review. Unknown/misspelled flags, targets after the first flag, and malformed values → error; do not guess intent.
 
-## HITL Mode (no arguments)
+For `--files worktree`, locate the repository from the working directory where the skill is invoked and use local refs only. Resolve the primary branch from the current branch's configured `<remote>/HEAD`, `origin/HEAD`, `origin/main`, local `main`, `origin/master`, then local `master`; stop if unresolved or if `HEAD` has no merge base. Select tracked files changed from that merge base to the current worktree plus untracked non-ignored files. Exclude deleted files, ignored files, directories, and submodules; use NUL-safe Git output, de-duplicate, and validate all files before writing. An empty result is reported explicitly. `--dry-run` also reports the resolved base and selected files.
 
-Scans TWO sources: (1) files created/modified in the current session, (2) git uncommitted changes (`git diff --name-only HEAD` + untracked files). Findings organized into Tier 0 (Security Critical — credentials), Tier 1 (purge candidates), Tier 2 (inline leakage), Tier 3 (session-level concerns). Zero findings → brief confirmation: "未在此会话和未提交文件中发现 AI 泄露痕迹。No AI leakage found."
+## HITL Mode (no `--files`)
+
+Scans all files created or modified through file-editing tools in the current session for the five categories and any user targets. Git status must not add files to this set. If the runtime cannot identify files created or modified in the current session, report the limitation and stop. Findings are organized into Tier 0 (Security Critical — credentials), Tier 1 (purge candidates), Tier 2 (inline leakage and user-target matches), and Tier 3 (session-level concerns). For zero findings, briefly report that no AI leakage was found; mention user-specified content only when targets were supplied.
 
 ## Rules
 
@@ -67,7 +75,7 @@ Scans TWO sources: (1) files created/modified in the current session, (2) git un
 
 ## Strip Strategy by File Type
 
-- **Code** (.java, .py, .ts, .go, .rs, .js, .tsx, .jsx, etc.): Remove comment lines containing leakage. Keep executable code as-is. Remove empty comment blocks.
-- **Markdown** (.md): Remove leakage paragraphs and sentences. Keep technical content.
+- **Code** (.java, .py, .ts, .go, .rs, .js, .tsx, .jsx, etc.): Remove comment lines matching leakage categories or user targets. Keep executable code as-is. Remove empty comment blocks.
+- **Markdown** (.md): Remove paragraphs and sentences matching leakage categories or user targets. Keep technical content.
 - **Config** (.yml, .yaml, .json, .xml, .toml, .env, .properties, .ini, .cfg): Remove leakage comments and sensitive values. Keep config structure. For YAML block scalars, replace entire value if partial strip would alter indentation.
-- **Other**: Remove any comment or prose matching the leakage categories.
+- **Other**: Remove any comment or prose matching the leakage categories or user targets.

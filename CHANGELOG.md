@@ -9,12 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Targeted hiding** (`--artifacts <target>`): remove only user-specified artifacts without running the five built-in leakage scans. The flag is repeatable and composes with output, preview, sub-agent, and HITL modes.
+- **User-specified semantic targets** (`/hiding "data sources" "internal rules" ...`): leading positional arguments add one-off content-hiding goals to the built-in five-category and credential scan. Targets must precede flags; executable-code and behavior-affecting config matches require human review.
+- **File selection** (`--files <file>...` or `--files worktree`): pass literal paths or select files changed from the primary-branch merge base through the invocation-time Git worktree. The worktree selector includes committed branch changes, staged and unstaged changes, and untracked non-ignored files. Without `--files`, `/hiding` uses every file created or modified in the current session.
 - **Guardrail leakage coverage**: the AI-facing rationale/guardrails category explicitly covers AI safety limits, refusal justifications, and behavioral fences.
 
 ### Changed
 
-- Description mode requires explicit file selection before writing, deleting, or following symlinks.
+- File paths are accepted only through `--files`; leading positional arguments are semantic content targets, never inferred file paths.
+- `worktree` is a reserved, standalone `--files` value; it cannot be mixed with paths, while `./worktree` addresses a literal same-named file. Selection uses local refs only and never fetches.
+- Unknown or malformed flags, targets after the first flag, and ambiguous values are explicit errors.
 - Credential handling distinguishes access-bearing secrets from sensitive context, preserves executable code and unsafe-to-rewrite configuration values, and validates a temporary candidate before replacing the original.
 
 ## [0.6.0] - Unreleased
@@ -24,10 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Output modes** (`--mode inplace|newfile|backup`): write cleaned content in place (default), to a `<name>-cleaned.<ext>` sibling, or to the original name with the original renamed to `<name>.<ext>.bak`.
 - **Output-target collision safety**: `newfile`/`backup` never overwrite an existing target — a numbered alternative (`-cleaned-2`, `.bak-2`) is used and reported in one line.
 - **`--dry-run`**: preview all would-be changes without modifying files, in every mode (File, Description, HITL).
-- **`--use-subagent`**: delegate stripping to a fresh-context sub-agent that sees only the file content and stripping rules; report and fall back to the main agent when sub-agents are unavailable (scope-guarded, no recursion).
+- **`--use-subagent`**: a fresh-context sub-agent reads only the target file and applicable rules, then returns edit suggestions for the main agent to apply and validate; report fallback when sub-agents are unavailable.
 - **Credential-rotation warnings**: whenever secrets or credentials are *found* — stripped or merely previewed — a mandatory rotate-credentials warning fires. The only mandatory exception to silent execution.
-- **Git-uncommitted discovery**: no-argument HITL mode inventories session files *and* uncommitted git changes (tracked modifications + untracked user artifacts).
-- **Flag validation**: unknown or malformed flags are explicit errors, never silently swallowed into Description mode.
+- **Current-session modified-file discovery**: no-`--files` HITL mode inventories only files created or modified in the current session; unrelated Git changes are excluded.
+- **Flag validation**: unknown or malformed flags and unsupported positional arguments are explicit errors.
 - Expanded known-extension list for File-mode detection.
 
 ### Changed

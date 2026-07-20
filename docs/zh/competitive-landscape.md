@@ -60,7 +60,7 @@
 2. **机密 + 强制轮换警告的组合独有。** papertowel 只检测密钥，不给轮换指引。
 3. **品类真实且正在升温**——undercover（2026-04）、papertowel（2026-04）、aislop v0.13.1（2026-06）、Hanfani Guard（2026-07-16）均为近期产物。需求已被验证；差异化窗口就在当下。
 4. **「内容级泄露 vs 文体指纹」的区分成立**（[docs/zh/hiding-vs-humanizer.md](hiding-vs-humanizer.md)）。humanizer 类工具（ai-humanizer、papertowel 的文体检测器）在分界线的另一侧。
-5. **潜在 roadmap 缺口**：Dogma 的 `sanitize-git` 能清理已提交历史；`/hiding` 只扫描未提交文件，对已提交凭证仅建议轮换。是否加历史改写是一个需要慎重决策的哲学问题（破坏性操作、需 force-push），不是疏漏——但值得留下一个成文决定。
+5. **潜在 roadmap 缺口**：Dogma 的 `sanitize-git` 能清理已提交历史；`/hiding` 默认只扫描当前 session 中通过文件编辑工具创建或修改的文件，对已提交凭证仅建议轮换。是否加历史改写是一个需要慎重决策的哲学问题（破坏性操作、需 force-push），不是疏漏——但值得留下一个成文决定。
 
 ## 局限说明
 

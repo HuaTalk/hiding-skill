@@ -4,7 +4,7 @@ A Claude Code plugin that removes AI-generated artifacts from files before commi
 
 ## What It Does
 
-`/hiding` cleans files so they read as if written by a human — no AI reasoning traces, no rule citations, no self-reference, no leaked credentials.
+`/hiding` removes AI leakage and user-specified sensitive content from files before they are shared.
 
 **Scope**: Files only (code, config, markdown, docs). Does NOT modify agent replies or conversation output.
 
@@ -117,7 +117,7 @@ No markers. No annotations. No one can tell it ran. The code simply reads as if 
 
 - Do not inject persistent constraints into normal sessions; preserve reasoning and generation quality.
 - Process files only. Agent replies and conversation output are out of scope.
-- Remove leakage without changing code logic or rewriting prose like a humanizer.
+- Remove leakage and user-specified sensitive content without changing code logic or rewriting prose like a humanizer.
 - Stay silent by default; the cleanup operation must leave no trace.
 - Credential safety overrides silence: always warn and recommend rotation when credentials are found.
 - Require human confirmation before deleting an entire file.
@@ -182,33 +182,42 @@ npx skills-npm setup
 ## Usage
 
 ```bash
-/hiding [<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent] [--artifacts <target>]...
+/hiding [<what-to-hide>...] [--files <file>...|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
 
-/hiding                              # Session-aware HITL — scans session files + git uncommitted
-/hiding <file>                       # Clean a specific file in-place
-/hiding <description>                # Hide content matching the description (e.g., "/hiding mock data")
+/hiding                              # HITL review of files created or modified in this session
+/hiding --files <file>               # Clean a specific file in-place
+/hiding --files worktree             # Clean files changed from the primary branch
+/hiding "data sources" --files report.md   # Also hide source attribution
 ```
 
-`<file-or-description>` is optional: a file-like value selects File mode, other text selects Description mode, and omitting it selects HITL mode. Flags may appear before or after it. `--mode` and `--artifacts` accept both `--name value` and `--name=value`; `--artifacts` is repeatable.
+Leading positional arguments describe additional content to hide. Each argument is a one-off semantic target, not a regex; quote phrases containing spaces and place all targets before the first flag. Targets augment the five-category scan and credential handling rather than replacing them.
 
-### Flags
+`--files` appears at most once. It accepts one or more literal file paths, ending at the next known flag, or the reserved single value `worktree`. Commas are not separators. Do not mix `worktree` with paths; use `./worktree` for a literal file with that name. Without the flag, `/hiding` uses every file created or modified in the current session and presents HITL findings before writing. `--mode` accepts both `--mode value` and `--mode=value`.
 
-| Flag | Values | Default | Description |
-|------|--------|---------|-------------|
+`--files worktree` uses the Git repository and working directory where `/hiding` is invoked. It compares the merge base of `HEAD` and the locally resolved primary branch with the current worktree, selecting branch commits, staged changes, unstaged changes, and untracked non-ignored files. Deleted files, ignored files, directories, and submodules are excluded. It never fetches. If no primary branch or merge base can be resolved, it stops with an error; if no files changed, it reports that explicitly.
+
+### Arguments And Flags
+
+| Input | Values | Default | Description |
+|-------|--------|---------|-------------|
+| `<what-to-hide>...` | leading quoted semantic targets | none | Additional content to hide |
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Where to write cleaned output |
-| `--use-subagent` | (flag) | off | Delegate to a fresh-context sub-agent; fall back to the main agent if unavailable |
+| `--use-subagent` | (flag) | off | Get edit suggestions from a fresh-context sub-agent; the main agent applies and validates them |
 | `--dry-run` | (flag) | off | Preview changes without modifying files |
-| `--artifacts` | `"<target>"` (repeatable) | (none) | Targeted mode: hide only the specified content — skips the five built-in leakage categories |
+| `--files` | `<file>...` or `worktree` (at most once) | files created or modified in the current session | Files to scan and clean |
 
 ```bash
-/hiding --mode newfile file.java          # Output to file-cleaned.java, leave original
-/hiding --mode backup config.yml          # Rename original to .bak, write cleaned
-/hiding --dry-run file.java               # Preview what would change
-/hiding --use-subagent file.java          # Strip in a fresh sub-agent context when available
+/hiding --files file.java --mode newfile       # Output to file-cleaned.java, leave original
+/hiding --files config.yml --mode backup       # Rename original to .bak, write cleaned
+/hiding --files file.java --dry-run            # Preview what would change
+/hiding --files file.java --use-subagent       # Get an independent review before the main agent edits
 /hiding --dry-run                         # HITL preview without executing
-/hiding --artifacts "ProjectX" file.java    # Remove only ProjectX references
-/hiding --artifacts "ProjectX" --artifacts "internal domains" --dry-run file.java   # Preview two targets
+/hiding --files README.md config.yml --dry-run   # Preview two files
+/hiding --files worktree --dry-run                # Preview the resolved base and changed files
+/hiding "data sources" "internal rules" --files report.md --dry-run
 ```
+
+Target matching is semantic: `"data sources"` includes source attributions and provenance, while an exact rule or project name includes obvious contextual references. `/hiding` removes the smallest coherent prose or comment unit that hides the target. Matches in executable code, identifiers, or behavior-affecting configuration are reported for human review and are never modified automatically.
 
 ### Output Modes
 
@@ -228,11 +237,9 @@ When secrets or credentials (API keys, tokens, passwords) are **found** — whet
 
 This is the only mandatory exception to silent execution — because a silent credential strip where the user doesn't know to rotate is worse than a noisy one.
 
-Note: in targeted mode (`--artifacts`), the five built-in leakage categories — including secrets and credentials — are not scanned, so no credential warning fires. Targeted mode does exactly what you asked, nothing more.
-
 ## Version
 
-Current: **0.8.0** — Targeted hiding (`--artifacts`), output modes (inplace/newfile/backup), dry-run preview, sub-agent execution, credential security warnings, git-uncommitted discovery, and AI-facing rationale/guardrail coverage.
+Current: **0.8.0** — User-specified semantic targets, literal and Git-worktree file selection (`--files`), discovery of files created or modified in the current session, output modes (inplace/newfile/backup), dry-run preview, fresh-context sub-agent review, credential security warnings, and AI-facing rationale/guardrail coverage.
 
 ## Responsible Use
 

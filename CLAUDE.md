@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Identity
 
-A standalone Claude Code plugin repository. Only the `/hiding` skill lives here — strip AI leakage from files before committing, pushing, or sharing.
+A standalone Claude Code plugin repository. Only the `/hiding` skill lives here — strip AI leakage and user-specified sensitive content from files before committing, pushing, or sharing.
 
 **No source code, no build, no tests.** This repo consists entirely of skill definitions and documentation.
 
@@ -73,7 +73,7 @@ Rationale (full argument in `docs/zh/design-tradeoffs.md`):
 
 3. **Chinese documentation is user-facing only**: `README-zh.md` and `docs/zh/` exist for Chinese-speaking users. English docs live in `docs/en/`. All maintainer-facing content (this file, scripts, CI, SKILL.md body) is English.
 
-4. **Version `0.8.0`**, installation path `hiding@hiding`. Features: targeted hiding (`--artifacts`), output modes (inplace/newfile/backup), `--dry-run`, `--use-subagent`, credential-rotation warnings, git-uncommitted discovery.
+4. **Version `0.8.0`**, installation path `hiding@hiding`. Features: leading user-specified semantic targets, literal-path and Git-worktree file selection (`--files`), discovery of files created or modified in the current session, output modes (inplace/newfile/backup), `--dry-run`, `--use-subagent`, and credential-rotation warnings. `--files worktree` compares the primary-branch merge base with the worktree where the skill is invoked; no `--files` remains session-only.
 
 ## Maintenance
 

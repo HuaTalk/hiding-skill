@@ -71,7 +71,7 @@ Before committing, pushing, or sharing files, scan them for AI-generated artifac
 
 不是每个场景都需要清理。探索性编码、内部讨论、临时文件——用户可以接受带着 AI 痕迹。只在提交、推送、分享前运行 `/hiding`。
 
-HITL（Human-in-the-Loop）模式更进一步：无参数运行 `/hiding` 时，它分析会话中所有文件，列出泄露候选项，让用户选择处理哪些。控制权始终在用户手中。
+HITL（Human-in-the-Loop）模式更进一步：无参数运行 `/hiding` 时，它分析当前 session 中通过文件编辑工具创建或修改的文件，列出泄露候选项，让用户选择处理哪些。控制权始终在用户手中。
 
 ### 4. 哲学一致性
 
