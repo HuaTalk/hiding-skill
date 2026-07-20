@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - File paths are accepted only through `--files`; leading positional arguments are semantic content targets, never inferred file paths.
 - `worktree` is a reserved, standalone `--files` value; it cannot be mixed with paths, while `./worktree` addresses a literal same-named file. Selection uses local refs only and never fetches.
-- Automatic session and worktree selection excludes planning-with-files control metadata (`.planning/`, and recognizable `task_plan.md` / `findings.md` / `progress.md` state); explicit literal paths override this exclusion. Durable decisions and research conclusions remain reference content.
+- Automatic session and worktree selection now resolves output artifacts by explicit selection, tool ownership, task goal, and target consumer, in that order. Known control state is excluded, literal paths override all automatic rules, and uncertain files require scope confirmation before scanning (`--dry-run` lists them unscanned). Filename and persistence alone are not decisive.
 - Unknown or malformed flags, targets after the first flag, and ambiguous values are explicit errors.
 - Credential handling distinguishes access-bearing secrets from sensitive context, preserves executable code and unsafe-to-rewrite configuration values, and validates a temporary candidate before replacing the original.
 - Credential detection now precedes purge decisions, and `--use-subagent` is detection-only; the main agent retains the original purge, security, editing, validation, and output workflow.

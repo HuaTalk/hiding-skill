@@ -28,6 +28,8 @@ Note: TODO/FIXME/HACK markers are NOT automatically AI leakage — human develop
 
 ## Execution Order
 
+For automatic session or `worktree` selection, resolve output-artifact eligibility and any uncertain scope before these steps. Do not inspect file content while deciding scope.
+
 1. **Validate**: file exists, not binary, not directory, not too large (> 10K lines / 500KB)
 2. **Credential scan**: detect credentials before any purge decision; the rotation warning fires even if the file is deleted or left unchanged
 3. **Purge check**: if removing transient thought-process traces, AI-facing rationale/guardrails, AI self-reference, and user-target matches leaves no section viable as standalone reference — ask before deleting
@@ -63,11 +65,11 @@ Targets are natural-language descriptions, not regexes. In comments or prose, re
 
 For `--files worktree`, locate the repository from the working directory where the skill is invoked and use local refs only. Resolve the primary branch from the current branch's configured `<remote>/HEAD`, `origin/HEAD`, `origin/main`, local `main`, `origin/master`, then local `master`; stop if unresolved or if `HEAD` has no merge base. Select tracked files changed from that merge base to the current worktree plus untracked non-ignored files. Exclude deleted files, ignored files, directories, and submodules; use NUL-safe Git output, de-duplicate, and validate all files before writing. An empty result is reported explicitly. `--dry-run` also reports the resolved base and selected files.
 
-Automatic session and `worktree` selection scans reader-facing deliverables only. Exclude `.planning/**` and recognizable planning-with-files state (`task_plan.md`, `findings.md`, `progress.md` used together), because they are functional control metadata. Literal `--files` paths explicitly override this exclusion. Preserve durable requirements, ADRs, trade-offs, research conclusions, and project plans; do not treat rationale as leakage merely because it explains why.
+Resolve automatic session and `worktree` scope before validation or scanning, in this order: (1) a literal `--files <path>` is always in scope; (2) exclude known agent/tool control state such as `.planning/**`, recognizable planning-with-files state, and equivalent session plans, logs, or memory; (3) include files directly requested as task deliverables; (4) include human/project-consumed files and exclude agent-only files; (5) preserve uncertain files and ask whether they are output artifacts before scanning. Under `--dry-run`, list uncertain candidates without scanning them. Filename and persistence alone are not decisive: a formal `findings.md` report may be an output, while persistent agent memory is control state.
 
 ## HITL Mode (no `--files`)
 
-Scans eligible files created or modified through file-editing tools in the current session for the five categories and any user targets. With `--use-subagent`, the sub-agent supplies candidate locations only; the main agent performs credential scanning, purge classification, tiering, confirmation, and execution. Git status must not add files to this set. If the runtime cannot identify files created or modified in the current session, report the limitation and stop. Findings are organized into Tier 0 (Security Critical — credentials), Tier 1 (purge candidates), Tier 2 (inline leakage and user-target matches), and Tier 3 (session-level concerns). For zero findings, briefly report that no AI leakage was found; mention user-specified content only when targets were supplied.
+Inventories files created or modified through file-editing tools in the current session; Git status must not expand the set. Resolve output-artifact eligibility and confirm uncertain scope before scanning. Then scan eligible files for the five categories and any user targets. With `--use-subagent`, the sub-agent supplies candidate locations only; the main agent performs credential scanning, purge classification, tiering, confirmation, and execution. If the runtime cannot identify session-modified files, report the limitation and stop. Findings are organized into Tier 0 (Security Critical — credentials), Tier 1 (purge candidates), Tier 2 (inline leakage and user-target matches), and Tier 3 (session-level concerns). For zero findings, briefly report that no AI leakage was found; mention user-specified content only when targets were supplied.
 
 ## Rules
 
