@@ -185,17 +185,18 @@ npx skills-npm setup
 ## 用法
 
 ```bash
-/hiding [<需要隐藏的内容>...] [--files <文件>...|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
+/hiding [<需要隐藏的内容>...] [--files <文件>...|session|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
 
 /hiding                              # HITL 审阅当前 session 中创建或修改的文件
 /hiding --files <文件>                # 原地清理指定文件
+/hiding --files session              # 默认 session 范围的显式写法
 /hiding --files worktree             # 清理相对主分支有改动的文件
 /hiding "数据来源" --files report.md   # 额外隐藏来源信息
 ```
 
 前置位置参数用于描述需要额外隐藏的内容。每个参数是仅当次生效的语义目标，不是正则表达式；包含空格时需加引号，且必须放在所有 flag 之前。这些目标会补充默认五类扫描和凭证处理，不会替代它们。
 
-`--files` 最多出现一次，可后接一个或多个字面文件路径（到下一个已知 flag 为止），也可使用保留的单值 `worktree`；逗号不是分隔符。不得混用 `worktree` 和路径；同名文件需写为 `./worktree`。不传该参数时，`/hiding` 使用当前 session 中创建或修改且符合自动范围的文件，并在写入前展示 HITL 结果。`--mode` 支持 `--mode value` 与 `--mode=value`。
+`--files` 最多出现一次，可后接一个或多个字面文件路径（到下一个已知 flag 为止），也可使用保留的 selector：`session` 或 `worktree`。selector 必须是唯一值，逗号不是分隔符；同名字面文件需写为 `./session` 或 `./worktree`。不传该参数与 `--files session` 完全等价：`/hiding` 使用当前 session 中创建或修改且符合自动范围的文件，并在写入前展示 HITL 结果。`--mode` 支持 `--mode value` 与 `--mode=value`。
 
 `--files worktree` 使用调用 `/hiding` 时所在工作目录对应的 Git 仓库。它比较 `HEAD` 与本地解析出的主分支的 merge base 到当前 worktree 的差异，覆盖分支提交、暂存改动、未暂存改动和未跟踪且未忽略的文件；排除已删除文件、忽略文件、目录和子模块。该选择器不会自动 fetch。无法解析主分支或 merge base 时会报错停止；没有符合范围的文件时会明确提示。
 
@@ -211,7 +212,7 @@ npx skills-npm setup
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | 输出模式 |
 | `--use-subagent` | （布尔标记） | 关闭 | 由独立上下文子代理返回疑似泄露位置，主代理执行原有 hiding 流程 |
 | `--dry-run` | （布尔标记） | 关闭 | 预览变更，不修改文件 |
-| `--files` | `<文件>...` 或 `worktree`（最多一次） | 当前 session 中创建或修改的文件 | 要扫描和清理的文件 |
+| `--files` | `<文件>...`、`session` 或 `worktree`（最多一次） | `session` | 要扫描和清理的文件 |
 
 ```bash
 /hiding --files file.java --mode newfile      # 输出到 file-cleaned.java，保留原文件
@@ -219,6 +220,7 @@ npx skills-npm setup
 /hiding --files file.java --dry-run           # 预览将要清理的内容
 /hiding --files file.java --use-subagent      # 主代理修改前先进行独立子代理审阅
 /hiding --dry-run                         # HITL 预览，不实际执行
+/hiding --files session --dry-run               # 显式预览当前 session 文件
 /hiding --files README.md config.yml --dry-run   # 预览两个文件
 /hiding --files worktree --dry-run                # 预览解析出的主分支和改动文件
 /hiding "数据来源" "内部规则" --files report.md --dry-run
@@ -246,7 +248,7 @@ npx skills-npm setup
 
 ## 版本
 
-当前：**0.7.0** —— 用户指定的语义目标、字面路径与 Git worktree 文件选择（`--files`）、发现当前 session 中创建或修改的文件、输出模式（inplace/newfile/backup）、dry-run 预览、独立上下文子代理审阅、凭证安全告警，以及面向 AI 的理由/护栏泄露覆盖。
+当前：**0.7.0** —— 用户指定的语义目标、字面路径、当前 session 与 Git worktree 文件选择（`--files`）、输出模式（inplace/newfile/backup）、dry-run 预览、独立上下文子代理审阅、凭证安全告警，以及面向 AI 的理由/护栏泄露覆盖。
 
 ## 负责任使用
 

@@ -1,7 +1,7 @@
 ---
 name: hiding
-description: Strip AI leakage and user-specified sensitive content from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的 AI 残留痕迹和用户指定的敏感内容。Supports leading semantic targets, explicit paths or Git worktree changes, discovery of files created or modified in the current session, output modes, dry-run preview, fresh-context sub-agent review, and credential-security warnings. 支持使用前置语义目标指定需隐藏的内容、选择明确路径或 Git worktree 改动、发现当前 session 中创建或修改的文件、输出模式、预览、独立子代理审阅和凭证安全告警。
-argument-hint: "[<what-to-hide>...] [--files <file>...|worktree] [options]"
+description: Strip AI leakage and user-specified sensitive content from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的 AI 残留痕迹和用户指定的敏感内容。Supports leading semantic targets, explicit paths, current-session changes, or Git worktree changes, output modes, dry-run preview, fresh-context sub-agent review, and credential-security warnings. 支持使用前置语义目标指定需隐藏的内容、选择明确路径、当前 session 改动或 Git worktree 改动、输出模式、预览、独立子代理审阅和凭证安全告警。
+argument-hint: "[<what-to-hide>...] [--files <file>...|session|worktree] [options]"
 metadata:
   author: HuaTalk
   version: "0.7.0"
@@ -28,7 +28,7 @@ Strip AI leakage and user-specified sensitive content from files without changin
 ## Usage
 
 ```
-/hiding [<what-to-hide>...] [--files <file>...|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
+/hiding [<what-to-hide>...] [--files <file>...|session|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
 ```
 
 | Input | Values | Default | Description |
@@ -37,13 +37,14 @@ Strip AI leakage and user-specified sensitive content from files without changin
 | `--mode` | `inplace`, `newfile`, `backup` | `inplace` | Output location |
 | `--dry-run` | boolean | off | Preview without writing |
 | `--use-subagent` | boolean | off | Ask a fresh-context sub-agent for candidate leakage locations only |
-| `--files` | one or more file paths, or `worktree` | files created or modified in the current session | Select files to scan and clean |
+| `--files` | one or more file paths, `session`, or `worktree` | `session` | Select files to scan and clean |
 
 ```
 /hiding --dry-run
 /hiding "data sources" "internal review rules" --files report.md --dry-run
 /hiding --files file.java --mode newfile --use-subagent
 /hiding --files README.md config.yml --dry-run
+/hiding --files session --dry-run
 /hiding "data sources" --files worktree --dry-run
 ```
 
@@ -51,11 +52,12 @@ Strip AI leakage and user-specified sensitive content from files without changin
 
 Parse zero or more semantic targets first, followed by flags. Each leading positional argument is one target; quote targets containing spaces. Targets must precede the first flag and apply only to this invocation. Treat targets as natural-language descriptions that may include exact literals, not as regexes.
 
-`--mode` accepts `--mode value` and `--mode=value`. `--files` appears at most once and consumes one or more values until the next recognized flag. Do not split values on commas. The exact single value `worktree` is a reserved selector; write `./worktree` to select a literal file with that name. Reject `worktree` mixed with paths.
+`--mode` accepts `--mode value` and `--mode=value`. `--files` appears at most once and consumes one or more values until the next recognized flag. Do not split values on commas. The exact single values `session` and `worktree` are reserved selectors. Each must be the only `--files` value; never mix a selector with paths or another selector. Use `./session` or `./worktree` for literal same-named files.
 
 1. **Explicit files**: resolve, de-duplicate, and pass Step 0 for every listed file before modifying any of them; then run Steps 1-4 on each. Never interpret a file path as content to hide. Every file receives the built-in scan plus any user targets. Explicit literal paths override the automatic scope exclusions below.
-2. **Git worktree selector**: `--files worktree` selects files changed in the Git worktree where the skill is invoked, relative to its primary branch. Follow `Git Worktree Selection` below; do not use conversation/session file inventory.
-3. **Current-session default**: without `--files`, use every file created or modified through file-editing tools in the current session. Do not add files merely because they have uncommitted Git changes. Run the Session HITL flow before writing.
+2. **Session selector**: `--files session` uses every file created or modified through file-editing tools in the current session and runs Session HITL before writing. Do not add files merely because they have uncommitted Git changes.
+3. **Git worktree selector**: `--files worktree` selects files changed in the Git worktree where the skill is invoked, relative to its primary branch. Follow `Git Worktree Selection` below; do not use conversation/session file inventory.
+4. **Default**: omitting `--files` is exactly equivalent to `--files session`.
 
 Reject positional targets after the first flag, repeated `--files`, `--files=<file>`, unknown flags, invalid/missing `--mode`, and missing `--files` paths. A recognized flag ends the file list and is not a path. Report the error rather than guessing intent.
 
@@ -69,7 +71,7 @@ Resolve scope before Step 0 or any content scan. For each candidate, apply this 
 4. **Target consumer**: include files intended for human or project use; exclude files intended only for an agent or tool.
 5. **Uncertain**: use task/session context to make a conservative decision. When confidence remains low, preserve and exclude the file without scanning; do not ask solely because classification is uncertain. Ask only when excluding it would prevent completion of an explicit user request. Do not infer from persistence or filename alone.
 
-In short, an automatically selected file is an output artifact when it is a task deliverable for a human/project consumer and is not tool control state. A formal `findings.md` report can qualify; a persistent agent memory does not. Apply this eligibility check only to current-session and `--files worktree` candidates.
+In short, an automatically selected file is an output artifact when it is a task deliverable for a human/project consumer and is not tool control state. A formal `findings.md` report can qualify; a persistent agent memory does not. Apply this eligibility check only to `session` and `worktree` selector candidates.
 
 ### Git Worktree Selection (`--files worktree`)
 
@@ -107,7 +109,7 @@ Never overwrite a `newfile` or backup target. Use the next numbered name (`-clea
 
 `--dry-run` never writes. For explicitly selected files, show built-in categories and user-target matches with line context. For `worktree`, first show its resolved base, eligible files, excluded control state, and low-confidence files conservatively excluded from scanning. For current-session selection, show the normal H1-H3 findings, including user-target matches. Redact secret values. Preview output is an explicit silence exception.
 
-## Session HITL (No `--files`)
+## Session HITL (`--files session` or Default)
 
 ### Step H1: Session Inventory
 

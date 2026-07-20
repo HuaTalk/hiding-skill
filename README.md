@@ -182,17 +182,18 @@ npx skills-npm setup
 ## Usage
 
 ```bash
-/hiding [<what-to-hide>...] [--files <file>...|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
+/hiding [<what-to-hide>...] [--files <file>...|session|worktree] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent]
 
 /hiding                              # HITL review of files created or modified in this session
 /hiding --files <file>               # Clean a specific file in-place
+/hiding --files session              # Explicit form of the default session scope
 /hiding --files worktree             # Clean files changed from the primary branch
 /hiding "data sources" --files report.md   # Also hide source attribution
 ```
 
 Leading positional arguments describe additional content to hide. Each argument is a one-off semantic target, not a regex; quote phrases containing spaces and place all targets before the first flag. Targets augment the five-category scan and credential handling rather than replacing them.
 
-`--files` appears at most once. It accepts one or more literal file paths, ending at the next known flag, or the reserved single value `worktree`. Commas are not separators. Do not mix `worktree` with paths; use `./worktree` for a literal file with that name. Without the flag, `/hiding` uses eligible files created or modified in the current session and presents HITL findings before writing. `--mode` accepts both `--mode value` and `--mode=value`.
+`--files` appears at most once. It accepts one or more literal file paths ending at the next known flag, or one reserved selector: `session` or `worktree`. A selector must be the only value; commas are not separators. Use `./session` or `./worktree` for literal same-named files. Omitting the flag is exactly equivalent to `--files session`: `/hiding` uses eligible files created or modified in the current session and presents HITL findings before writing. `--mode` accepts both `--mode value` and `--mode=value`.
 
 `--files worktree` uses the Git repository and working directory where `/hiding` is invoked. It compares the merge base of `HEAD` and the locally resolved primary branch with the current worktree, selecting branch commits, staged changes, unstaged changes, and untracked non-ignored files. Deleted files, ignored files, directories, and submodules are excluded. It never fetches. If no primary branch or merge base can be resolved, it stops with an error; if no eligible files changed, it reports that explicitly.
 
@@ -208,7 +209,7 @@ This is based on ownership, task goal, and audience, not filename or persistence
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Where to write cleaned output |
 | `--use-subagent` | (flag) | off | Get candidate leakage locations from a fresh-context sub-agent; the main agent applies the normal hiding workflow |
 | `--dry-run` | (flag) | off | Preview changes without modifying files |
-| `--files` | `<file>...` or `worktree` (at most once) | files created or modified in the current session | Files to scan and clean |
+| `--files` | `<file>...`, `session`, or `worktree` (at most once) | `session` | Files to scan and clean |
 
 ```bash
 /hiding --files file.java --mode newfile       # Output to file-cleaned.java, leave original
@@ -216,6 +217,7 @@ This is based on ownership, task goal, and audience, not filename or persistence
 /hiding --files file.java --dry-run            # Preview what would change
 /hiding --files file.java --use-subagent       # Get an independent review before the main agent edits
 /hiding --dry-run                         # HITL preview without executing
+/hiding --files session --dry-run                # Explicit preview of current-session files
 /hiding --files README.md config.yml --dry-run   # Preview two files
 /hiding --files worktree --dry-run                # Preview the resolved base and changed files
 /hiding "data sources" "internal rules" --files report.md --dry-run
@@ -243,7 +245,7 @@ This is the only mandatory exception to silent execution — because a silent cr
 
 ## Version
 
-Current: **0.7.0** — User-specified semantic targets, literal and Git-worktree file selection (`--files`), discovery of files created or modified in the current session, output modes (inplace/newfile/backup), dry-run preview, fresh-context sub-agent review, credential security warnings, and AI-facing rationale/guardrail coverage.
+Current: **0.7.0** — User-specified semantic targets, literal, current-session, and Git-worktree file selection (`--files`), output modes (inplace/newfile/backup), dry-run preview, fresh-context sub-agent review, credential security warnings, and AI-facing rationale/guardrail coverage.
 
 ## Responsible Use
 
