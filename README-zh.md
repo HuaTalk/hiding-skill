@@ -185,10 +185,14 @@ npx skills-npm setup
 ## 用法
 
 ```bash
+/hiding [<文件或描述>] [--mode <inplace|newfile|backup>] [--dry-run] [--subagent] [--artifacts <目标>]...
+
 /hiding                              # 会话感知 HITL —— 扫描会话文件 + git 未提交文件
 /hiding <文件路径>                     # 原地清理指定文件
 /hiding <描述>                         # 按描述隐藏匹配内容（如 "/hiding mock数据"）
 ```
+
+`<文件或描述>` 可省略：文件形式的值进入 File 模式，其他文本进入 Description 模式，省略时进入 HITL 模式。参数可放在位置参数之前或之后；`--mode` 和 `--artifacts` 同时支持 `--name value` 与 `--name=value`，其中 `--artifacts` 可重复使用。
 
 ### 参数
 

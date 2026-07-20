@@ -182,10 +182,14 @@ npx skills-npm setup
 ## Usage
 
 ```bash
+/hiding [<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--subagent] [--artifacts <target>]...
+
 /hiding                              # Session-aware HITL — scans session files + git uncommitted
 /hiding <file>                       # Clean a specific file in-place
 /hiding <description>                # Hide content matching the description (e.g., "/hiding mock data")
 ```
+
+`<file-or-description>` is optional: a file-like value selects File mode, other text selects Description mode, and omitting it selects HITL mode. Flags may appear before or after it. `--mode` and `--artifacts` accept both `--name value` and `--name=value`; `--artifacts` is repeatable.
 
 ### Flags
 
