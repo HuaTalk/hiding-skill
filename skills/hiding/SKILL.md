@@ -1,7 +1,7 @@
 ---
 name: hiding
-description: Strip AI leakage from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的AI残留痕迹。Supports inplace/newfile/backup output modes, dry-run preview, sub-agent execution, and credential-security warnings. 支持原地修改/新建文件/备份修改三种输出模式、预览模式、子代理执行、凭证安全告警。
-argument-hint: "[<file>|<description>] [--artifacts <target>]... [--mode inplace|newfile|backup] [--dry-run] [--subagent]"
+description: Strip AI leakage from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的AI残留痕迹。Supports targeted artifact removal, inplace/newfile/backup output modes, dry-run preview, sub-agent execution, and credential-security warnings. 支持定向清理、原地修改/新建文件/备份修改三种输出模式、预览模式、子代理执行、凭证安全告警。
+argument-hint: "[<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--subagent] [--artifacts <target>]..."
 metadata:
   author: HuaTalk
   version: "0.8.0"
@@ -27,13 +27,24 @@ Strip AI leakage from files so they read as human-written: no AI reasoning trace
 ## Usage
 
 ```
+/hiding [<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--subagent] [--artifacts <target>]...
+
 /hiding                              Analyze session + git uncommitted for leakage (HITL)
 /hiding <file>                       Clean a specific file
 /hiding <description>                Hide content matching the description (e.g., "/hiding mock data")
 /hiding --artifacts "<target>" [...]   Targeted mode: hide ONLY the specified content (see Targeted Strip)
 ```
 
-### Flags (optional, can appear anywhere in the argument)
+### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<file-or-description>` | No | Existing or file-like path selects File mode; other text selects Description mode; omitted selects HITL mode |
+| `--artifacts <target>` | No, repeatable | Selects the content to hide and enables Targeted mode |
+
+Flags may appear before or after the positional argument. Valued flags accept both `--name value` and `--name=value`.
+
+### Flags
 
 | Flag | Values | Default | Description |
 |------|--------|---------|-------------|
@@ -52,7 +63,7 @@ Strip AI leakage from files so they read as human-written: no AI reasoning trace
 /hiding --artifacts "ProjectX" --artifacts "内部域名" --dry-run file.java   Preview matches for two targets
 ```
 
-### Flag Parsing
+### Argument Parsing
 
 Before mode selection, parse flags from the argument string. Remove parsed flags; the remaining text is the mode argument (file path, description, or empty for HITL).
 
