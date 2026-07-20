@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Output modes** (`--mode inplace|newfile|backup`): write cleaned content in place (default), to a `<name>-cleaned.<ext>` sibling, or to the original name with the original renamed to `<name>.<ext>.bak`.
 - **Output-target collision safety**: `newfile`/`backup` never overwrite an existing target — a numbered alternative (`-cleaned-2`, `.bak-2`) is used and reported in one line.
 - **`--dry-run`**: preview all would-be changes without modifying files, in every mode (File, Description, HITL).
-- **`--use-subagent`**: delegate stripping to an isolated sub-agent that sees only the file content and the stripping rules (scope-guarded, no recursion).
+- **`--use-subagent`**: delegate stripping to a fresh-context sub-agent that sees only the file content and stripping rules; report and fall back to the main agent when sub-agents are unavailable (scope-guarded, no recursion).
 - **Credential-rotation warnings**: whenever secrets or credentials are *found* — stripped or merely previewed — a mandatory rotate-credentials warning fires. The only mandatory exception to silent execution.
 - **Git-uncommitted discovery**: no-argument HITL mode inventories session files *and* uncommitted git changes (tracked modifications + untracked user artifacts).
 - **Flag validation**: unknown or malformed flags are explicit errors, never silently swallowed into Description mode.

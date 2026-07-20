@@ -1,7 +1,7 @@
 ---
 name: hiding
-description: Strip AI leakage from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的AI残留痕迹。Supports targeted artifact removal, inplace/newfile/backup output modes, dry-run preview, sub-agent execution, and credential-security warnings. 支持定向清理、原地修改/新建文件/备份修改三种输出模式、预览模式、子代理执行、凭证安全告警。
-argument-hint: "[<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent] [--artifacts <target>]..."
+description: Strip AI leakage from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的AI残留痕迹。Supports targeted artifact removal, inplace/newfile/backup output modes, dry-run preview, fresh-context sub-agent execution, and credential-security warnings. 支持定向清理、原地修改/新建文件/备份修改三种输出模式、预览模式、独立上下文子代理执行、凭证安全告警。
+argument-hint: "[file-or-description] [options]"
 metadata:
   author: HuaTalk
   version: "0.8.0"
@@ -49,7 +49,7 @@ Flags may appear before or after the positional argument. Valued flags accept bo
 | Flag | Values | Default | Description |
 |------|--------|---------|-------------|
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Output mode (see Output Modes below) |
-| `--use-subagent` | (boolean flag) | off | Delegate stripping to a sub-agent for cleaner isolation |
+| `--use-subagent` | (boolean flag) | off | Delegate stripping to a fresh-context sub-agent; fall back to the main agent if unavailable |
 | `--dry-run` | (boolean flag) | off | Preview what would change without modifying any files |
 | `--artifacts` | `"<target>"` (repeatable) | (none) | Targeted mode: hide only content matching the given target(s); the five built-in leakage categories are NOT scanned (see Targeted Strip below) |
 
@@ -318,9 +318,9 @@ The silence rules and exceptions apply unchanged, with these adjustments:
 
 ## Sub-Agent Execution (`--use-subagent`)
 
-When the `--use-subagent` flag is set, do NOT perform the stripping yourself. Instead:
+When `--use-subagent` is set, delegate stripping to a fresh-context sub-agent. If the runtime does not support sub-agents, fall back to the main agent with the same scope guard and report the fallback before processing.
 
-1. **Spawn a sub-agent** using the runtime's sub-agent mechanism. If no sub-agent mechanism exists, continue in the main agent and apply the same scope guard.
+1. **Spawn a fresh-context sub-agent** using the runtime's sub-agent mechanism. If unavailable, follow the documented fallback above.
 2. **Pass the file content** (the full text) and these execution instructions (Steps 0–4, the five leakage categories, and strip strategy by file type) to the sub-agent.
 3. **The sub-agent returns the result** as its final response — format depends on dry-run (see below).
 4. **Apply the output mode** (`--mode`) to write the result — the main agent handles file I/O based on the sub-agent's output.
@@ -342,7 +342,7 @@ When the `--use-subagent` flag is set, do NOT perform the stripping yourself. In
 
 **HITL + `--use-subagent`**: in no-argument HITL mode, after the user selects files to clean in Step H3, spawn ONE sub-agent per selected file (passing that file's content). Apply the chosen output mode to each sub-agent's result. Sub-agent is skipped for the user's "delete" choices (deletion needs no stripping).
 
-**Default: sub-agent is OFF.** Most invocations don't need the overhead of spawning a sub-agent. Use `--use-subagent` for sensitive or important files where extra discipline is warranted.
+**Default: sub-agent is OFF.** Most invocations don't need the overhead of spawning a sub-agent. Use `--use-subagent` when an independent context is useful; treat fallback execution as non-isolated.
 
 ## Strip Strategy by File Type
 
@@ -381,6 +381,7 @@ These are the ONLY cases where `/hiding` produces output beyond the HITL decisio
 8. **External modification during operation** (mtime check) — warn and abort, don't overwrite concurrent changes.
 9. **Output-target collision** (`newfile`/`backup`) — the target file already exists; never overwrite it, write to a numbered alternative and report the name used.
 10. **Target in executable code** (targeted mode, Step 2') — a `--artifacts` target matched executable code, an identifier, or a config value; report the location for human review instead of silently modifying code.
+11. **Sub-agent unavailable** (`--use-subagent`) — report that execution will fall back to the main agent and will not have fresh-context isolation.
 
 ### Behavior Guardrails
 
