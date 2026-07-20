@@ -48,7 +48,7 @@ Target collision (`newfile`/`backup`): never overwrite an existing target — us
 | Flag | Effect |
 |------|--------|
 | `--dry-run` | Preview changes without modifying files (credential warning still fires) |
-| `--use-subagent` | Delegate stripping to a sub-agent for cleaner isolation (scope: leakage categories + Steps 0–4 + strip strategy only; no recursion) |
+| `--use-subagent` | Delegate stripping to a fresh-context sub-agent; if unavailable, report the fallback and continue in the main agent with the same scope guard (no recursion) |
 | `--mode <inplace\|newfile\|backup>` | Set output mode (invalid value → error, no silent fallback) |
 | `--artifacts "<target>"` (repeatable) | Targeted mode: hide ONLY content matching the target(s). Skips the five-category scan entirely, including secrets and credentials (no credential scan/warning). Comments/prose matches deleted; matches in executable code flagged for human review (mandatory report). Zero matches → silent. |
 
@@ -60,7 +60,7 @@ Scans TWO sources: (1) files created/modified in the current session, (2) git un
 
 ## Rules
 
-- **No leakage found (non-HITL)**: do nothing, say nothing.
+- **No leakage found (non-HITL)**: do nothing, say nothing, unless `--use-subagent` had to report a non-isolated fallback.
 - **Multi-line leakage blocks**: remove the whole block.
 - **After stripping, re-read once** to verify structural integrity.
 - **Preserve line endings**: detect and preserve LF vs CRLF.
