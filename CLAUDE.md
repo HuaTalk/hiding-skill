@@ -73,7 +73,7 @@ Rationale (full argument in `docs/zh/design-tradeoffs.md`):
 
 3. **Chinese documentation is user-facing only**: `README-zh.md` and `docs/zh/` exist for Chinese-speaking users. English docs live in `docs/en/`. All maintainer-facing content (this file, scripts, CI, SKILL.md body) is English.
 
-4. **Version `0.6.0`**, installation path `hiding@hiding`. Features: output modes (inplace/newfile/backup), `--dry-run`, `--subagent`, credential-rotation warnings, git-uncommitted discovery.
+4. **Version `0.8.0`**, installation path `hiding@hiding`. Features: targeted hiding (`--artifacts`), output modes (inplace/newfile/backup), `--dry-run`, `--use-subagent`, credential-rotation warnings, git-uncommitted discovery.
 
 ## Maintenance
 

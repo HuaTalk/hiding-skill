@@ -185,7 +185,7 @@ npx skills-npm setup
 ## 用法
 
 ```bash
-/hiding [<文件或描述>] [--mode <inplace|newfile|backup>] [--dry-run] [--subagent] [--artifacts <目标>]...
+/hiding [<文件或描述>] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent] [--artifacts <目标>]...
 
 /hiding                              # 会话感知 HITL —— 扫描会话文件 + git 未提交文件
 /hiding <文件路径>                     # 原地清理指定文件
@@ -199,7 +199,7 @@ npx skills-npm setup
 | 参数 | 值 | 默认 | 说明 |
 |------|--------|---------|-------------|
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | 输出模式 |
-| `--subagent` | （布尔标记） | 关闭 | 使用子代理执行，隔离性更好 |
+| `--use-subagent` | （布尔标记） | 关闭 | 使用子代理执行，隔离性更好 |
 | `--dry-run` | （布尔标记） | 关闭 | 预览变更，不修改文件 |
 | `--artifacts` | `"<目标>"`（可重复） | （无） | 定向模式：只隐藏指定内容——跳过五类内建泄露内容扫描 |
 
@@ -207,7 +207,7 @@ npx skills-npm setup
 /hiding --mode newfile file.java          # 输出到 file-cleaned.java，保留原文件
 /hiding --mode backup config.yml          # 原文件重命名为 .bak，清理版使用原名
 /hiding --dry-run file.java               # 预览将要清理的内容
-/hiding --subagent file.java              # 通过子代理剥离泄露痕迹
+/hiding --use-subagent file.java          # 通过子代理剥离泄露痕迹
 /hiding --dry-run                         # HITL 预览，不实际执行
 /hiding --artifacts "ProjectX" file.java    # 只移除 ProjectX 相关内容
 /hiding --artifacts "ProjectX" --artifacts "内部域名" --dry-run file.java   # 预览两个目标的匹配

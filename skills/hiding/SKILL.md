@@ -1,7 +1,7 @@
 ---
 name: hiding
 description: Strip AI leakage from files before committing, pushing, or sharing. 在提交/推送/分享前清理文件中的AI残留痕迹。Supports targeted artifact removal, inplace/newfile/backup output modes, dry-run preview, sub-agent execution, and credential-security warnings. 支持定向清理、原地修改/新建文件/备份修改三种输出模式、预览模式、子代理执行、凭证安全告警。
-argument-hint: "[<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--subagent] [--artifacts <target>]..."
+argument-hint: "[<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent] [--artifacts <target>]..."
 metadata:
   author: HuaTalk
   version: "0.8.0"
@@ -27,7 +27,7 @@ Strip AI leakage from files so they read as human-written: no AI reasoning trace
 ## Usage
 
 ```
-/hiding [<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--subagent] [--artifacts <target>]...
+/hiding [<file-or-description>] [--mode <inplace|newfile|backup>] [--dry-run] [--use-subagent] [--artifacts <target>]...
 
 /hiding                              Analyze session + git uncommitted for leakage (HITL)
 /hiding <file>                       Clean a specific file
@@ -49,7 +49,7 @@ Flags may appear before or after the positional argument. Valued flags accept bo
 | Flag | Values | Default | Description |
 |------|--------|---------|-------------|
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Output mode (see Output Modes below) |
-| `--subagent` | (boolean flag) | off | Delegate stripping to a sub-agent for cleaner isolation |
+| `--use-subagent` | (boolean flag) | off | Delegate stripping to a sub-agent for cleaner isolation |
 | `--dry-run` | (boolean flag) | off | Preview what would change without modifying any files |
 | `--artifacts` | `"<target>"` (repeatable) | (none) | Targeted mode: hide only content matching the given target(s); the five built-in leakage categories are NOT scanned (see Targeted Strip below) |
 
@@ -57,7 +57,7 @@ Flags may appear before or after the positional argument. Valued flags accept bo
 ```
 /hiding --mode newfile file.java          Clean file.java, output to file-cleaned.java
 /hiding --dry-run file.java               Show what would be stripped, don't modify
-/hiding --mode newfile --subagent --dry-run file.java   Preview sub-agent output to new file
+/hiding --mode newfile --use-subagent --dry-run file.java   Preview sub-agent output to new file
 /hiding --dry-run                         HITL preview: show findings without executing
 /hiding --artifacts "ProjectX" file.java    Remove only ProjectX references from file.java
 /hiding --artifacts "ProjectX" --artifacts "内部域名" --dry-run file.java   Preview matches for two targets
@@ -72,7 +72,7 @@ Before mode selection, parse flags from the argument string. Remove parsed flags
 **Validation (report error, stop — do NOT silently fall back to default):**
 - `--mode` without a value, or value not in `{inplace, newfile, backup}` → report: "Invalid --mode value. Use inplace, newfile, or backup." If the token after `--mode` itself starts with `--` (e.g. `--mode --dry-run`), treat `--mode` as missing its value — do NOT consume the next flag as the mode value.
 - `--artifacts` without a value, with an empty-string value, or where the token after `--artifacts` itself starts with `--` (e.g. `--artifacts --dry-run`) → report: "Invalid --artifacts value. Provide a non-empty target description." Do NOT consume the next flag as the target value. `--artifacts` is repeatable — each occurrence must independently pass this validation.
-- Any token starting with `--` that is not a recognized flag → report: "Unknown flag: <flag>. Known flags: --mode, --subagent, --dry-run, --artifacts."
+- Any token starting with `--` that is not a recognized flag → report: "Unknown flag: <flag>. Known flags: --mode, --use-subagent, --dry-run, --artifacts."
 
 These are explicit errors, not silent fallbacks. A misspelled flag (e.g. `--dryrun`, `--mod newfile`) must surface, not be swallowed into Description mode.
 
@@ -307,7 +307,7 @@ When one or more `--artifacts` targets are present, `/hiding` hides ONLY what th
 - **HITL mode** (no non-flag arguments): Step H1 inventory unchanged; Step H2 reports ONLY target matches (no five-category scan); Step H3 per-file confirmation, then targeted strip on confirmed files. Zero findings → "未发现匹配指定目标的内容。No content matching the specified targets was found."
 - **`--mode`**: orthogonal — inplace/newfile/backup apply to the targeted result as usual.
 - **`--dry-run`**: list each target with its matches (`<target>` → `<file>:<line>`: matched text). No writes.
-- **`--subagent`**: pass the targets, Steps 0/2'/4, the strip strategy by file type, and the no-recursion rule. Do NOT pass the leakage categories reference — the sub-agent must not scan for them.
+- **`--use-subagent`**: pass the targets, Steps 0/2'/4, the strip strategy by file type, and the no-recursion rule. Do NOT pass the leakage categories reference — the sub-agent must not scan for them.
 
 ### Silence (Targeted)
 
@@ -316,9 +316,9 @@ The silence rules and exceptions apply unchanged, with these adjustments:
 - Exception 10 (target in executable code) is the only targeted-specific mandatory output.
 - HITL zero-findings wording is target-specific (see Mode Combinations above).
 
-## Sub-Agent Execution (`--subagent`)
+## Sub-Agent Execution (`--use-subagent`)
 
-When the `--subagent` flag is set, do NOT perform the stripping yourself. Instead:
+When the `--use-subagent` flag is set, do NOT perform the stripping yourself. Instead:
 
 1. **Spawn a sub-agent** using the runtime's sub-agent mechanism. If no sub-agent mechanism exists, continue in the main agent and apply the same scope guard.
 2. **Pass the file content** (the full text) and these execution instructions (Steps 0–4, the five leakage categories, and strip strategy by file type) to the sub-agent.
@@ -334,15 +334,15 @@ When the `--subagent` flag is set, do NOT perform the stripping yourself. Instea
 
 **Do NOT pass to the sub-agent:** the Usage section, Mode Selection, Output Modes, the Sub-Agent Execution section itself, the HITL flow, or Execution Rules. The sub-agent needs only the stripping logic. (The no-recursion rule above is the only meta-instruction it receives — keep it in the pass-list so it actually reaches the sub-agent.)
 
-**Targeted mode (`--artifacts` + `--subagent`):** replace the pass-list above with: the `--artifacts` targets, Steps 0/2'/4 (the targeted execution order), the strip strategy by file type, the dry-run instruction appropriate to the mode, and the no-recursion rule. Do NOT pass the leakage categories reference — the sub-agent must strip only the user's targets.
+**Targeted mode (`--artifacts` + `--use-subagent`):** replace the pass-list above with: the `--artifacts` targets, Steps 0/2'/4 (the targeted execution order), the strip strategy by file type, the dry-run instruction appropriate to the mode, and the no-recursion rule. Do NOT pass the leakage categories reference — the sub-agent must strip only the user's targets.
 
 **Dry-run determines the sub-agent's task and return format:**
 - **Without `--dry-run`**: instruct the sub-agent: "Return ONLY the cleaned file content. Do not add explanations, markers, or commentary." The main agent writes this per the output mode.
 - **With `--dry-run`**: instruct the sub-agent: "Identify all leakage instances in the file. For each, report the category, line number, and a short description. For secrets, report only the secret type and a redacted value; never return the matched secret. Do NOT return cleaned content." The main agent presents this list without writing any file. (The credential warning from Step 2 still fires if any secret is found.)
 
-**HITL + `--subagent`**: in no-argument HITL mode, after the user selects files to clean in Step H3, spawn ONE sub-agent per selected file (passing that file's content). Apply the chosen output mode to each sub-agent's result. Sub-agent is skipped for the user's "delete" choices (deletion needs no stripping).
+**HITL + `--use-subagent`**: in no-argument HITL mode, after the user selects files to clean in Step H3, spawn ONE sub-agent per selected file (passing that file's content). Apply the chosen output mode to each sub-agent's result. Sub-agent is skipped for the user's "delete" choices (deletion needs no stripping).
 
-**Default: sub-agent is OFF.** Most invocations don't need the overhead of spawning a sub-agent. Use `--subagent` for sensitive or important files where extra discipline is warranted.
+**Default: sub-agent is OFF.** Most invocations don't need the overhead of spawning a sub-agent. Use `--use-subagent` for sensitive or important files where extra discipline is warranted.
 
 ## Strip Strategy by File Type
 
