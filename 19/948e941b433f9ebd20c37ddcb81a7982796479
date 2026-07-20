@@ -1,0 +1,14 @@
+AGENTS.md
+  s_458b97628c636f::t_7c35b485d5ca33 11
+package.json
+  s_458b97628c636f::t_1ce4c809790dbc 3
+skills/hiding/SKILL.md
+  s_458b97628c636f::t_df384a67add0ab 187
+  s_e72bd928b907cf::t_d4d7855d059ef6 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.34-trip",
+  "base_commit_sha": "19948e941b433f9ebd20c37ddcb81a7982796479",
+  "prompts": {}
+}
