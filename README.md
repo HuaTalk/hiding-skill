@@ -132,9 +132,9 @@ Think of it like Fermat's margin note. Fermat didn't show his work — he wrote 
 |-----------------|----------------|
 | Secrets and credentials | API keys, tokens, passwords, connection strings, internal URLs |
 | Unshared rule references | References to CLAUDE.md, skill instructions, team conventions the reader doesn't share |
-| AI-facing rationale/guardrails | "I can't use X because the team requires Y", rationale trails about AI-facing constraints |
+| AI-facing rationale/guardrails | Prompt compliance, refusal justification, safety fences, and rationale about satisfying agent instructions |
 | AI self-reference | "As an AI…", "I think…", "Here's the result:", "I hope this helps!" |
-| Thought-process traces | Step-by-step reasoning, dated progress logs, research findings, design rationale trails |
+| Thought-process traces | Transient derivations, intermediate attempts, session work logs, and temporary step-by-step reasoning |
 
 ## Execution Guarantees
 
@@ -192,9 +192,11 @@ npx skills-npm setup
 
 Leading positional arguments describe additional content to hide. Each argument is a one-off semantic target, not a regex; quote phrases containing spaces and place all targets before the first flag. Targets augment the five-category scan and credential handling rather than replacing them.
 
-`--files` appears at most once. It accepts one or more literal file paths, ending at the next known flag, or the reserved single value `worktree`. Commas are not separators. Do not mix `worktree` with paths; use `./worktree` for a literal file with that name. Without the flag, `/hiding` uses every file created or modified in the current session and presents HITL findings before writing. `--mode` accepts both `--mode value` and `--mode=value`.
+`--files` appears at most once. It accepts one or more literal file paths, ending at the next known flag, or the reserved single value `worktree`. Commas are not separators. Do not mix `worktree` with paths; use `./worktree` for a literal file with that name. Without the flag, `/hiding` uses eligible files created or modified in the current session and presents HITL findings before writing. `--mode` accepts both `--mode value` and `--mode=value`.
 
-`--files worktree` uses the Git repository and working directory where `/hiding` is invoked. It compares the merge base of `HEAD` and the locally resolved primary branch with the current worktree, selecting branch commits, staged changes, unstaged changes, and untracked non-ignored files. Deleted files, ignored files, directories, and submodules are excluded. It never fetches. If no primary branch or merge base can be resolved, it stops with an error; if no files changed, it reports that explicitly.
+`--files worktree` uses the Git repository and working directory where `/hiding` is invoked. It compares the merge base of `HEAD` and the locally resolved primary branch with the current worktree, selecting branch commits, staged changes, unstaged changes, and untracked non-ignored files. Deleted files, ignored files, directories, submodules, and planning control files are excluded. It never fetches. If no primary branch or merge base can be resolved, it stops with an error; if no eligible files changed, it reports that explicitly.
+
+Automatic selection is for reader-facing deliverables. It skips `.planning/` and recognizable planning-with-files state (`task_plan.md`, `findings.md`, and `progress.md` used together), because those files are functional planning metadata rather than output leakage. Durable requirements, ADRs, design trade-offs, final research findings, and project plans remain valid reference material. A literal `--files <path>` is an explicit override when the user intentionally wants to process a control file.
 
 ### Arguments And Flags
 
@@ -202,7 +204,7 @@ Leading positional arguments describe additional content to hide. Each argument 
 |-------|--------|---------|-------------|
 | `<what-to-hide>...` | leading quoted semantic targets | none | Additional content to hide |
 | `--mode` | `inplace` / `newfile` / `backup` | `inplace` | Where to write cleaned output |
-| `--use-subagent` | (flag) | off | Get edit suggestions from a fresh-context sub-agent; the main agent applies and validates them |
+| `--use-subagent` | (flag) | off | Get candidate leakage locations from a fresh-context sub-agent; the main agent applies the normal hiding workflow |
 | `--dry-run` | (flag) | off | Preview changes without modifying files |
 | `--files` | `<file>...` or `worktree` (at most once) | files created or modified in the current session | Files to scan and clean |
 

@@ -10,6 +10,7 @@ Before committing, pushing, or sharing files, scan them for AI-generated artifac
 - Stay silent by default; the cleanup operation must leave no trace.
 - Credential safety overrides silence: warn and recommend rotation whenever credentials are found.
 - Require explicit user confirmation before deleting an entire file.
+- Automatically scan deliverables, not agent control-plane or planning state.
 - Keep behavior consistent across supported agent environments.
 
 ## Five Leakage Categories
@@ -28,9 +29,9 @@ Note: TODO/FIXME/HACK markers are NOT automatically AI leakage — human develop
 ## Execution Order
 
 1. **Validate**: file exists, not binary, not directory, not too large (> 10K lines / 500KB)
-2. **Purge check**: if removing thought-process traces, AI-facing rationale/guardrails, AI self-reference, and user-target matches leaves no section viable as standalone reference — ask before deleting
-3. **Strip secrets and credentials** first, before anything else. Mandatory warning if credentials found.
-4. **Strip style leakage** (unshared rule references, AI-facing rationale/guardrails, AI self-reference, and thought-process traces): cosmetic/quality concerns
+2. **Credential scan**: detect credentials before any purge decision; the rotation warning fires even if the file is deleted or left unchanged
+3. **Purge check**: if removing transient thought-process traces, AI-facing rationale/guardrails, AI self-reference, and user-target matches leaves no section viable as standalone reference — ask before deleting
+4. **Strip**: credentials first, then style leakage and user-target matches
 5. **Verify**: use actual parsers (Python json/yaml, xmllint, jq) where available; visual check as fallback
 
 ## Output Modes
@@ -54,7 +55,7 @@ Leading positional arguments are one-off semantic targets that augment the five-
 | Flag | Effect |
 |------|--------|
 | `--dry-run` | Preview changes without modifying files (credential warning still fires) |
-| `--use-subagent` | Ask a fresh-context sub-agent to read only the target file and applicable rules, then return edit suggestions; the main agent applies and validates them. If unavailable, report the fallback. |
+| `--use-subagent` | Ask a fresh-context sub-agent to identify candidate leakage only; the main agent still performs all confirmation, security, editing, validation, output, and write logic. If unavailable, report the fallback. |
 | `--mode <inplace\|newfile\|backup>` | Set output mode (invalid value → error, no silent fallback) |
 | `--files <file>...` or `--files worktree` (at most once) | Select literal paths, or use the reserved single value `worktree` for files changed from the primary-branch merge base through the invocation-time Git worktree. Never mix `worktree` with paths; use `./worktree` for a literal same-named file. Without this flag, use files created or modified in the current session. |
 
@@ -62,9 +63,11 @@ Targets are natural-language descriptions, not regexes. In comments or prose, re
 
 For `--files worktree`, locate the repository from the working directory where the skill is invoked and use local refs only. Resolve the primary branch from the current branch's configured `<remote>/HEAD`, `origin/HEAD`, `origin/main`, local `main`, `origin/master`, then local `master`; stop if unresolved or if `HEAD` has no merge base. Select tracked files changed from that merge base to the current worktree plus untracked non-ignored files. Exclude deleted files, ignored files, directories, and submodules; use NUL-safe Git output, de-duplicate, and validate all files before writing. An empty result is reported explicitly. `--dry-run` also reports the resolved base and selected files.
 
+Automatic session and `worktree` selection scans reader-facing deliverables only. Exclude `.planning/**` and recognizable planning-with-files state (`task_plan.md`, `findings.md`, `progress.md` used together), because they are functional control metadata. Literal `--files` paths explicitly override this exclusion. Preserve durable requirements, ADRs, trade-offs, research conclusions, and project plans; do not treat rationale as leakage merely because it explains why.
+
 ## HITL Mode (no `--files`)
 
-Scans all files created or modified through file-editing tools in the current session for the five categories and any user targets. Git status must not add files to this set. If the runtime cannot identify files created or modified in the current session, report the limitation and stop. Findings are organized into Tier 0 (Security Critical — credentials), Tier 1 (purge candidates), Tier 2 (inline leakage and user-target matches), and Tier 3 (session-level concerns). For zero findings, briefly report that no AI leakage was found; mention user-specified content only when targets were supplied.
+Scans eligible files created or modified through file-editing tools in the current session for the five categories and any user targets. With `--use-subagent`, the sub-agent supplies candidate locations only; the main agent performs credential scanning, purge classification, tiering, confirmation, and execution. Git status must not add files to this set. If the runtime cannot identify files created or modified in the current session, report the limitation and stop. Findings are organized into Tier 0 (Security Critical — credentials), Tier 1 (purge candidates), Tier 2 (inline leakage and user-target matches), and Tier 3 (session-level concerns). For zero findings, briefly report that no AI leakage was found; mention user-specified content only when targets were supplied.
 
 ## Rules
 
@@ -77,5 +80,5 @@ Scans all files created or modified through file-editing tools in the current se
 
 - **Code** (.java, .py, .ts, .go, .rs, .js, .tsx, .jsx, etc.): Remove comment lines matching leakage categories or user targets. Keep executable code as-is. Remove empty comment blocks.
 - **Markdown** (.md): Remove paragraphs and sentences matching leakage categories or user targets. Keep technical content.
-- **Config** (.yml, .yaml, .json, .xml, .toml, .env, .properties, .ini, .cfg): Remove leakage comments and sensitive values. Keep config structure. For YAML block scalars, replace entire value if partial strip would alter indentation.
+- **Config** (.yml, .yaml, .json, .xml, .toml, .env, .properties, .ini, .cfg): Remove leakage comments. Change credential values only when a format-safe placeholder preserves structure; report other behavior-affecting values for human review.
 - **Other**: Remove any comment or prose matching the leakage categories or user targets.

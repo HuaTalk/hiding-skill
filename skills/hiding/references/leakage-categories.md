@@ -8,7 +8,7 @@ Credentials and access-bearing endpoints are security risks. Internal names and 
 
 Examples: API keys, tokens, passwords, connection strings, and access-bearing internal URLs.
 
-Project codenames, mock data labels, server names, IPs, and non-access-bearing URLs are sensitive context. Classify them separately unless they grant access.
+Project codenames, mock data labels, server names, IPs, and non-access-bearing URLs are not a sixth built-in category. Remove them only when they match another category or an explicit user target.
 
 Credentials are handled first. Follow the warning, executable-code, and configuration-value rules in `SKILL.md`.
 
@@ -20,9 +20,9 @@ Examples: references to skill instructions, `CLAUDE.md`, architecture documents,
 
 ## AI-facing Rationale/Guardrails
 
-Reasoning about AI-facing constraints instead of documenting the chosen result. State the decision, not the derivation or justification. Business constraints remain valid documentation.
+Reasoning about AI-facing constraints instead of documenting the chosen result. Business and technical rationale written for future readers remains valid documentation.
 
-Examples: "I can't use X because the team requires Y", "we chose X because...", "由于规范要求...", and design or research rationale trails.
+Strip prompt compliance, refusal justification, safety fences, and narration about satisfying agent instructions. Preserve requirements, architecture decisions, alternatives, evidence, trade-offs, and conclusions that help a reader understand or maintain the result. A sentence such as "we chose X because Y" is not leakage by itself; judge its audience and lifecycle.
 
 ## AI Self-Reference
 
@@ -34,10 +34,10 @@ TODO, FIXME, and HACK markers are not leakage by themselves. Strip only accompan
 
 ## Thought-process Traces
 
-Documentation of how a result was reached rather than the resulting reference material. If it reads like a lab notebook instead of standalone reference documentation, strip it.
+Transient documentation of how the current session reached a result rather than durable reference material.
 
-Examples: "we chose X because...", dated progress logs, research findings, decision records, step-by-step reasoning, and sections headed "progress" or "findings".
+Strip conversational derivations, intermediate attempts, temporary work logs, and session-bound step-by-step reasoning from deliverables. Preserve ADRs, final research findings, requirements, implementation plans intended for the project, and other independently useful records.
 
 ## Overlap
 
-Categories may overlap. When uncertain, apply the stricter judgment and strip. AI-facing rationale/guardrails and thought-process traces commonly overlap.
+Categories may overlap. AI-facing rationale/guardrails and thought-process traces commonly overlap. When uncertain whether content is transient process or durable rationale, preserve it; in HITL or `--dry-run`, flag it for human review instead of stripping.
