@@ -67,7 +67,7 @@ Resolve scope before Step 0 or any content scan. For each candidate, apply this 
 2. **Tool ownership**: automatically exclude known agent/tool control state, including `.planning/**`, recognizable planning-with-files state (`task_plan.md`, `findings.md`, and `progress.md` used together), and equivalent session plans, progress logs, or memory used to operate the agent.
 3. **Task goal**: include files directly requested as task deliverables, such as an article, report, code change, ADR, requirements document, final research conclusion, or project-facing plan.
 4. **Target consumer**: include files intended for human or project use; exclude files intended only for an agent or tool.
-5. **Uncertain**: preserve the file and ask whether it is an output artifact before scanning it. Do not infer from persistence or filename alone.
+5. **Uncertain**: use task/session context to make a conservative decision. When confidence remains low, preserve and exclude the file without scanning; do not ask solely because classification is uncertain. Ask only when excluding it would prevent completion of an explicit user request. Do not infer from persistence or filename alone.
 
 In short, an automatically selected file is an output artifact when it is a task deliverable for a human/project consumer and is not tool control state. A formal `findings.md` report can qualify; a persistent agent memory does not. Apply this eligibility check only to current-session and `--files worktree` candidates.
 
@@ -80,11 +80,11 @@ Use local Git state only; do not fetch. Resolve paths from the working directory
 3. Run `git merge-base HEAD <base-ref>`; report and stop if no merge base exists.
 4. From the repository root, collect tracked paths with `git diff --name-only --diff-filter=ACMRTUXB -z <merge-base> --` and untracked, non-ignored paths with `git ls-files --others --exclude-standard -z`.
 5. De-duplicate the NUL-delimited paths. Exclude deleted files, ignored files, directories, and index entries with mode `160000` (submodules). Classify the remaining files using `Output Artifact Eligibility`.
-6. Before Step 0 or any scan, ask the user whether uncertain candidates are output artifacts. Scan only confirmed and otherwise eligible files. Under `--dry-run`, list uncertain candidates as unresolved and leave them unscanned instead of requiring a decision.
+6. Before Step 0 or any scan, resolve uncertain candidates autonomously using task/session context. Exclude low-confidence candidates without scanning. Under `--dry-run`, list these conservative exclusions with a brief reason.
 
 This comparison is `merge-base(HEAD, primary branch) -> worktree at invocation time`, so it includes branch commits, staged changes, unstaged changes, and untracked files, but not primary-branch-only commits made after divergence.
 
-If no eligible or uncertain candidates remain after classification, report `No eligible files changed in the current worktree relative to <base>.` and stop. After scope confirmation, use the same result if the user selects none. Under `--dry-run`, show the resolved base ref, merge base, eligible paths, and unresolved candidates before the normal preview. All output modes, purge checks, credential handling, and `--use-subagent` behavior then apply per selected file.
+If no eligible candidates remain after classification, report `No eligible files changed in the current worktree relative to <base>.` and stop. Under `--dry-run`, show the resolved base ref, merge base, eligible paths, and conservative scope exclusions before the normal preview. All output modes, purge checks, credential handling, and `--use-subagent` behavior then apply per selected file.
 
 ### User-Specified Targets
 
@@ -105,7 +105,7 @@ User targets augment, never replace, the five leakage categories and credential 
 
 Never overwrite a `newfile` or backup target. Use the next numbered name (`-cleaned-2`, `.bak-2`, then increment) and report the collision.
 
-`--dry-run` never writes. For explicitly selected files, show built-in categories and user-target matches with line context. For `worktree`, first show its resolved base, eligible files, excluded control state, and unresolved scope candidates; do not scan unresolved candidates. For current-session selection, show the normal H1-H3 findings, including user-target matches. Redact secret values. Preview output is an explicit silence exception.
+`--dry-run` never writes. For explicitly selected files, show built-in categories and user-target matches with line context. For `worktree`, first show its resolved base, eligible files, excluded control state, and low-confidence files conservatively excluded from scanning. For current-session selection, show the normal H1-H3 findings, including user-target matches. Redact secret values. Preview output is an explicit silence exception.
 
 ## Session HITL (No `--files`)
 
@@ -115,13 +115,13 @@ Inventory and de-duplicate every file created or modified through file-editing t
 
 Record session topics, sensitive context, and reasoning traces as Tier 3 clues. Only access-granting values count as credentials.
 
-### Step H1.5: Confirm Uncertain Scope
+### Step H1.5: Resolve Uncertain Scope
 
-Before H2 or any content scan, present uncertain files with a brief reason and ask which are output artifacts. Preserve and do not scan unselected files. Under `--dry-run`, list them as unresolved scope candidates without scanning them.
+Before H2 or any content scan, classify uncertain files autonomously from task goal, ownership, and intended consumer. Preserve and exclude low-confidence files without asking. Under `--dry-run`, list these exclusions with a brief reason. Ask for scope clarification only if conservative exclusion would prevent completion of an explicit user request.
 
 ### Step H2: Leakage Candidate Detection
 
-Scan only eligible and user-confirmed inventory files using [references/leakage-categories.md](references/leakage-categories.md) and any user-specified targets. With `--use-subagent`, use its candidate list as detection evidence; the main agent still performs credential scanning, purge classification, tiering, and every later decision.
+Scan only eligible inventory files using [references/leakage-categories.md](references/leakage-categories.md) and any user-specified targets. With `--use-subagent`, use its candidate list as detection evidence; the main agent still performs credential scanning, purge classification, tiering, and every later decision.
 
 | Tier | Finding |
 |------|---------|
@@ -220,7 +220,7 @@ Leave no trace of cleanup: no announcements, removed-item lists, markers, metada
 
 These are the ONLY cases where `/hiding` produces output beyond the HITL decision flow:
 
-1. **HITL findings and scope confirmation** (Steps H1-H3 and worktree scope resolution) — user-facing decisions, not cleanup announcements.
+1. **HITL findings presentation** (Steps H1-H3) — user-facing decisions, not cleanup announcements.
 2. **Step 2 purge check** — asking the user whether to delete a file.
 3. **Secret and credential warning** (Step 1) — mandatory security warning. "⚠️ 发现并移除了安全敏感内容... rotate credentials immediately."
 4. **`--dry-run` preview** — user explicitly requested a preview.
@@ -233,6 +233,7 @@ These are the ONLY cases where `/hiding` produces output beyond the HITL decisio
 11. **Sub-agent unavailable** (`--use-subagent`) — report that execution will fall back to the main agent and will not have fresh-context isolation.
 12. **User target in executable content** — report the location for human review instead of changing code or runtime behavior.
 13. **Git worktree selection result** — report repository/base resolution errors and an empty selection; under `--dry-run`, report the resolved base and selected files.
+14. **Blocking scope ambiguity** — ask only when conservative exclusion would make an explicit user request impossible to complete.
 
 ### Behavior Guardrails
 
