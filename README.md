@@ -239,7 +239,7 @@ This is the only mandatory exception to silent execution — because a silent cr
 
 ## Version
 
-Current: **0.8.0** — User-specified semantic targets, literal and Git-worktree file selection (`--files`), discovery of files created or modified in the current session, output modes (inplace/newfile/backup), dry-run preview, fresh-context sub-agent review, credential security warnings, and AI-facing rationale/guardrail coverage.
+Current: **0.7.0** — User-specified semantic targets, literal and Git-worktree file selection (`--files`), discovery of files created or modified in the current session, output modes (inplace/newfile/backup), dry-run preview, fresh-context sub-agent review, credential security warnings, and AI-facing rationale/guardrail coverage.
 
 ## Responsible Use
 

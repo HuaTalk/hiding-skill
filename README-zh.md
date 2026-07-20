@@ -242,7 +242,7 @@ npx skills-npm setup
 
 ## 版本
 
-当前：**0.8.0** —— 用户指定的语义目标、字面路径与 Git worktree 文件选择（`--files`）、发现当前 session 中创建或修改的文件、输出模式（inplace/newfile/backup）、dry-run 预览、独立上下文子代理审阅、凭证安全告警，以及面向 AI 的理由/护栏泄露覆盖。
+当前：**0.7.0** —— 用户指定的语义目标、字面路径与 Git worktree 文件选择（`--files`）、发现当前 session 中创建或修改的文件、输出模式（inplace/newfile/backup）、dry-run 预览、独立上下文子代理审阅、凭证安全告警，以及面向 AI 的理由/护栏泄露覆盖。
 
 ## 负责任使用
 

@@ -4,7 +4,7 @@ description: Strip AI leakage and user-specified sensitive content from files be
 argument-hint: "[<what-to-hide>...] [--files <file>...|worktree] [options]"
 metadata:
   author: HuaTalk
-  version: "0.8.0"
+  version: "0.7.0"
   category: output-discipline
 ---
 

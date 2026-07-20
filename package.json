@@ -1,6 +1,6 @@
 {
   "name": "@huatalk/hiding-skill",
-  "version": "0.8.0",
+  "version": "0.7.0",
   "description": "Strip AI leakage and user-specified sensitive content from files before committing, pushing, or sharing.",
   "keywords": [
     "claude-code",
