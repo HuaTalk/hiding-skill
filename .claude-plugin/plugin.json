@@ -1,9 +1,7 @@
 {
   "name": "hiding-skill",
-  "description": "Hide skill: strip AI leakage from files — secrets, self-reference, thought process, rule citations. Cleaned files read human-written.",
-  "description_zh": "Hide 技能：清理文件中的 AI 泄露痕迹——机密凭证、自我指涉、思维推导过程、规则引用。清理后文件如人类编写。",
+  "description": "Clean files before commit, push, or sharing: catch credentials first and remove private rule references, AI narration, transient reasoning, and user-specified content without changing executable behavior.",
   "version": "0.7.0",
-  "languages": ["en", "zh"],
   "author": {
     "name": "HuaTalk",
     "url": "https://github.com/HuaTalk"
