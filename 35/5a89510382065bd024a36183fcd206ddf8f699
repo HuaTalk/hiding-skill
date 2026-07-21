@@ -1,0 +1,19 @@
+skills/hiding/SKILL.md
+  s_78b173a0a6edda::t_30c5574a516804 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.35-trip",
+  "base_commit_sha": "355a89510382065bd024a36183fcd206ddf8f699",
+  "prompts": {},
+  "sessions": {
+    "s_78b173a0a6edda": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f82c1-1347-7df1-9781-1a2dc68c65f1",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
