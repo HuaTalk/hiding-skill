@@ -79,7 +79,7 @@ Rationale (full argument in `docs/zh/design-tradeoffs.md`):
 
 3. **Chinese documentation is user-facing only**: `README-zh.md` and `docs/zh/` exist for Chinese-speaking users. English docs live in `docs/en/`. All maintainer-facing content (this file, scripts, CI, SKILL.md body) is English.
 
-4. **Version `0.7.0`**, installation path `hiding@hiding`. Features: leading user-specified semantic targets, literal-path, current-session, and Git-worktree file selection (`--files`), output modes (inplace/newfile/backup), `--dry-run`, `--use-subagent`, and credential-rotation warnings. `--files worktree` compares the primary-branch merge base with the worktree where the skill is invoked; omitting `--files` is equivalent to `--files session`.
+4. **Version `0.7.1`**, installation path `hiding@hiding`. Features: leading user-specified semantic targets, literal-path, current-session, and Git-worktree file selection (`--files`), output modes (inplace/newfile/backup), `--dry-run`, `--use-subagent`, and credential-rotation warnings. `--files worktree` compares the primary-branch merge base with the worktree where the skill is invoked; omitting `--files` is equivalent to `--files session`.
 
 ## Maintenance
 

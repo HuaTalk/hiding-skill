@@ -1,7 +1,7 @@
 {
   "name": "hiding-skill",
   "description": "Strategically remove AI leakage, exposed constraints, provenance clues, credentials, and user-specified sensitive content from files without changing executable behavior.",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "author": {
     "name": "HuaTalk",
     "url": "https://github.com/HuaTalk"

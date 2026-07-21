@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.7.0] - 2026-07-21
+## [0.7.1] - 2026-07-21
 
 This is the first version intended for public npm distribution.
+
+### Changed
+
+- Positioned Hiding as strategic content cleanup for provenance clues, exposed constraints, AI participation, and user-specified sensitive context, with release hygiene as a common use case rather than a prerequisite.
+- Simplified and aligned the Skill, Claude plugin, marketplace, npm, and bilingual README descriptions for clearer discovery and consistent product positioning.
+- Prepared public npm distribution with an explicit official registry, public scoped-package access, complete linked documentation, a token-based bootstrap path, and subsequent Trusted Publisher/OIDC releases.
+
+## [0.7.0] - 2026-07-21
+
+This was a repository milestone only. It was never tagged or published to npm;
+its changes are included in the first public 0.7.1 package.
 
 ### Added
 
