@@ -5,7 +5,11 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - Unreleased
+## [Unreleased]
+
+## [0.7.0] - 2026-07-21
+
+This is the first version intended for public npm distribution.
 
 ### Added
 
@@ -30,7 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--use-subagent` now receives absolute target and leakage-category reference paths resolved from the installed Skill, so invocation from another project cannot lose the category definitions.
 - Remaining documentation examples now use `--files` for file selection and quote multi-word semantic targets under the v0.7.0 argument grammar.
 
-## [0.6.0] - Unreleased
+## [0.6.0] - 2026-07-16
+
+This was a repository milestone only. It was never tagged or published to npm;
+its changes are included in the first public 0.7.0 package.
 
 ### Added
 
