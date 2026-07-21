@@ -1,0 +1,27 @@
+skills/hiding/SKILL.md
+  s_49ab4bc122c895::t_02a4b09cb4c6d0 7
+.claude-plugin/plugin.json
+  s_49ab4bc122c895::t_02a4b09cb4c6d0 4
+package.json
+  s_49ab4bc122c895::t_02a4b09cb4c6d0 3
+CLAUDE.md
+  s_49ab4bc122c895::t_02a4b09cb4c6d0 82
+CHANGELOG.md
+  s_49ab4bc122c895::t_02a4b09cb4c6d0 10,14-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.35-trip",
+  "base_commit_sha": "7f72a6c2dc489992f5fde729d2440b657da6e12b",
+  "prompts": {},
+  "sessions": {
+    "s_49ab4bc122c895": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f827d-ae70-75c1-828e-e56765336ee4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
