@@ -1,12 +1,13 @@
-# Hiding — strip AI leakage from files
+# Hiding — strategic content cleanup for files
 
-Before committing, pushing, or sharing files, scan them for AI-generated artifacts and user-specified sensitive content that should not leave the session.
+Hiding strips AI-generated artifacts, exposed constraints, source/provenance clues, and user-specified sensitive content whenever a file needs to reveal less about its origin, process, AI participation, constraints, or sensitive context. Release hygiene is a common context, not a prerequisite.
 
 ## Core Operating Contract
 
 - Do not inject persistent constraints into normal sessions; preserve reasoning and generation quality.
 - Process files only. Agent replies and conversation output are out of scope.
 - Remove leakage without changing code logic or rewriting prose like a humanizer.
+- The product purpose includes strategic concealment of AI participation, source/provenance, exposed constraints, and process when requested, including avoiding disclosure; do not add a transparency objective that the user did not request.
 - Stay silent by default; the cleanup operation must leave no trace.
 - Credential safety overrides silence: warn and recommend rotation whenever credentials are found.
 - Require explicit user confirmation before deleting an entire file.
