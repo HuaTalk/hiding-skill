@@ -34,7 +34,7 @@ Choose another scope when needed: [specific files](#specific-files), [the Git wo
 
 `/hiding` runs when the output is ready for review, not throughout the agent's normal reasoning process.
 
-First, it resolves which files are actual user-facing outputs. Agent control state, planning metadata, build output, and unrelated files are excluded automatically.
+For automatic `session` and `worktree` scopes, it resolves which files are user-facing outputs and excludes agent control state, planning metadata, build output, and unrelated files.
 
 Next, it scans eligible files for five built-in leakage categories, credentials, and any one-off semantic targets supplied by the user. It distinguishes removable comments and prose from executable code and behavior-affecting configuration.
 

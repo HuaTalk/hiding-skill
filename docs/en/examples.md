@@ -2,11 +2,11 @@
 
 These examples show intended outcomes. Detection is contextual: `/hiding` decides whether content remains useful to a reader who only has the file, rather than matching a fixed keyword list.
 
-## 1. Redundant Code Rationale
+## 1. Transient Session Note
 
 ```python
 # Before
-# Returns a dict instead of a tuple for readability.
+# Session note: the first attempt returned a tuple; changed after checking callers.
 def get_user() -> dict[str, str]:
     ...
 
@@ -15,7 +15,7 @@ def get_user() -> dict[str, str]:
     ...
 ```
 
-The signature already communicates the return shape, so the comment does not add useful reference information.
+The comment records how this session reached the result, not information needed to maintain it.
 
 ## 2. Private Rule Reference
 

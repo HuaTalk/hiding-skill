@@ -34,7 +34,7 @@ npx skills add HuaTalk/hiding-skill
 
 `/hiding` 在输出准备接受审查时运行，而不是持续干预 Agent 的正常推理过程。
 
-首先，它判断哪些文件是真正面向用户的产物。Agent 控制状态、规划元数据、构建输出和无关文件会被自动排除。
+使用 `session` 或 `worktree` 自动选取时，它会识别面向用户的产物，并排除 Agent 控制状态、规划元数据、构建输出和无关文件。
 
 接着，它扫描五类内置泄露内容、凭据和用户提供的一次性语义目标，并区分可以移除的注释或 prose 与可执行代码、会影响行为的配置。
 
@@ -212,7 +212,7 @@ npx skills-npm setup
 - **保持行为** - 不静默修改代码逻辑和运行时可见内容。
 - **证据优先** - 尽可能先预览、解析、重新读取；验证失败时保留原文件。
 
-进一步阅读 [Agent 可移植性](docs/en/agent-portability.md)、[平台原生集成](docs/en/platform-native.md)和[项目设计哲学](docs/en/hiding-philosophy.md)。
+进一步阅读[设计取舍](docs/zh/design-tradeoffs.md)和[与 humanizer 的边界](docs/zh/hiding-vs-humanizer.md)。
 
 ## 验证与局限
 
