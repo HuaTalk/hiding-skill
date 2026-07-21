@@ -1,0 +1,21 @@
+.github/workflows/publish.yml
+  s_49ab4bc122c895::t_7ffe5847e5150d 14-15,26,28,31
+CONTRIBUTING.md
+  s_49ab4bc122c895::t_7ffe5847e5150d 62-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.35-trip",
+  "base_commit_sha": "731a8a559a41b99268aa7e296860fd7d968dca6e",
+  "prompts": {},
+  "sessions": {
+    "s_49ab4bc122c895": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f827d-ae70-75c1-828e-e56765336ee4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
