@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "hiding",
-  "description": "Strip AI leakage from files before committing — secrets, self-reference, thought process, rule citations. Silent by default. Cleaned files read human-written.",
+  "description": "Strategic content cleanup for files that should reveal less about their origin, process, AI participation, constraints, or sensitive context.",
   "owner": {
     "name": "HuaTalk",
     "url": "https://github.com/HuaTalk"
@@ -10,7 +10,7 @@
     {
       "name": "hiding",
       "source": "./",
-      "description": "Strip AI leakage from files before committing, pushing, or sharing. Removes secrets, AI self-reference, thought process traces, and rule citations. Session-aware HITL mode for interactive cleanup.",
+      "description": "Strategically remove AI leakage, exposed constraints, provenance clues, credentials, and user-specified sensitive content from files. Release hygiene is a common scenario, not a prerequisite.",
       "category": "output-discipline"
     }
   ]

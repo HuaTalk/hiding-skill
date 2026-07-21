@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Identity
 
-A standalone Claude Code plugin repository. Only the `/hiding` skill lives here — strip AI leakage and user-specified sensitive content from files before committing, pushing, or sharing.
+A standalone Claude Code plugin repository. Only the `/hiding` skill lives here — strategic content cleanup that strips AI leakage, exposed constraints, source/provenance clues, and user-specified sensitive content whenever a file needs to reveal less. Release hygiene is a common context, not a prerequisite.
 
 **No source code, no build, no tests.** This repo consists entirely of skill definitions and documentation.
 
@@ -49,6 +49,12 @@ Three files carry the version number:
 - Require explicit user confirmation before deleting an entire file.
 - Keep behavior consistent across supported agent environments.
 
+### Product Positioning
+
+`/hiding` is a strategic concealment tool, not only release hygiene. Its psychological use case is visibility control: the user decides which parts of a file's origin, process, AI participation, exposed constraints, and sensitive context remain inferable to the next reader. This includes source/provenance concealment and avoiding disclosure when that is the user's intent. Do not assume transparency or attribution is a product goal unless the user asks for it.
+
+The core invariant is that the user controls the visible artifact while executable behavior remains unchanged. Review, handoff, archiving, publication, commit, push, and sharing are downstream contexts; none is required to invoke the skill.
+
 ### Post-hoc cleanup, not real-time constraint
 
 `/hiding` is a cleanup tool, not a behavior modifier. It does NOT inject rules into agent sessions. It lets the model work naturally, then strips traces afterward.
@@ -73,7 +79,7 @@ Rationale (full argument in `docs/zh/design-tradeoffs.md`):
 
 3. **Chinese documentation is user-facing only**: `README-zh.md` and `docs/zh/` exist for Chinese-speaking users. English docs live in `docs/en/`. All maintainer-facing content (this file, scripts, CI, SKILL.md body) is English.
 
-4. **Version `0.7.0`**, installation path `hiding@hiding`. Features: leading user-specified semantic targets, literal-path, current-session, and Git-worktree file selection (`--files`), output modes (inplace/newfile/backup), `--dry-run`, `--use-subagent`, and credential-rotation warnings. `--files worktree` compares the primary-branch merge base with the worktree where the skill is invoked; omitting `--files` is equivalent to `--files session`.
+4. **Version `0.7.1`**, installation path `hiding@hiding`. Features: leading user-specified semantic targets, literal-path, current-session, and Git-worktree file selection (`--files`), output modes (inplace/newfile/backup), `--dry-run`, `--use-subagent`, and credential-rotation warnings. `--files worktree` compares the primary-branch merge base with the worktree where the skill is invoked; omitting `--files` is equivalent to `--files session`.
 
 ## Maintenance
 

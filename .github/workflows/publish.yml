@@ -3,7 +3,6 @@ name: publish
 on:
   push:
     tags: ['v*']
-  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -12,6 +11,8 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,5 +20,13 @@ jobs:
           node-version: '22'
       - name: Check version consistency
         run: node scripts/check-versions.js
-      - run: npm install -g npm@latest
-      - run: npm publish --provenance
+      - name: Install current npm CLI
+        run: npm install -g npm@latest
+      - name: Publish first release with npm token
+        if: env.NPM_TOKEN != ''
+        run: |
+          npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN" --location=user
+          npm publish --provenance --access public --registry=https://registry.npmjs.org/
+      - name: Publish with npm Trusted Publisher
+        if: env.NPM_TOKEN == ''
+        run: npm publish --provenance --access public --registry=https://registry.npmjs.org/

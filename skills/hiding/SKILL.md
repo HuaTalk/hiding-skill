@@ -1,16 +1,16 @@
 ---
 name: hiding
-description: Remove AI leakage and specified sensitive content from files before commit, push, or sharing. Supports file, session, and worktree scopes, dry runs, output modes, and sub-agent detection. 中文触发词：隐藏 AI 痕迹、清理 AI 泄露、提交前清理、隐藏数据来源、隐藏指定规则。
+description: Strategically remove AI leakage, provenance clues, exposed constraints, credentials, and any user-specified content from files without changing executable behavior. Use for concealment or release hygiene. Triggers include clean AI traces, hide source, hide constraints, 隐藏 AI 痕迹、清理规则、隐藏数据来源、隐藏约束、清理 xxx 痕迹。
 argument-hint: "[<what-to-hide>...] [--files <file>...|session|worktree] [options]"
 metadata:
   author: HuaTalk
-  version: "0.7.0"
+  version: "0.7.1"
   category: output-discipline
 ---
 
 # /hiding
 
-Strip AI leakage and user-specified sensitive content from files without changing executable behavior.
+Strategically strip AI leakage, provenance clues, exposed constraints, and user-specified sensitive content from files without changing executable behavior.
 
 **Scope**: Code, config, markdown, and documentation files only. Agent replies and conversation output are out of scope.
 

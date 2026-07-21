@@ -6,9 +6,9 @@
 
 **Ship the work, not the agent's working notes.**
 
-Hiding is a release-hygiene skill for coding agents. Before you commit, push, or share files, it removes private instruction references, AI narration, transient reasoning, and user-specified content from comments and prose. It catches credentials first, preserves executable code, and reports unsafe configuration changes for review.
+Hiding is a strategic content-cleanup Skill for coding agents. Use it whenever a file needs to reveal less about its origin, process, AI participation, constraints, or sensitive context. It removes private instruction and constraint references, source and provenance clues, AI narration, transient reasoning, credentials, and user-specified content while preserving executable behavior. Release hygiene is a common use case; review, handoff, publication, commit, push, and sharing are examples, not prerequisites.
 
-> Hiding cleans file contents. It does not erase provenance or replace any required disclosure of AI assistance.
+> Hiding can remove provenance and disclosure clues from selected files. It does not rewrite repository history, metadata, or records outside the selected scope.
 
 ## Quickstart
 
@@ -34,7 +34,7 @@ Choose another scope when needed: [specific files](#specific-files), [the Git wo
 
 ## How It Works
 
-`/hiding` runs when the output is ready for review, not throughout the agent's normal reasoning process.
+`/hiding` runs on demand after content exists, not throughout the agent's normal reasoning process. The target may be a draft, an existing file, a review or handoff artifact, or release-ready output.
 
 For automatic `session` and `worktree` scopes, it resolves which files are user-facing outputs and excludes agent control state, planning metadata, build output, and unrelated files.
 
@@ -208,8 +208,9 @@ Unknown flags, targets placed after flags, repeated `--files`, and ambiguous sel
 
 ## Philosophy
 
+- **Strategic cleanup, not release-only** - Run it whenever a file should reveal less; release hygiene is one common application.
 - **Post-hoc, not always-on** - Cleanup runs on demand and does not consume every session with persistent self-censorship instructions.
-- **Content, not style** - The Skill removes material that should not be in the file; it does not rewrite prose to imitate a human voice.
+- **Content, not style** - The Skill removes selected content and clues; it does not rewrite prose to imitate a human voice.
 - **Decisions over derivations** - Keep durable conclusions and reader-facing rationale; remove private instructions and transient process trails.
 - **Behavior preservation** - Code logic and runtime-visible content are never silently changed.
 - **Evidence over claims** - Preview, parse where possible, re-read, and preserve the original when verification fails.
@@ -240,11 +241,11 @@ Claude Code:
 
 Restart Claude Code after updating. See the [changelog](CHANGELOG.md) for release details.
 
-## Responsible Use
+## Scope Boundaries
 
-`/hiding` improves the contents of files; it does not erase authorship history or override disclosure obligations. If an employer, project, client, or publication venue requires disclosure of AI assistance, that policy still governs.
+`/hiding` can remove source, provenance, attribution, constraint, audit, licensing, or disclosure clues when they appear in editable comments or prose and match the built-in categories or a user-specified target.
 
-User-specified targets are intended for legitimate privacy and release-hygiene needs. Do not use them to conceal required attribution, provenance, licensing, audit records, or material facts.
+Its scope is the selected file content. It does not rewrite Git history, external metadata, access logs, signed records, or copies outside that scope, and it does not silently change executable code or behavior-affecting configuration.
 
 ## Contributing
 
