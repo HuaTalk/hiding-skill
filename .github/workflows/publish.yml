@@ -3,12 +3,6 @@ name: publish
 on:
   push:
     tags: ['v*']
-  workflow_dispatch:
-    inputs:
-      bootstrap:
-        description: 'Publish the first npm release with the NPM_TOKEN secret'
-        required: true
-        type: boolean
 
 permissions:
   id-token: write
@@ -17,6 +11,8 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,22 +22,11 @@ jobs:
         run: node scripts/check-versions.js
       - name: Install current npm CLI
         run: npm install -g npm@latest
-      - name: Require bootstrap confirmation
-        if: github.event_name == 'workflow_dispatch' && !inputs.bootstrap
-        run: |
-          echo 'Enable bootstrap to run the first npm publication.' >&2
-          exit 1
       - name: Publish first release with npm token
-        if: github.event_name == 'workflow_dispatch' && inputs.bootstrap
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: env.NPM_TOKEN != ''
         run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo 'NPM_TOKEN is required for the bootstrap publish.' >&2
-            exit 1
-          fi
-          npm config set //registry.npmjs.org/:_authToken "$NODE_AUTH_TOKEN" --location=user
+          npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN" --location=user
           npm publish --provenance --access public --registry=https://registry.npmjs.org/
       - name: Publish with npm Trusted Publisher
-        if: github.event_name == 'push'
+        if: env.NPM_TOKEN == ''
         run: npm publish --provenance --access public --registry=https://registry.npmjs.org/

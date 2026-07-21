@@ -59,9 +59,9 @@ Before the first publication:
    the npm organization settings that the account may create packages.
 3. Create a short-lived or granular npm access token with publish permission and
    store it as the repository secret `NPM_TOKEN`.
-4. Run the `publish` workflow manually with `bootstrap` enabled. This token path
-   exists only because npm Trusted Publisher cannot be configured until the
-   package exists.
+4. Push the release tag. While `NPM_TOKEN` exists, the tag-triggered `publish`
+   workflow uses it for the first publication. This token path exists only
+   because npm Trusted Publisher cannot be configured until the package exists.
 
 After the first package exists, configure Trusted Publisher on the npm package
 `@huatalk/hiding-skill` with GitHub owner `HuaTalk`, repository `hiding-skill`,
