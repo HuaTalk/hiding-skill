@@ -1,12 +1,14 @@
 # Hiding
 
+[![CI](https://github.com/HuaTalk/hiding-skill/actions/workflows/test.yml/badge.svg)](https://github.com/HuaTalk/hiding-skill/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Chinese](https://img.shields.io/badge/lang-Chinese-blue.svg)](README-zh.md)
+
 **Ship the work, not the agent's working notes.**
 
 Hiding is a release-hygiene skill for coding agents. Before you commit, push, or share files, it removes private instruction references, AI narration, transient reasoning, and user-specified content from comments and prose. It catches credentials first, preserves executable code, and reports unsafe configuration changes for review.
 
 > Hiding cleans file contents. It does not erase provenance or replace any required disclosure of AI assistance.
-
-[Chinese](README-zh.md)
 
 ## Quickstart
 

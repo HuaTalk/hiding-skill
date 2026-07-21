@@ -1,12 +1,14 @@
 # Hiding
 
+[![CI](https://github.com/HuaTalk/hiding-skill/actions/workflows/test.yml/badge.svg)](https://github.com/HuaTalk/hiding-skill/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](README.md)
+
 **交付成果，不交付 Agent 的工作草稿。**
 
 Hiding 是面向编码 Agent 的发布前清理 Skill。在提交、推送或分享文件前，它会从注释和叙述性文本中移除私有指令引用、AI 叙述、临时推导和用户指定的内容。它优先发现凭据、保护可执行代码，并将不安全的配置修改交给人工审查。
 
 > Hiding 只清理文件内容，不会抹除来源记录，也不能替代规定的 AI 使用披露。
-
-[English](README.md)
 
 ## 快速开始
 
