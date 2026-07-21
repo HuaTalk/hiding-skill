@@ -1,0 +1,24 @@
+.claude-plugin/plugin.json
+  s_49ab4bc122c895::t_1435cf8f4a5201 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.35-trip",
+  "base_commit_sha": "342b02516cb7893f14aa5ed16c464cfe6173ee76",
+  "prompts": {},
+  "humans": {
+    "h_5595c707bc937d": {
+      "author": "linqh <linqh@trip.com>"
+    }
+  },
+  "sessions": {
+    "s_49ab4bc122c895": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f827d-ae70-75c1-828e-e56765336ee4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "linqh <linqh@trip.com>"
+    }
+  }
+}
