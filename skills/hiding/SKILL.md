@@ -1,6 +1,6 @@
 ---
 name: hiding
-description: Strategically remove AI leakage, source/provenance clues, exposed constraints, credentials, and user-specified sensitive content from files without changing executable behavior. Use whenever a file needs to reveal less about its origin, process, AI participation, constraints, or sensitive context. Release hygiene is a common scenario; review, handoff, publication, commit, push, and sharing are examples, not prerequisites. Triggers include /hiding, clean AI traces, hide provenance, hide constraints, avoid disclosure, 隐藏 AI 痕迹、清理 AI 泄露、清理规则、提交前清理、隐藏数据来源、隐藏来源、隐藏约束、规避披露、清理文件产物。
+description: Strategically remove AI leakage, provenance clues, exposed constraints, credentials, and any user-specified content from files without changing executable behavior. Use for concealment or release hygiene. Triggers include clean AI traces, hide source, hide constraints, 隐藏 AI 痕迹、清理规则、隐藏数据来源、隐藏约束、清理 xxx 痕迹。
 argument-hint: "[<what-to-hide>...] [--files <file>...|session|worktree] [options]"
 metadata:
   author: HuaTalk
