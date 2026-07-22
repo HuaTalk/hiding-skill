@@ -88,7 +88,7 @@ After literal selection or automatic scope chooses a file and Step 0 validates i
 
 Before any purge decision, scan every line, key, and value for credentials. Credentials grant access; internal names, non-access-bearing URLs, and mock labels are not credentials. Record findings and the required warning without modifying the file yet.
 
-Never reproduce a credential value or any substring of it in output, including prefixes, suffixes, or masked fragments. Use a fixed `[REDACTED]` label and file/line/key location instead; do not preserve its original length or shape. Credentials in executable code require human review. Configuration credentials may be replaced only with a format-safe placeholder during Step 3.
+In output, identify credentials only by a fixed `[REDACTED]` label and file/line/key location. Never emit or describe a value substring, recognizable prefix or suffix, format, pattern, provider-specific scheme or token type, original length, or shape. Credentials in executable code require human review. Configuration credentials may be replaced only with a format-safe placeholder during Step 3.
 
 The warning fires after the outcome is known even if the file is deleted as a purge candidate or left unchanged:
 
@@ -118,6 +118,8 @@ Validate a temporary candidate before changing the original:
 After stripping, re-read the candidate once. On failure, discard it and leave the original untouched. Report: "Structural issue detected after cleaning — file left unchanged. Human review needed." A successful visual fallback is silent.
 
 The default `inplace` mode replaces the original only after successful validation. Before any write, preserve the file's original line ending style (LF vs CRLF) and compare mtime with the value observed when reading; if it changed, warn and abort. Replace atomically where supported.
+
+On a silent path, the last required tool result is terminal: send no assistant text and end the turn immediately.
 
 ## Strip Strategy by File Type
 

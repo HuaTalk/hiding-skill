@@ -146,11 +146,13 @@ const corpus = [skill, ...referenceFiles.map(read)].join('\n');
 const requiredInlineContracts = [
   ['silent no-findings behavior', /with no findings outside Session HITL or `--dry-run`, do nothing and say nothing/],
   ['silent tool-only execution', /On silent paths, emit tool calls only from the start and do not narrate analysis/],
-  ['credential output is fully redacted', /Never reproduce a credential value or any substring of it in output/],
+  ['credential output is fully redacted', /identify credentials only by a fixed `\[REDACTED\]` label and file\/line\/key location/],
+  ['credential descriptors are not exposed', /Never emit or describe a value substring, recognizable prefix or suffix, format, pattern, provider-specific scheme or token type, original length, or shape/],
   ['default inplace behavior', /default `inplace` mode replaces the original only after successful validation/],
   ['line endings before writes', /Before any write, preserve the file's original line ending style/],
   ['concurrent modification before writes', /compare mtime with the value observed when reading; if it changed, warn and abort/],
   ['whole-block removal', /Remove a multi-line leakage block as a whole/],
+  ['silent terminal behavior', /the last required tool result is terminal: send no assistant text/],
 ];
 
 for (const [label, pattern] of requiredInlineContracts) {
