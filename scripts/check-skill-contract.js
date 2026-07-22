@@ -96,7 +96,43 @@ for (const referencePath of referenceFiles) {
   }
 }
 
+const automaticScope = read(path.join(referencesDir, 'automatic-scope.md'));
+if (!/when `--files` is omitted or set to `session` or `worktree`/.test(automaticScope)) {
+  fail('Automatic-scope reference must include the default invocation condition.');
+}
+
+const requiredEntryRoutes = [
+  ['automatic eligibility before content access', /Omitted `--files`, `--files session`, or `--files worktree`[^\n]+\(references\/automatic-scope\.md\) before validation or content access/],
+  ['default session workflow', /Omitted `--files` or `--files session`[^\n]+\(references\/session-mode\.md\)/],
+  ['worktree workflow', /`--files worktree`[^\n]+\(references\/worktree-mode\.md\)/],
+  ['category rubric after scope and validation', /After literal selection or automatic scope chooses a file and Step 0 validates it, read \[Leakage categories\]\(references\/leakage-categories\.md\) before leakage scanning/],
+  ['semantic-target rules', /One or more semantic targets[^\n]+\(references\/user-targets\.md\)/],
+  ['optional output behavior', /`--dry-run` or a non-default output mode[^\n]+\(references\/output-modes\.md\)/],
+  ['sub-agent workflow', /`--use-subagent`[^\n]+\(references\/subagent-review\.md\)/],
+  ['reporting before visible output', /Before any user-visible output[^\n]+\(references\/reporting\.md\)/],
+];
+
+for (const [label, pattern] of requiredEntryRoutes) {
+  if (!pattern.test(skill)) fail(`Conditional reference route is missing: ${label}.`);
+}
+
+if (skill.indexOf('(references/automatic-scope.md)') > skill.indexOf('(references/leakage-categories.md)')) {
+  fail('Automatic-scope route must precede the scan-only category route.');
+}
+
 const corpus = [skill, ...referenceFiles.map(read)].join('\n');
+const requiredInlineContracts = [
+  ['silent no-findings behavior', /with no findings outside Session HITL or `--dry-run`, do nothing and say nothing/],
+  ['default inplace behavior', /default `inplace` mode replaces the original only after successful validation/],
+  ['line endings before writes', /Before any write, preserve the file's original line ending style/],
+  ['concurrent modification before writes', /compare mtime with the value observed when reading; if it changed, warn and abort/],
+  ['whole-block removal', /Remove a multi-line leakage block as a whole/],
+];
+
+for (const [label, pattern] of requiredInlineContracts) {
+  if (!pattern.test(skill)) fail(`Always-loaded contract is missing from SKILL.md: ${label}.`);
+}
+
 const requiredContracts = [
   ['automatic scope before scanning', /Resolve scope before Step 0 or any content scan/],
   ['session inventory is not expanded by Git', /Git status may provide context but must not expand this inventory/],
@@ -108,8 +144,6 @@ const requiredContracts = [
   ['dry-run never writes', /`--dry-run` never writes/],
   ['subagents detect candidates only', /sub-agent detects candidate leakage only/],
   ['runtime-visible code content is protected', /runtime-visible doc strings as-is/],
-  ['line endings are preserved', /Preserve the file's original line ending style/],
-  ['concurrent modifications abort writes', /compare mtime/],
 ];
 
 for (const [label, pattern] of requiredContracts) {
