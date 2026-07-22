@@ -21,6 +21,14 @@ function read(filePath) {
   return fs.readFileSync(filePath, 'utf8').replace(/\r\n/g, '\n');
 }
 
+function readRegularFile(filePath) {
+  try {
+    return fs.statSync(filePath).isFile() ? read(filePath) : '';
+  } catch {
+    return '';
+  }
+}
+
 function walkMarkdown(directory) {
   const files = [];
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -96,9 +104,22 @@ for (const referencePath of referenceFiles) {
   }
 }
 
-const automaticScope = read(path.join(referencesDir, 'automatic-scope.md'));
+const automaticScope = readRegularFile(path.join(referencesDir, 'automatic-scope.md'));
 if (!/when `--files` is omitted or set to `session` or `worktree`/.test(automaticScope)) {
   fail('Automatic-scope reference must include the default invocation condition.');
+}
+
+const reporting = readRegularFile(path.join(referencesDir, 'reporting.md'));
+const requiredReportingContracts = [
+  ['HITL, purge, and dry-run output', /Session HITL findings and choices, whole-file purge confirmation, and `--dry-run` previews/],
+  ['credential and Session status output', /Credential rotation warnings, plus Session zero-findings and unavailable-inventory notices/],
+  ['input, structure, and concurrency errors', /Input errors, structural-validation failures, and concurrent-modification aborts/],
+  ['collision, sub-agent, and protected-target output', /Numbered collision filenames, sub-agent fallback notices, and user-target matches in executable content/],
+  ['worktree and blocking-scope output', /Worktree resolution errors, empty selections, and dry-run base\/file reports; blocking scope questions/],
+];
+
+for (const [label, pattern] of requiredReportingContracts) {
+  if (!pattern.test(reporting)) fail(`Reporting contract is missing: ${label}.`);
 }
 
 const requiredEntryRoutes = [

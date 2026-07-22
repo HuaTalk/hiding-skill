@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Reduced the always-loaded Skill instructions by moving selector, target, output, sub-agent, and reporting workflows into directly routed one-level references without changing the discovery description or behavior contract.
+- Condensed the reporting exception whitelist into five equivalent groups while preserving every existing user-visible output case.
 
 ### Fixed
 
