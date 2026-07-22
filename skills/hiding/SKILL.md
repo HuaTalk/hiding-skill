@@ -10,8 +10,6 @@ metadata:
 
 # /hiding
 
-Strategically strip AI leakage, provenance clues, exposed constraints, and user-specified sensitive content from files without changing executable behavior.
-
 **Scope**: Code, config, markdown, and documentation files only. Agent replies and conversation output are out of scope.
 
 ## Core Contract
@@ -40,15 +38,6 @@ Strategically strip AI leakage, provenance clues, exposed constraints, and user-
 | `--dry-run` | boolean | off | Preview without writing |
 | `--use-subagent` | boolean | off | Ask a fresh-context sub-agent for candidate leakage locations only |
 | `--files` | one or more file paths, `session`, or `worktree` | `session` | Select files to scan and clean |
-
-```
-/hiding --dry-run
-/hiding "data sources" "internal review rules" --files report.md --dry-run
-/hiding --files file.java --mode newfile --use-subagent
-/hiding --files README.md config.yml --dry-run
-/hiding --files session --dry-run
-/hiding "data sources" --files worktree --dry-run
-```
 
 ### Argument Parsing
 
@@ -123,9 +112,9 @@ On a silent path, the last required tool result is terminal: send no assistant t
 
 ## Strip Strategy by File Type
 
-- **Code** (.java, .py, .ts, .go, .rs, .js, etc.): Remove comment lines matching leakage categories or user targets. Keep executable code, string literals, and runtime-visible doc strings as-is; report those matches for human review. If removing a comment would leave an empty comment block (e.g., `/** */`), remove the whole block.
-- **Markdown** (.md): Remove paragraphs and sentences matching leakage categories or user targets. Keep technical content.
-- **Config** (.yml, .yaml, .json, .xml, .toml, .env, .properties, .ini, .cfg): Remove leakage comments. Handle credential values only as Step 3 permits; report user-target matches in behavior-affecting values for human review. Keep config structure and other values. For YAML block scalars (`|`, `>`), replace the entire scalar value only when the permitted edit remains format-safe.
+- **Code**: Remove comment lines matching leakage categories or user targets. Keep executable code, string literals, and runtime-visible doc strings as-is; report those matches for human review. If removing a comment would leave an empty comment block (e.g., `/** */`), remove the whole block.
+- **Markdown**: Remove paragraphs and sentences matching leakage categories or user targets. Keep technical content.
+- **Config**: Remove leakage comments. Handle credential values only as Step 3 permits; report user-target matches in behavior-affecting values for human review. Keep config structure and other values. For YAML block scalars (`|`, `>`), replace the entire scalar value only when the permitted edit remains format-safe.
 - **Other**: Remove any comment or prose matching the leakage categories or user targets.
 
 Remove a multi-line leakage block as a whole.
