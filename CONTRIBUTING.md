@@ -4,7 +4,7 @@ Thanks for your interest in improving `/hiding`.
 
 ## Repository layout
 
-This repo contains no source code, no build, and no runtime tests — it is entirely skill definitions and documentation.
+This repo has no runtime implementation or build. It contains skill definitions, documentation, packaging metadata, and static contract checks.
 
 | Change | Files to edit |
 |--------|--------------|
@@ -12,15 +12,16 @@ This repo contains no source code, no build, and no runtime tests — it is enti
 | Pattern reference card | `AGENTS.md` |
 | User-facing install/usage docs | `README.md`, `README-zh.md` |
 | Version bump | `.claude-plugin/plugin.json`, `package.json`, `SKILL.md` frontmatter (`metadata.version`) |
+| Static Skill invariants | `scripts/check-skill-contract.js` |
 | CI checks | `.github/workflows/test.yml` |
 
 ## Making a change
 
-1. Edit `skills/hiding/SKILL.md` for any behavior change.
+1. Keep universal behavior and routing in `skills/hiding/SKILL.md`; edit the corresponding directly linked reference for condition-specific behavior. See [Skill progressive loading](docs/en/skill-progressive-loading.md) for placement and model-validation rules.
 2. Keep `AGENTS.md` (the condensed reference card) in sync if the pattern logic, output modes, flags, or execution rules changed.
 3. Keep `README.md` and `README-zh.md` in sync if user-facing behavior changed. The two READMEs must say the same thing.
 4. Update `CHANGELOG.md`.
-5. Run `npm test` — it verifies the version is consistent across all version-bearing files.
+5. Run `npm test` - it verifies version consistency, static Skill contract anchors, and local reference integrity. This does not replace agent-level behavior validation.
 
 ## Language conventions
 
@@ -32,7 +33,7 @@ This repo contains no source code, no build, and no runtime tests — it is enti
 
 `/hiding` is a **post-hoc cleanup tool**, not a real-time behavior constraint. Proposals that inject rules into agent sessions (always-on rule files, session hooks, statusline badges) conflict with the project philosophy and will be declined. See `CLAUDE.md` and `docs/zh/design-tradeoffs.md` for the full rationale.
 
-Silent execution is the default; the exceptions are enumerated in SKILL.md ("Explicit Exceptions to Silence"). New user-visible output must be justified as a new numbered exception, not added ad hoc.
+Silent execution is the default. Any user-visible output must be required by the corresponding Skill workflow and covered by its reporting contract, not added ad hoc.
 
 ## Releasing (maintainers)
 

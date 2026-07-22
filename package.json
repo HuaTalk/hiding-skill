@@ -1,6 +1,6 @@
 {
   "name": "@huatalk/hiding-skill",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Strategic content cleanup for files that should reveal less about their origin, process, AI participation, constraints, or sensitive context.",
   "keywords": [
     "claude-code",
@@ -41,7 +41,7 @@
     "README-zh.md"
   ],
   "scripts": {
-    "test": "node scripts/check-versions.js",
-    "check": "node scripts/check-versions.js"
+    "test": "node scripts/check-versions.js && node scripts/check-skill-contract.js",
+    "check": "node scripts/check-versions.js && node scripts/check-skill-contract.js"
   }
 }

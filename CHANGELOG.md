@@ -5,7 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.0] - 2026-07-22
+
+### Added
+
+- Added static checks for the protected Skill discovery contract, high-impact safety anchors, and one-level local reference integrity; wired them into pull-request, tag, and publish validation.
+- Added maintainer guidance for progressive-loading placement, baseline-model evaluation, and failure-driven harnessing.
+
+### Changed
+
+- Reduced the always-loaded Skill instructions by moving selector, target, output, sub-agent, and reporting workflows into directly routed one-level references without changing the discovery description or behavior contract.
+- Condensed the reporting exception whitelist into five equivalent groups while preserving every existing user-visible output case.
+- Further reduced the always-loaded instructions by removing duplicated purpose prose, redundant invocation examples, and extension enumerations while retaining the file-scope and behavior contracts.
+
+### Fixed
+
+- Strengthened credential-output redaction so previews use a fixed label and location instead of reproducing value fragments, recognizable patterns, shape-preserving masks, or provider-specific credential descriptors.
+- Enforced tool-only silent cleanup and made the final required tool result terminal to prevent validation summaries and cleanup-status narration.
 
 ## [0.7.1] - 2026-07-21
 

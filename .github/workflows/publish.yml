@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check version consistency
-        run: node scripts/check-versions.js
+      - name: Check repository contracts
+        run: npm test
       - name: Install current npm CLI
         run: npm install -g npm@latest
       - name: Publish first release with npm token
