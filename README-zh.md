@@ -12,10 +12,11 @@ Hiding 是面向编码 Agent 的策略性内容清理 Skill。当文件需要减
 
 ## 快速开始
 
-通过 [Agent Skills](https://agentskills.io/) 安装 `/hiding`：
+通过 npm 安装 `/hiding`：
 
 ```bash
-npx skills add HuaTalk/hiding-skill
+npm install -D @huatalk/hiding-skill
+npx skills-npm setup
 ```
 
 然后让 Agent 预览当前会话中修改过的文件：
@@ -61,6 +62,15 @@ const UserProfile = memo(({ user }) => {
 
 安装方式取决于编码 Agent 加载 Skill 的机制。
 
+### npm
+
+适用于使用 `skills-npm` 的环境：
+
+```bash
+npm install -D @huatalk/hiding-skill
+npx skills-npm setup
+```
+
 ### Agent Skills
 
 适用于 Codex、Cursor、Windsurf、Gemini CLI、GitHub Copilot、Cline 以及 Agent Skills 生态支持的其他 Agent：
@@ -86,15 +96,6 @@ Agent 兼容性和安装位置由安装器以及各 Agent 的 Skill 实现决定
 ```
 
 安装完成后重启 Claude Code。
-
-### npm
-
-适用于使用 `skills-npm` 的环境：
-
-```bash
-npm install -D @huatalk/hiding-skill
-npx skills-npm setup
-```
 
 ## 基本工作流
 
