@@ -4,7 +4,7 @@ description: Strategically remove AI leakage, provenance clues, exposed constrai
 argument-hint: "[<what-to-hide>...] [--files <file>...|session|worktree] [options]"
 metadata:
   author: HuaTalk
-  version: "0.8.0"
+  version: "0.8.1"
   category: output-discipline
 ---
 
