@@ -12,10 +12,11 @@ Hiding is a strategic content-cleanup Skill for coding agents. Use it whenever a
 
 ## Quickstart
 
-Install `/hiding` with [Agent Skills](https://agentskills.io/):
+Install `/hiding` from npm:
 
 ```bash
-npx skills add HuaTalk/hiding-skill
+npm install -D @huatalk/hiding-skill
+npx skills-npm setup
 ```
 
 Then ask your agent to preview files changed in the current session:
@@ -61,6 +62,15 @@ The unavailable rule reference and AI narration disappear. The useful technical 
 
 Installation depends on how your coding agent loads Skills.
 
+### npm
+
+For environments using `skills-npm`:
+
+```bash
+npm install -D @huatalk/hiding-skill
+npx skills-npm setup
+```
+
 ### Agent Skills
 
 Use this for Codex, Cursor, Windsurf, Gemini CLI, GitHub Copilot, Cline, and other agents supported by the Agent Skills ecosystem:
@@ -86,15 +96,6 @@ Then install the plugin in a separate prompt:
 ```
 
 Restart Claude Code after installation.
-
-### npm
-
-For environments using `skills-npm`:
-
-```bash
-npm install -D @huatalk/hiding-skill
-npx skills-npm setup
-```
 
 ## The Basic Workflow
 
