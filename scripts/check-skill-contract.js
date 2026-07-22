@@ -67,7 +67,7 @@ if (!frontmatterMatch) {
   }
 }
 
-const skillLines = skill.split('\n').length;
+const skillLines = skill.length === 0 ? 0 : skill.split('\n').length - Number(skill.endsWith('\n'));
 if (skillLines > 500) fail(`SKILL.md exceeds the 500-line Agent Skills guideline (${skillLines}).`);
 
 const localLinkPattern = /\[[^\]]+\]\(([^)]+\.md(?:#[^)]+)?)\)/g;
