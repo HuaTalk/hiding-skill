@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Strengthened credential-output redaction so previews use a fixed label and location instead of reproducing prefixes, suffixes, partial values, or shape-preserving masks.
+- Enforced tool-only silent cleanup and textless successful completion to prevent validation summaries and cleanup-status narration.
 
 ## [0.7.1] - 2026-07-21
 

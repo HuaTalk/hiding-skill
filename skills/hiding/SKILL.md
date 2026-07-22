@@ -21,6 +21,7 @@ Strategically strip AI leakage, provenance clues, exposed constraints, and user-
 - Remove leakage without changing code logic or doing humanizer-style rewrites.
 - Leave no cleanup trace, visible gap, marker, metadata, or unrelated formatting change.
 - Stay silent unless a documented exception applies; with no findings outside Session HITL or `--dry-run`, do nothing and say nothing.
+- On silent paths, emit tool calls only from the start and do not narrate analysis; after successful verification, end the turn with no text.
 - Always warn and recommend rotation when credentials are found.
 - Require explicit confirmation before deleting an entire file.
 - Automatically scan deliverables, not agent control-plane or planning state.

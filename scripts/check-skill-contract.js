@@ -111,6 +111,7 @@ if (!/when `--files` is omitted or set to `session` or `worktree`/.test(automati
 
 const reporting = readRegularFile(path.join(referencesDir, 'reporting.md'));
 const requiredReportingContracts = [
+  ['silent tool execution and completion', /use tools without narration and end the turn immediately after successful verification with no text/],
   ['HITL, purge, and dry-run output', /Session HITL findings and choices, whole-file purge confirmation, and `--dry-run` previews/],
   ['credential and Session status output', /Credential rotation warnings, plus Session zero-findings and unavailable-inventory notices/],
   ['input, structure, and concurrency errors', /Input errors, structural-validation failures, and concurrent-modification aborts/],
@@ -144,6 +145,7 @@ if (skill.indexOf('(references/automatic-scope.md)') > skill.indexOf('(reference
 const corpus = [skill, ...referenceFiles.map(read)].join('\n');
 const requiredInlineContracts = [
   ['silent no-findings behavior', /with no findings outside Session HITL or `--dry-run`, do nothing and say nothing/],
+  ['silent tool-only execution', /On silent paths, emit tool calls only from the start and do not narrate analysis/],
   ['credential output is fully redacted', /Never reproduce a credential value or any substring of it in output/],
   ['default inplace behavior', /default `inplace` mode replaces the original only after successful validation/],
   ['line endings before writes', /Before any write, preserve the file's original line ending style/],

@@ -2,7 +2,7 @@
 
 Read this file before producing any user-visible output.
 
-Successful cleanup is silent: do not announce it or list removed items. If asked what was removed or whether cleanup ran, reply only: "X leakage categories were addressed." Do not itemize or celebrate.
+On silent paths, use tools without narration and end the turn immediately after successful verification with no text. Do not output validation summaries, completion status, cleanup acknowledgments, removed-item lists, or other prose. If asked what was removed or whether cleanup ran, reply only: "X leakage categories were addressed." Do not itemize or celebrate.
 
 The only other user-visible outputs are:
 
