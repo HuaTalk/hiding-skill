@@ -16,8 +16,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Check version consistency
-        run: node scripts/check-versions.js
+      - name: Check repository contracts
+        run: npm test
 
       - name: Validate plugin JSON
         run: |

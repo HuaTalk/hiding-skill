@@ -6,20 +6,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A standalone Claude Code plugin repository. Only the `/hiding` skill lives here — strategic content cleanup that strips AI leakage, exposed constraints, source/provenance clues, and user-specified sensitive content whenever a file needs to reveal less. Release hygiene is a common context, not a prerequisite.
 
-**No source code, no build, no tests.** This repo consists entirely of skill definitions and documentation.
+**No runtime implementation or build.** This repo consists of skill definitions, documentation, and static contract checks.
 
 ## Commands
 
 ```bash
-npm test              # Verify version consistency across all version-bearing files
-node scripts/check-versions.js   # Same, without npm
+npm test                              # Run version and Skill contract checks
+node scripts/check-versions.js        # Verify version consistency only
+node scripts/check-skill-contract.js  # Verify static discovery, safety, and reference anchors
 ```
 
-CI (`.github/workflows/test.yml`) additionally validates JSON syntax of plugin manifests and SKILL.md frontmatter integrity. CI runs on push to `main`, PRs, and `v*` tags.
+CI (`.github/workflows/test.yml`) runs these checks and additionally validates plugin JSON, SKILL.md frontmatter integrity, and English-document language separation. It runs on push to `main`, PRs, and `v*` tags.
 
 ## Core Architecture
 
-The canonical skill: `skills/hiding/SKILL.md` (~360 lines). Everything else is packaging or documentation.
+The canonical skill is `skills/hiding/SKILL.md`; its directly linked references are runtime resources. Everything else is packaging, validation, or documentation.
 
 ### Distribution: Two channels
 
@@ -89,7 +90,7 @@ When updating the skill:
 2. Update `AGENTS.md` if the leakage category reference card changes
 3. Update `README.md` / `README-zh.md` if user-facing behavior changes — the two are language versions of one document and must stay structurally identical (same section order, same headings, equivalent content); any change to one must be mirrored in the other. Known allowed divergence: the zh version's extra "能力边界" paragraph in 设计哲学.
 4. Bump version in `.claude-plugin/plugin.json`, `package.json`, and `SKILL.md` frontmatter
-5. Run `npm test` to verify consistency
+5. Run `npm test` to verify versions and Skill contracts
 6. Tag the release (`v0.6.1`, etc.) and push — CI publishes to npm on `v*` tags
 
 ### File map (what to edit for what change)

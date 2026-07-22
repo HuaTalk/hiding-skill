@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added static checks for the protected Skill discovery contract, high-impact safety anchors, and one-level local reference integrity; wired them into pull-request, tag, and publish validation.
+
 ## [0.7.1] - 2026-07-21
 
 This is the first version intended for public npm distribution.

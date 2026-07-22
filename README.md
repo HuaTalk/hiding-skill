@@ -219,7 +219,7 @@ Read more about [agent portability](docs/en/agent-portability.md), [platform-nat
 
 ## Validation and Limitations
 
-Repository CI validates version consistency, plugin JSON, English-document language separation, and Skill frontmatter. The project does not yet publish runtime accuracy benchmarks.
+Repository CI validates version consistency, static Skill contract anchors, local references, plugin JSON, English-document language separation, and Skill frontmatter. The project does not yet publish runtime accuracy benchmarks.
 
 Detection relies on contextual model judgment and may miss or over-classify content. Files over 10,000 lines or 500 KB, binary files, directories, and empty files are rejected. JSON, YAML, and XML use parsers where available; other formats may receive visual structural verification.
 

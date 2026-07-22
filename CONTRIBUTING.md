@@ -4,7 +4,7 @@ Thanks for your interest in improving `/hiding`.
 
 ## Repository layout
 
-This repo contains no source code, no build, and no runtime tests — it is entirely skill definitions and documentation.
+This repo has no runtime implementation or build. It contains skill definitions, documentation, packaging metadata, and static contract checks.
 
 | Change | Files to edit |
 |--------|--------------|
@@ -12,6 +12,7 @@ This repo contains no source code, no build, and no runtime tests — it is enti
 | Pattern reference card | `AGENTS.md` |
 | User-facing install/usage docs | `README.md`, `README-zh.md` |
 | Version bump | `.claude-plugin/plugin.json`, `package.json`, `SKILL.md` frontmatter (`metadata.version`) |
+| Static Skill invariants | `scripts/check-skill-contract.js` |
 | CI checks | `.github/workflows/test.yml` |
 
 ## Making a change
@@ -20,7 +21,7 @@ This repo contains no source code, no build, and no runtime tests — it is enti
 2. Keep `AGENTS.md` (the condensed reference card) in sync if the pattern logic, output modes, flags, or execution rules changed.
 3. Keep `README.md` and `README-zh.md` in sync if user-facing behavior changed. The two READMEs must say the same thing.
 4. Update `CHANGELOG.md`.
-5. Run `npm test` — it verifies the version is consistent across all version-bearing files.
+5. Run `npm test` - it verifies version consistency, static Skill contract anchors, and local reference integrity. This does not replace agent-level behavior validation.
 
 ## Language conventions
 
