@@ -87,7 +87,7 @@ After literal selection or automatic scope chooses a file and Step 0 validates i
 
 Before any purge decision, scan every line, key, and value for credentials. Credentials grant access; internal names, non-access-bearing URLs, and mock labels are not credentials. Record findings and the required warning without modifying the file yet.
 
-Never echo or itemize secret values. Credentials in executable code require human review. Configuration credentials may be replaced only with a format-safe placeholder during Step 3.
+Never reproduce a credential value or any substring of it in output, including prefixes, suffixes, or masked fragments. Use a fixed `[REDACTED]` label and file/line/key location instead; do not preserve its original length or shape. Credentials in executable code require human review. Configuration credentials may be replaced only with a format-safe placeholder during Step 3.
 
 The warning fires after the outcome is known even if the file is deleted as a purge candidate or left unchanged:
 

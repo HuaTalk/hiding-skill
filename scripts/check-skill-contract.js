@@ -123,6 +123,7 @@ if (skill.indexOf('(references/automatic-scope.md)') > skill.indexOf('(reference
 const corpus = [skill, ...referenceFiles.map(read)].join('\n');
 const requiredInlineContracts = [
   ['silent no-findings behavior', /with no findings outside Session HITL or `--dry-run`, do nothing and say nothing/],
+  ['credential output is fully redacted', /Never reproduce a credential value or any substring of it in output/],
   ['default inplace behavior', /default `inplace` mode replaces the original only after successful validation/],
   ['line endings before writes', /Before any write, preserve the file's original line ending style/],
   ['concurrent modification before writes', /compare mtime with the value observed when reading; if it changed, warn and abort/],
